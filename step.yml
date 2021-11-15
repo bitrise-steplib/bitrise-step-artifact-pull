@@ -1,0 +1,31 @@
+title: Artifact pull
+summary: Step to pull artifacts
+description: |-
+  Step description
+
+website: https://github.com/bitrise-steplib/steps-artifact-pull
+source_code_url: https://github.com/bitrise-steplib/steps-artifact-pull
+support_url: https://github.com/bitrise-steplib/steps-artifact-pull/issues
+# type_tags:
+# - build
+is_always_run: false
+is_skippable: false
+# deps:
+#  check_only:
+#  - name: xcode
+toolkit:
+  go:
+    package_name: github.com/bitrise-steplib/steps-artifact-pull
+
+inputs:
+- example_input: default_value
+  opts:
+    title: Example input
+    summary: Step input summary
+    is_required: true
+
+outputs:
+- EXAMPLE_OUTPUT:
+  opts:
+    title: Example step output
+    summary: Example step output
