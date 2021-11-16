@@ -9,22 +9,21 @@ import (
 )
 
 type Input struct {
-	Example string `env:"example,required"`
+	Verbose bool `env:"verbose,required"`
 }
 
 type Config struct {
-	Example string
+	Verbose bool
 }
 
 type Result struct {
-
 }
 
 type ArtifactPull struct {
-	inputParser stepconf.InputParser
+	inputParser   stepconf.InputParser
 	envRepository env.Repository
-	cmdFactory command.Factory
-	logger log.Logger
+	cmdFactory    command.Factory
+	logger        log.Logger
 }
 
 func (a ArtifactPull) ProcessConfig() (Config, error) {
@@ -36,12 +35,14 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 
 	stepconf.Print(input)
 
+	// TODO: validate inputs here and possibly convert from string to a concrete type
 	return Config{
-		Example: input.Example,
+		Verbose: input.Verbose,
 	}, nil
 }
 
 func (a ArtifactPull) Run(cfg Config) (Result, error) {
+	a.logger.EnableDebugLog(cfg.Verbose)
 	// TODO
 	return Result{}, nil
 }
