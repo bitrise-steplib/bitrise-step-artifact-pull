@@ -18,11 +18,14 @@ toolkit:
     package_name: github.com/bitrise-steplib/steps-artifact-pull
 
 inputs:
-- example_input: default_value
+- verbose: "false"
   opts:
-    title: Example input
-    summary: Step input summary
+    title: Enable verbose logging
+    summary: Enable logging additional information for debugging
     is_required: true
+    value_options:
+    - "true"
+    - "false"
 
 outputs:
 - EXAMPLE_OUTPUT:
