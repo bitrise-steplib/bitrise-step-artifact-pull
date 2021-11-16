@@ -36,6 +36,7 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 	stepconf.Print(input)
 
 	// TODO: validate inputs here and possibly convert from string to a concrete type
+	//nolint:gosimple
 	return Config{
 		Verbose: input.Verbose,
 	}, nil
