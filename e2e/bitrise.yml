@@ -9,15 +9,35 @@ app:
 
 workflows:
 
-  test_pull_single_artifact:
+  test_pull_single_artifact_success:
     before_run:
     - _setup
     after_run:
     - _check_downloaded_artifacts
-    steps:  
+    steps:
+    - path::./:
+        title: Execute step
+        inputs:
+
+  # test_pull_artifact_of_different_pipeline_fails:
+  #   before_run:
+  #   - _setup
+  #   after_run:
+  #   steps:
+  #   - path::./:
+  #     title: Execute step
+  #     is_skippable: true
+  #     inputs:
 
   _setup:
     steps:
+    - script:
+        title: Get access token
+        inputs:
+        - content: |-
+            #!/bin/env bash
+            set -ex
+            bash ./get_access_token.sh
     - script:
         title: Clean _tmp folder
         inputs:
@@ -31,10 +51,7 @@ workflows:
         inputs:
         - path: ./_tmp
         - is_create_path: true
-    - path::./:
-        title: Execute step
-        inputs:
-
+            
   _check_downloaded_artifacts:
     steps:
     - script:
