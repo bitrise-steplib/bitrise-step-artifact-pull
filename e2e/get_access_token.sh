@@ -13,5 +13,5 @@ json_response=$(curl -X POST https://auth.services.bitrise.dev/auth/realms/bitri
 
 acces_token=$(echo "$json_response" | jq .access_token)
 
-envman add --key BITRISEIO_ARTIFACT_PULL_TOKEN --value "$acces_token"
-echo "$acces_token"
+envman add --key BITRISEIO_ARTIFACT_PULL_TOKEN --value "$access_token"
+echo "$access_token"
