@@ -27,7 +27,7 @@ inputs:
     - "true"
     - "false"
 
-- artifact_source: ""
+- artifact_sources: ""
   opts:
     title: Artifact source
     summary: The list fo the workflows/stages, thawhicht could generate artifacts.
