@@ -10,7 +10,7 @@ description: |-
   You need to use the {stage}.{workflow} syntax.
   The "dot" character is the delimiter between
   the stage and the workflow.
-  You can use wildrards in the expression.
+  You can use wildcards in the expression.
   If you leave it empty, the default value
   will be the "*" (star), that means, it will
   get every artifacts from every workflow.
