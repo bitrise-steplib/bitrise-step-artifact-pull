@@ -1,6 +1,7 @@
 package main
 
 import (
+	"sort"
 	"testing"
 
 	"github.com/bitrise-steplib/bitrise-step-artifact-pull/model"
@@ -101,6 +102,9 @@ func Test_GetBuildIDs_without_wildcards(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 			}
+
+			sort.Strings(buildIDs)
+			sort.Strings(tC.expectedBuildIDs)
 
 			assert.Equal(t, tC.expectedBuildIDs, buildIDs)
 		})

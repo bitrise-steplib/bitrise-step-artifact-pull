@@ -14,7 +14,7 @@ import (
 
 type Input struct {
 	Verbose         bool   `env:"verbose,required"`
-	ArtifactSources string `env:"artifact_source"`
+	ArtifactSources string `env:"artifact_sources"`
 }
 
 type Config struct {
@@ -45,8 +45,10 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 	finishedStages := a.envRepository.Get("BITRISEIO_FINISHED_STAGES")
 
 	var finishedStagesModel model.FinishedStages
-	if err := json.Unmarshal([]byte(finishedStages), &finishedStagesModel); err != nil {
-		return Config{}, fmt.Errorf("failed to parse step inputs: %w", err)
+	if finishedStages != "" {
+		if err := json.Unmarshal([]byte(finishedStages), &finishedStagesModel); err != nil {
+			return Config{}, fmt.Errorf("failed to parse step inputs: %w", err)
+		}
 	}
 
 	// TODO: validate inputs here and possibly convert from string to a concrete type
