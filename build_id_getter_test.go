@@ -10,41 +10,39 @@ import (
 
 func Test_GetBuildIDs_without_wildcards(t *testing.T) {
 	finishedStages := model.FinishedStages{
-		Stages: []model.Stage{
-			{
-				Name: "stage1",
-				Workflows: []model.Workflow{
-					{
-						Name:       "workflow1",
-						ExternalId: "build1",
-					},
+		{
+			Name: "stage1",
+			Workflows: []model.Workflow{
+				{
+					Name:       "workflow1",
+					ExternalId: "build1",
 				},
 			},
-			{
-				Name: "stage2",
-				Workflows: []model.Workflow{
-					{
-						Name:       "workflow2",
-						ExternalId: "build2",
-					},
+		},
+		{
+			Name: "stage2",
+			Workflows: []model.Workflow{
+				{
+					Name:       "workflow2",
+					ExternalId: "build2",
 				},
 			},
-			{
-				Name: "stage3",
-				Workflows: []model.Workflow{
-					{
-						Name:       "workflow1",
-						ExternalId: "build3",
-					},
+		},
+		{
+			Name: "stage3",
+			Workflows: []model.Workflow{
+				{
+					Name:       "workflow1",
+					ExternalId: "build3",
 				},
 			},
-			{
-				Name: "stage4",
-				Workflows: []model.Workflow{
-					{
-						Name:       "workflow3",
-						ExternalId: "build4",
-					},
+		},
+		{
+			Name: "stage4",
+			Workflows: []model.Workflow{
+				{
+					Name:       "workflow3",
+					ExternalId: "build4",
 				},
 			},
 		},
