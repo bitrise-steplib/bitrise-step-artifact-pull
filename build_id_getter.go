@@ -55,7 +55,7 @@ func (bg DefaultBuildIDGetter) GetBuildIDs() ([]string, error) {
 
 func (bg DefaultBuildIDGetter) createWorkflowMap() map[string]string {
 	stageWorkflowMap := map[string]string{}
-	for _, stage := range bg.FinishedStages.Stages {
+	for _, stage := range bg.FinishedStages {
 		for _, wf := range stage.Workflows {
 			stageWorkflowMap[stage.Name+DELIMITER+wf.Name] = wf.ExternalId
 		}

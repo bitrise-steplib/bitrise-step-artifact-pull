@@ -1,8 +1,6 @@
 package model
 
-type FinishedStages struct {
-	Stages []Stage
-}
+type FinishedStages []Stage
 
 type Stage struct {
 	Name      string     `json:"name"`
