@@ -32,7 +32,7 @@ inputs:
     title: Artifact source
     summary: The list fo the workflows/stages, thawhicht could generate artifacts.
     description: 
-      'A coma separated list of workflows or stage names, which can generate artifacts. Example 1: test-apk-generator-workflow, ipa-generator-for-testers'
+      'A comma separated list of workflows or stage names, which can generate artifacts. Example 1: test-apk-generator-workflow, ipa-generator-for-testers'
     is_required: true
 
 outputs:
