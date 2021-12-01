@@ -42,7 +42,7 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 
 	stepconf.Print(input)
 
-	finishedStages := a.envRepository.Get("FINISHED_STAGES")
+	finishedStages := a.envRepository.Get("BITRISEIO_FINISHED_STAGES")
 
 	var finishedStagesModel model.FinishedStages
 	if err := json.Unmarshal([]byte(finishedStages), &finishedStagesModel); err != nil {
@@ -50,7 +50,6 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 	}
 
 	// TODO: validate inputs here and possibly convert from string to a concrete type
-	//nolint:gosimple
 	return Config{
 		Verbose:         input.Verbose,
 		ArtifactSources: strings.Split(input.ArtifactSources, ","),
@@ -66,6 +65,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 		return Result{}, err
 	}
 
+	// TODO: Do not print these build IDs, remove this line. It is just for the developer who will implement thed artifact download
 	a.logger.Printf("%+v", buildIDs)
 	// TODO
 	return Result{}, nil

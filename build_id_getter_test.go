@@ -83,6 +83,13 @@ func Test_GetBuildIDs_without_wildcards(t *testing.T) {
 			expectedBuildIDs:     []string{"build4"},
 			expectedErrorMessage: "",
 		},
+		{
+			desc:                 "when user does not define target names, it returns with all build ids",
+			targetNames:          []string{},
+			finishedStages:       finishedStages,
+			expectedBuildIDs:     []string{"build1", "build2", "build3", "build4"},
+			expectedErrorMessage: "",
+		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {

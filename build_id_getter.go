@@ -29,6 +29,14 @@ func (bg DefaultBuildIDGetter) GetBuildIDs() ([]string, error) {
 
 	stageWorkflowMap := bg.createWorkflowMap()
 
+	if len(bg.TargetNames) == 0 {
+		for _, v := range stageWorkflowMap {
+			buildIDs = append(buildIDs, v)
+		}
+
+		return buildIDs, nil
+	}
+
 	for _, target := range bg.TargetNames {
 		for k, v := range stageWorkflowMap {
 			matched, err := filepath.Match(target, k)
