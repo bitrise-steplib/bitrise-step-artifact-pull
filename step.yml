@@ -13,7 +13,7 @@ description: |-
   You can use wildcards in the expression.
   If you leave it empty, the default value
   will be the "*" (star), which means, it will
-  get every artifacts from every workflow.
+  get every artifact from every workflow.
 
 
   #### Examples
