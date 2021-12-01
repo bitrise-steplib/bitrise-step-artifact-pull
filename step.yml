@@ -22,7 +22,7 @@ description: |-
   1. stage1.* - Gets all artifacts
     from the stage1's workflows.
   1. *workflow1 - Gets the workflow1s'
-    artifacts form all stages.
+    artifacts from all stages.
   1. * - Gets every generated artifacts
     in the pipeline.
 
