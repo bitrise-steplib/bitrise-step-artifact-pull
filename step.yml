@@ -20,7 +20,7 @@ description: |-
   1. stage1.workflow1 - Gets the artifacts
     form the stage1's workflow1.
   1. stage1.* - Gets all artifacts
-    form the stage1's workflows.
+    from the stage1's workflows.
   1. *workflow1 - Gets the workflow1s'
     artifacts form all stages.
   1. * - Gets every generated artifacts
