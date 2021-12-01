@@ -6,6 +6,7 @@ app:
   # Shared envs for every test workflow
   - TEST_APP_URL: TODO
   - TEST_APP_BRANCH: TODO
+  - BITRISEIO_FINISHED_STAGES: '[{"id":"68df59e4-d108-4bc2-bfb7-a4c1eb402ff8","name":"stage-successful-1","workflows":[{"external_id":"6eea668f-9089-4047-8a66-c9001e88f2dc","finished_at":"2021-11-30T09:37:30Z","id":"a234e4d3-fc0a-4576-8bc9-240c68639f34","name":"successful-20s","started_at":"2021-11-30T09:37:02Z","status":"succeeded"}]},{"id":"59b55e9b-fa65-40ac-9b34-ffcf08f85bd9","name":"stage-successful-2","workflows":[{"external_id":"258d489b-c672-4f63-a508-9e736aacf67d","finished_at":"2021-11-30T09:41:22Z","id":"90896496-e084-4bce-9dbe-8e5ba955ec7a","name":"successful-20s","started_at":"2021-11-30T09:40:54Z","status":"succeeded"},{"external_id":"ea9f95cb-5ed6-42b3-ba14-21342029fd58","finished_at":"2021-11-30T09:44:34Z","id":"8a7ad0a2-b908-461d-a2f4-0ebc31e14974","name":"successful-30s","started_at":"2021-11-30T09:43:58Z","status":"succeeded"}]}]' # yamllint disable-line
 
 workflows:
 
@@ -38,3 +39,5 @@ workflows:
     - path::./:
         title: Execute step
         inputs:
+        - verbose: false
+        - artifact_sources: "*"

@@ -1,7 +1,30 @@
+---
 title: Artifact pull
 summary: Step to pull artifacts
 description: |-
-  Step description
+  ## Input configuration
+
+  ### artifact_sources
+  A comma separated list of workflows and stage
+  paths, which can generate artifacts.
+  You need to use the {stage}.{workflow} syntax.
+  The "dot" character is the delimiter between
+  the stage and the workflow.
+  You can use wildcards in the expression.
+  If you leave it empty, the default value
+  will be the "*" (star), which means, it will
+  get every artifact from every workflow.
+
+
+  #### Examples
+  1. stage1.workflow1 - Gets the artifacts
+    from the stage1's workflow1.
+  1. stage1.* - Gets all artifacts
+    from the stage1's workflows.
+  1. *workflow1 - Gets the workflows'
+    artifacts from all stages.
+  1. * - Gets every generated artifacts
+    in the pipeline.
 
 website: https://github.com/bitrise-steplib/steps-artifact-pull
 source_code_url: https://github.com/bitrise-steplib/steps-artifact-pull
@@ -27,6 +50,15 @@ inputs:
     - "true"
     - "false"
 
+- artifact_sources: ""
+  opts:
+    title: Artifact source
+    summary: |-
+      The list of the stage and workflow
+      paths, which can generate artifacts.
+    description: |-
+      A comma separated list of workflows and stage
+      paths, which can generate artifacts.
 outputs:
 - EXAMPLE_OUTPUT:
   opts:
