@@ -12,7 +12,7 @@ description: |-
   the stage and the workflow.
   You can use wildcards in the expression.
   If you leave it empty, the default value
-  will be the "*" (star), that means, it will
+  will be the "*" (star), which means, it will
   get every artifacts from every workflow.
 
 
