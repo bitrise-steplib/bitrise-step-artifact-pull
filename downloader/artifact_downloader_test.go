@@ -16,12 +16,12 @@ type MockDownloader struct {
 	mock.Mock
 }
 
-func (m MockDownloader) DownloadFileFromURL(url string) (io.ReadCloser, error) {
+func (m *MockDownloader) DownloadFileFromURL(url string) (io.ReadCloser, error) {
 	args := m.Called()
 	return args.Get(0).(io.ReadCloser), args.Error(1)
 }
 
-func (m MockDownloader) CloseResponseWithErrorLogging(resp io.ReadCloser) {
+func (m *MockDownloader) CloseResponseWithErrorLogging(resp io.ReadCloser) {
 	m.Called()
 }
 
@@ -35,7 +35,7 @@ func getDownloadDir(dirName string) string {
 }
 
 func Test_DownloadAndSaveArtifacts(t *testing.T) {
-	mockDownloader := MockDownloader{}
+	mockDownloader := &MockDownloader{}
 	mockDownloader.
 		On("DownloadFileFromURL", mock.AnythingOfTypeArgument("string")).
 		Return(ioutil.NopCloser(bytes.NewReader([]byte("asd"))), nil)
