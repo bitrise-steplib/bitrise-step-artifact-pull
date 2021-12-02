@@ -4,13 +4,17 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/bitrise-io/go-utils/log"
 )
 
 type FileDownloader interface {
 	DownloadFileFromURL(url string) (io.ReadCloser, error)
+	CloseResponseWithErrorLogging(resp io.ReadCloser)
 }
 
 type DefaultFileDownloader struct {
+	Logger log.Logger
 }
 
 func (fd DefaultFileDownloader) DownloadFileFromURL(url string) (io.ReadCloser, error) {
@@ -26,6 +30,14 @@ func (fd DefaultFileDownloader) DownloadFileFromURL(url string) (io.ReadCloser, 
 	return resp.Body, nil
 }
 
-func NewDefaultFileDownloader() FileDownloader {
-	return DefaultFileDownloader{}
+func (fd DefaultFileDownloader) CloseResponseWithErrorLogging(resp io.ReadCloser) {
+	err := resp.Close()
+
+	if err != nil {
+		fd.Logger.Errorf("failed to close response reader")
+	}
+}
+
+func NewDefaultFileDownloader(logger log.Logger) FileDownloader {
+	return DefaultFileDownloader{Logger: logger}
 }

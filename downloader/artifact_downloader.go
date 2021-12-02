@@ -62,7 +62,7 @@ func (ad ConcurrentArtifactDownloader) download(
 	if err != nil {
 		errors[index] = err
 	}
-	defer dataReader.Close()
+	defer ad.Downloader.CloseResponseWithErrorLogging(dataReader)
 
 	<-semaphore // release
 
@@ -100,5 +100,8 @@ func getTargetDir(dirName string) (string, error) {
 }
 
 func NewConcurrentArtifactDownloader(downloadURLs []string, downloader FileDownloader, logger log.Logger) ArtifactDownloader {
-	return ConcurrentArtifactDownloader{DownloadURLs: downloadURLs, Downloader: downloader, Logger: logger}
+	return ConcurrentArtifactDownloader{
+		DownloadURLs: downloadURLs,
+		Downloader:   downloader,
+		Logger:       logger}
 }

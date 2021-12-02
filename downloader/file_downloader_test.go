@@ -7,22 +7,24 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/bitrise-io/go-utils/log"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_DownloadFileFromURL(t *testing.T) {
 	expected := "dummy data"
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, expected)
+		fmt.Fprint(w, expected)
 	}))
 	defer svr.Close()
-	c := NewDefaultFileDownloader()
+	c := NewDefaultFileDownloader(log.NewLogger())
 	res, err := c.DownloadFileFromURL(svr.URL)
+	assert.NoError(t, err)
 
-	defer res.Close()
+	defer c.CloseResponseWithErrorLogging(res)
 
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(res)
+	_, err = buf.ReadFrom(res)
 	data := buf.String()
 
 	assert.NoError(t, err)
@@ -34,7 +36,7 @@ func Test_DownloadFileFromURL_UnauthorizedError(t *testing.T) {
 		w.WriteHeader(http.StatusUnauthorized)
 	}))
 	defer svr.Close()
-	c := NewDefaultFileDownloader()
+	c := NewDefaultFileDownloader(log.NewLogger())
 	res, err := c.DownloadFileFromURL(svr.URL)
 
 	assert.Nil(t, res)
@@ -42,7 +44,7 @@ func Test_DownloadFileFromURL_UnauthorizedError(t *testing.T) {
 }
 
 func Test_DownloadFileFromURL_ServerNotFound(t *testing.T) {
-	c := NewDefaultFileDownloader()
+	c := NewDefaultFileDownloader(log.NewLogger())
 	_, err := c.DownloadFileFromURL("http://dummy-url.hu")
 
 	assert.EqualError(t, err, `Get "http://dummy-url.hu": dial tcp: lookup dummy-url.hu: no such host`)

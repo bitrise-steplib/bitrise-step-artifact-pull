@@ -21,6 +21,10 @@ func (m MockDownloader) DownloadFileFromURL(url string) (io.ReadCloser, error) {
 	return args.Get(0).(io.ReadCloser), args.Error(1)
 }
 
+func (m MockDownloader) CloseResponseWithErrorLogging(resp io.ReadCloser) {
+	m.Called()
+}
+
 func getDownloadDir(dirName string) string {
 	pwd, err := os.Getwd()
 	if err != nil {
@@ -35,6 +39,9 @@ func Test_DownloadAndSaveArtifacts(t *testing.T) {
 	mockDownloader.
 		On("DownloadFileFromURL", mock.AnythingOfTypeArgument("string")).
 		Return(ioutil.NopCloser(bytes.NewReader([]byte("asd"))), nil)
+
+	mockDownloader.
+		On("CloseResponseWithErrorLogging", mock.AnythingOfTypeArgument("string"))
 
 	downloadURLs := []string{
 		"http://nice-file.hu/1.txt",
