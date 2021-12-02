@@ -1,6 +1,7 @@
 package downloader
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 )
@@ -17,6 +18,11 @@ func (fd DefaultFileDownloader) DownloadFileFromURL(url string) (io.ReadCloser, 
 	if err != nil {
 		return nil, err
 	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to download file from %s, status code: %d", url, resp.StatusCode)
+	}
+
 	return resp.Body, nil
 }
 

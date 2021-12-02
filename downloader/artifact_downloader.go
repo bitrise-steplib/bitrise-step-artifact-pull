@@ -14,17 +14,16 @@ const FILE_PERMISSION = 0755
 const MAX_CONCURRENT_DOWNLOAD_THREAD = 5
 
 type ArtifactDownloader interface {
-	DownloadAndSaveArtifact() ([]string, []error, error)
+	DownloadAndSaveArtifacts() ([]string, []error, error)
 }
 
 type ConcurrentArtifactDownloader struct {
-	BasePath     string
 	DownloadURLs []string
 	Downloader   FileDownloader
 	Logger       log.Logger
 }
 
-func (ad ConcurrentArtifactDownloader) DownloadAndSaveArtifact() ([]string, []error, error) {
+func (ad ConcurrentArtifactDownloader) DownloadAndSaveArtifacts() ([]string, []error, error) {
 	paths := make([]string, len(ad.DownloadURLs))
 	errors := make([]error, len(ad.DownloadURLs))
 
@@ -100,6 +99,6 @@ func getTargetDir(dirName string) (string, error) {
 	return pwd + "/" + dirName, nil
 }
 
-func NewConcurrentArtifactDownloader(basePath string, downloadURLs []string, logger log.Logger) ArtifactDownloader {
-	return ConcurrentArtifactDownloader{BasePath: basePath, DownloadURLs: downloadURLs, Logger: logger}
+func NewConcurrentArtifactDownloader(downloadURLs []string, downloader FileDownloader, logger log.Logger) ArtifactDownloader {
+	return ConcurrentArtifactDownloader{DownloadURLs: downloadURLs, Downloader: downloader, Logger: logger}
 }
