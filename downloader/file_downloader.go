@@ -16,7 +16,7 @@ type DefaultFileDownloader struct {
 	Logger log.Logger
 }
 
-func (fd DefaultFileDownloader) DownloadFileFromURL(url string) (io.ReadCloser, error) {
+func (fd *DefaultFileDownloader) DownloadFileFromURL(url string) (io.ReadCloser, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -30,5 +30,5 @@ func (fd DefaultFileDownloader) DownloadFileFromURL(url string) (io.ReadCloser, 
 }
 
 func NewDefaultFileDownloader(logger log.Logger) FileDownloader {
-	return DefaultFileDownloader{Logger: logger}
+	return &DefaultFileDownloader{Logger: logger}
 }
