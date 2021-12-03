@@ -1,6 +1,7 @@
 package downloader
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"strings"
