@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	relativeDownloadPath         = "_tmp"
 	filePermission               = 0755
 	maxConcurrentDownloadThreads = 10
+	relativeDownloadPath         = "_tmp"
 )
 
 type ArtifactDownloader interface {
