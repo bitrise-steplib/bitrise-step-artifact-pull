@@ -21,11 +21,12 @@ func Test_DownloadFileFromURL(t *testing.T) {
 	res, err := c.DownloadFileFromURL(svr.URL)
 	assert.NoError(t, err)
 
-	defer c.CloseResponseWithErrorLogging(res)
-
 	buf := new(bytes.Buffer)
 	_, err = buf.ReadFrom(res)
+	assert.NoError(t, err)
+
 	data := buf.String()
+	err = res.Close()
 
 	assert.NoError(t, err)
 	assert.Equal(t, expected, string(data))
@@ -45,7 +46,7 @@ func Test_DownloadFileFromURL_UnauthorizedError(t *testing.T) {
 
 func Test_DownloadFileFromURL_ServerNotFound(t *testing.T) {
 	c := NewDefaultFileDownloader(log.NewLogger())
-	_, err := c.DownloadFileFromURL("http://dummy-url.hu")
+	_, err := c.DownloadFileFromURL("http://dummy-url")
 
-	assert.EqualError(t, err, `Get "http://dummy-url.hu": dial tcp: lookup dummy-url.hu: no such host`)
+	assert.EqualError(t, err, `Get "http://dummy-url": dial tcp: lookup dummy-url: no such host`)
 }

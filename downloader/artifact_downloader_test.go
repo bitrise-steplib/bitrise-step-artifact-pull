@@ -21,10 +21,6 @@ func (m *MockDownloader) DownloadFileFromURL(url string) (io.ReadCloser, error) 
 	return args.Get(0).(io.ReadCloser), args.Error(1)
 }
 
-func (m *MockDownloader) CloseResponseWithErrorLogging(resp io.ReadCloser) {
-	m.Called()
-}
-
 func getDownloadDir(dirName string) string {
 	pwd, err := os.Getwd()
 	if err != nil {
@@ -40,17 +36,14 @@ func Test_DownloadAndSaveArtifacts(t *testing.T) {
 		On("DownloadFileFromURL", mock.AnythingOfTypeArgument("string")).
 		Return(ioutil.NopCloser(bytes.NewReader([]byte("asd"))), nil)
 
-	mockDownloader.
-		On("CloseResponseWithErrorLogging", mock.AnythingOfTypeArgument("string"))
-
 	downloadURLs := []string{
 		"http://nice-file.hu/1.txt",
 		"http://nice-file.hu/2.txt",
 	}
 	expectedErrors := []error{nil, nil}
 	expectedDownloadPaths := []string{
-		getDownloadDir(DOWNLOAD_PATH) + "/1.txt",
-		getDownloadDir(DOWNLOAD_PATH) + "/2.txt",
+		getDownloadDir(realtiveDownloadPath) + "/1.txt",
+		getDownloadDir(realtiveDownloadPath) + "/2.txt",
 	}
 
 	artifactDownloader := NewConcurrentArtifactDownloader(downloadURLs, mockDownloader, log.NewLogger())
@@ -61,5 +54,5 @@ func Test_DownloadAndSaveArtifacts(t *testing.T) {
 	assert.Equal(t, expectedErrors, errors)
 	assert.Equal(t, expectedDownloadPaths, artifactPaths)
 
-	os.RemoveAll(getDownloadDir(DOWNLOAD_PATH))
+	os.RemoveAll(getDownloadDir(realtiveDownloadPath))
 }

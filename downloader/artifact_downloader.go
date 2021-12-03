@@ -9,9 +9,11 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 )
 
-const DOWNLOAD_PATH = "_tmp" // under current work dir
-const FILE_PERMISSION = 0755
-const MAX_CONCURRENT_DOWNLOAD_THREAD = 10
+const (
+	realtiveDownloadPath         = "_tmp"
+	filePermission               = 0755
+	maxConcurrentDownloadThreads = 10
+)
 
 type ArtifactDownloader interface {
 	DownloadAndSaveArtifacts() ([]string, []error, error)
@@ -28,19 +30,18 @@ func (ad *ConcurrentArtifactDownloader) DownloadAndSaveArtifacts() ([]string, []
 	paths := make([]string, len(ad.DownloadURLs))
 	errors := make([]error, len(ad.DownloadURLs))
 
-	targetDir, err := getTargetDir(DOWNLOAD_PATH)
+	targetDir, err := getTargetDir(realtiveDownloadPath)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	if _, err := os.Stat(targetDir); os.IsNotExist(err) {
-		err = os.Mkdir(targetDir, FILE_PERMISSION)
-		if err != nil {
+		if err := os.Mkdir(targetDir, filePermission); err != nil {
 			return nil, nil, err
 		}
 	}
 
-	semaphore := make(chan struct{}, MAX_CONCURRENT_DOWNLOAD_THREAD)
+	semaphore := make(chan struct{}, maxConcurrentDownloadThreads)
 	wg := &sync.WaitGroup{}
 	for i, url := range ad.DownloadURLs {
 		wg.Add(1)
@@ -66,7 +67,6 @@ func (ad *ConcurrentArtifactDownloader) download(
 	if err != nil {
 		errors[index] = err
 	}
-	defer ad.Downloader.CloseResponseWithErrorLogging(dataReader)
 
 	<-semaphore // release
 
@@ -78,9 +78,17 @@ func (ad *ConcurrentArtifactDownloader) download(
 	if err != nil {
 		errors[index] = err
 	}
-	defer out.Close()
 
-	_, err = io.Copy(out, dataReader)
+	if _, err := io.Copy(out, dataReader); err != nil {
+		errors[index] = err
+	}
+
+	err = out.Close()
+	if err != nil {
+		errors[index] = err
+	}
+
+	err = dataReader.Close()
 	if err != nil {
 		errors[index] = err
 	}

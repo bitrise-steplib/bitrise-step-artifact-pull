@@ -10,7 +10,6 @@ import (
 
 type FileDownloader interface {
 	DownloadFileFromURL(url string) (io.ReadCloser, error)
-	CloseResponseWithErrorLogging(resp io.ReadCloser)
 }
 
 type DefaultFileDownloader struct {
@@ -28,14 +27,6 @@ func (fd DefaultFileDownloader) DownloadFileFromURL(url string) (io.ReadCloser, 
 	}
 
 	return resp.Body, nil
-}
-
-func (fd DefaultFileDownloader) CloseResponseWithErrorLogging(resp io.ReadCloser) {
-	err := resp.Close()
-
-	if err != nil {
-		fd.Logger.Errorf("failed to close response reader")
-	}
 }
 
 func NewDefaultFileDownloader(logger log.Logger) FileDownloader {
