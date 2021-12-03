@@ -19,6 +19,7 @@ type MockDownloader struct {
 
 func (m *MockDownloader) DownloadFileFromURL(_ string) (io.ReadCloser, error) {
 	args := m.Called()
+	// as it is used concurrently we need to give back new return value every time
 	return io.NopCloser(strings.NewReader("shiny!")), args.Error(1)
 }
 
