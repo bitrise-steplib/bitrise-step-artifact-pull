@@ -2,11 +2,12 @@ package downloader
 
 import (
 	"fmt"
-	"github.com/bitrise-io/go-utils/log"
 	"io"
 	"os"
 	"strings"
 	"sync"
+
+	"github.com/bitrise-io/go-utils/log"
 )
 
 const (
