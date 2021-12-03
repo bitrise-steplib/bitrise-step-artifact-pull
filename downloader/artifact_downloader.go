@@ -70,7 +70,7 @@ func (ad *ConcurrentArtifactDownloader) download(
 
 	<-semaphore // release
 
-	fileFullPath := downloadDir + "/" + getFileNameFromURL(url)
+	fileFullPath := fmt.Sprintf("%s/%s", downloadDir, getFileNameFromURL(url))
 
 	ad.Logger.Printf("Saving %d file from %s URL", index, fileFullPath)
 
