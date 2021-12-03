@@ -70,7 +70,7 @@ func (ad *ConcurrentArtifactDownloader) download(
 
 	<-semaphore // release
 
-	fileFullPath := downloadDir + "/" + getFileNameFromURL(url)
+	fileFullPath := fmt.Sprintf("%s/%s", downloadDir, getFileNameFromURL(url))
 
 	ad.Logger.Printf("Saving %d file from %s URL", index, fileFullPath)
 
@@ -108,12 +108,13 @@ func getTargetDir(dirName string) (string, error) {
 		return "", err
 	}
 
-	return pwd + "/" + dirName, nil
+	return fmt.Sprintf("%s/%s", pwd, dirName), nil
 }
 
 func NewConcurrentArtifactDownloader(downloadURLs []string, downloader FileDownloader, logger log.Logger) ArtifactDownloader {
 	return &ConcurrentArtifactDownloader{
 		DownloadURLs: downloadURLs,
 		Downloader:   downloader,
-		Logger:       logger}
+		Logger:       logger,
+	}
 }
