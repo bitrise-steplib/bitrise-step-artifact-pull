@@ -2,22 +2,21 @@ package downloader
 
 import (
 	"fmt"
+	"github.com/bitrise-io/go-utils/log"
 	"io"
 	"os"
 	"strings"
 	"sync"
-
-	"github.com/bitrise-io/go-utils/log"
 )
 
 const (
-	realtiveDownloadPath         = "_tmp"
+	relativeDownloadPath         = "_tmp"
 	filePermission               = 0755
 	maxConcurrentDownloadThreads = 10
 )
 
 type ArtifactDownloader interface {
-	DownloadAndSaveArtifacts() ([]string, []error, error)
+	DownloadAndSaveArtifacts() ([]ArtifactDownloadResult, error)
 }
 
 type ConcurrentArtifactDownloader struct {
@@ -27,74 +26,80 @@ type ConcurrentArtifactDownloader struct {
 	valueMutex   sync.Mutex
 }
 
-func (ad *ConcurrentArtifactDownloader) DownloadAndSaveArtifacts() ([]string, []error, error) {
-	paths := make([]string, len(ad.DownloadURLs))
-	errors := make([]error, len(ad.DownloadURLs))
+type ArtifactDownloadResult struct {
+	DownloadError error
+	DownloadPath  string
+	DownloadURL   string
+}
 
-	targetDir, err := getTargetDir(realtiveDownloadPath)
+func (ad *ConcurrentArtifactDownloader) DownloadAndSaveArtifacts() ([]ArtifactDownloadResult, error) {
+	targetDir, err := getTargetDir(relativeDownloadPath)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	if _, err := os.Stat(targetDir); os.IsNotExist(err) {
 		if err := os.Mkdir(targetDir, filePermission); err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 	}
 
-	semaphore := make(chan struct{}, maxConcurrentDownloadThreads)
-	wg := &sync.WaitGroup{}
-	for i, url := range ad.DownloadURLs {
-		wg.Add(1)
-		go ad.download(i, url, targetDir, paths, errors, wg, semaphore)
-	}
-	wg.Wait()
-
-	return paths, errors, nil
+	return ad.downloadParallel(targetDir)
 }
 
-func (ad *ConcurrentArtifactDownloader) download(
-	index int, url string, downloadDir string, paths []string, errors []error, wg *sync.WaitGroup, semaphore chan struct{},
-) {
-	defer wg.Done()
-	semaphore <- struct{}{} // acquire
+func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]ArtifactDownloadResult, error) {
+	downloadResultChan := make(chan ArtifactDownloadResult)
+	defer close(downloadResultChan)
 
-	ad.Logger.Printf("Downloading %d file from %s URL", index, url)
-
-	ad.valueMutex.Lock()
-	defer ad.valueMutex.Unlock()
-
-	dataReader, err := ad.Downloader.DownloadFileFromURL(url)
-	if err != nil {
-		errors[index] = err
+	semaphore := make(chan struct{}, maxConcurrentDownloadThreads)
+	for _, url := range ad.DownloadURLs {
+		semaphore <- struct{}{} // acquire
+		go func(url string) {
+			downloadResultChan <- ad.download(url, targetDir)
+			<-semaphore // release
+		}(url)
 	}
 
-	<-semaphore // release
+	var downloadResults []ArtifactDownloadResult
+	for { // block until results are filled up
+		select {
+		case result := <-downloadResultChan:
+			downloadResults = append(downloadResults, result)
+			if len(downloadResults) == len(ad.DownloadURLs) {
+				return downloadResults, nil
+			}
+		}
+	}
+}
 
-	fileFullPath := fmt.Sprintf("%s/%s", downloadDir, getFileNameFromURL(url))
+func (ad *ConcurrentArtifactDownloader) download(url, dir string) ArtifactDownloadResult {
+	dataReader, err := ad.Downloader.DownloadFileFromURL(url)
+	if err != nil {
+		return ArtifactDownloadResult{DownloadError: err, DownloadURL: url}
+	}
+	defer func() {
+		if err := dataReader.Close(); err != nil {
+			ad.Logger.Errorf("failed to close data reader")
+		}
+	}()
 
-	ad.Logger.Printf("Saving %d file from %s URL", index, fileFullPath)
+	fileFullPath := fmt.Sprintf("%s/%s", dir, getFileNameFromURL(url))
 
 	out, err := os.Create(fileFullPath)
 	if err != nil {
-		errors[index] = err
+		return ArtifactDownloadResult{DownloadError: err, DownloadURL: url}
 	}
+	defer func() {
+		if err := out.Close(); err != nil {
+			ad.Logger.Errorf("couldn't close file: %s", out.Name())
+		}
+	}()
 
 	if _, err := io.Copy(out, dataReader); err != nil {
-		errors[index] = err
+		return ArtifactDownloadResult{DownloadError: err, DownloadURL: url}
 	}
 
-	err = out.Close()
-	if err != nil {
-		errors[index] = err
-	}
-
-	err = dataReader.Close()
-	if err != nil {
-		errors[index] = err
-	}
-
-	paths[index] = fileFullPath
+	return ArtifactDownloadResult{DownloadPath: fileFullPath, DownloadURL: url}
 }
 
 func getFileNameFromURL(url string) string {

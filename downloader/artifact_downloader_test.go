@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/bitrise-io/go-utils/log"
@@ -16,9 +17,9 @@ type MockDownloader struct {
 	mock.Mock
 }
 
-func (m *MockDownloader) DownloadFileFromURL(url string) (io.ReadCloser, error) {
+func (m *MockDownloader) DownloadFileFromURL(_ string) (io.ReadCloser, error) {
 	args := m.Called()
-	return args.Get(0).(io.ReadCloser), args.Error(1)
+	return io.NopCloser(strings.NewReader("shiny!")), args.Error(1)
 }
 
 func getDownloadDir(dirName string) string {
@@ -37,22 +38,26 @@ func Test_DownloadAndSaveArtifacts(t *testing.T) {
 		Return(ioutil.NopCloser(bytes.NewReader([]byte("asd"))), nil)
 
 	downloadURLs := []string{
-		"http://nice-file.hu/1.txt",
-		"http://nice-file.hu/2.txt",
+		"https://nice-file.hu/1.txt",
+		"https://nice-file.hu/2.txt",
 	}
-	expectedErrors := []error{nil, nil}
-	expectedDownloadPaths := []string{
-		getDownloadDir(realtiveDownloadPath) + "/1.txt",
-		getDownloadDir(realtiveDownloadPath) + "/2.txt",
+	expectedDownloadResults := []ArtifactDownloadResult{
+		{
+			DownloadPath: getDownloadDir(relativeDownloadPath) + "/1.txt",
+			DownloadURL:  downloadURLs[0],
+		},
+		{
+			DownloadPath: getDownloadDir(relativeDownloadPath) + "/2.txt",
+			DownloadURL:  downloadURLs[1],
+		},
 	}
 
 	artifactDownloader := NewConcurrentArtifactDownloader(downloadURLs, mockDownloader, log.NewLogger())
 
-	artifactPaths, errors, err := artifactDownloader.DownloadAndSaveArtifacts()
+	downloadResults, err := artifactDownloader.DownloadAndSaveArtifacts()
 
 	assert.NoError(t, err)
-	assert.Equal(t, expectedErrors, errors)
-	assert.Equal(t, expectedDownloadPaths, artifactPaths)
+	assert.ElementsMatch(t, expectedDownloadResults, downloadResults)
 
-	os.RemoveAll(getDownloadDir(realtiveDownloadPath))
+	_ = os.RemoveAll(getDownloadDir(relativeDownloadPath))
 }
