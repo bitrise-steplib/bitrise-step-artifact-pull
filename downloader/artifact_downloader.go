@@ -107,5 +107,6 @@ func NewConcurrentArtifactDownloader(downloadURLs []string, downloader FileDownl
 	return &ConcurrentArtifactDownloader{
 		DownloadURLs: downloadURLs,
 		Downloader:   downloader,
-		Logger:       logger}
+		Logger:       logger,
+	}
 }
