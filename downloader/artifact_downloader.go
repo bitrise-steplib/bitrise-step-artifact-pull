@@ -11,7 +11,7 @@ import (
 
 const DOWNLOAD_PATH = "_tmp" // under current work dir
 const FILE_PERMISSION = 0755
-const MAX_CONCURRENT_DOWNLOAD_THREAD = 5
+const MAX_CONCURRENT_DOWNLOAD_THREAD = 10
 
 type ArtifactDownloader interface {
 	DownloadAndSaveArtifacts() ([]string, []error, error)
@@ -21,9 +21,10 @@ type ConcurrentArtifactDownloader struct {
 	DownloadURLs []string
 	Downloader   FileDownloader
 	Logger       log.Logger
+	valueMutex   sync.Mutex
 }
 
-func (ad ConcurrentArtifactDownloader) DownloadAndSaveArtifacts() ([]string, []error, error) {
+func (ad *ConcurrentArtifactDownloader) DownloadAndSaveArtifacts() ([]string, []error, error) {
 	paths := make([]string, len(ad.DownloadURLs))
 	errors := make([]error, len(ad.DownloadURLs))
 
@@ -50,13 +51,16 @@ func (ad ConcurrentArtifactDownloader) DownloadAndSaveArtifacts() ([]string, []e
 	return paths, errors, nil
 }
 
-func (ad ConcurrentArtifactDownloader) download(
+func (ad *ConcurrentArtifactDownloader) download(
 	index int, url string, downloadDir string, paths []string, errors []error, wg *sync.WaitGroup, semaphore chan struct{},
 ) {
 	defer wg.Done()
 	semaphore <- struct{}{} // acquire
 
 	ad.Logger.Printf("Downloading %d file from %s URL", index, url)
+
+	ad.valueMutex.Lock()
+	defer ad.valueMutex.Unlock()
 
 	dataReader, err := ad.Downloader.DownloadFileFromURL(url)
 	if err != nil {
@@ -100,7 +104,7 @@ func getTargetDir(dirName string) (string, error) {
 }
 
 func NewConcurrentArtifactDownloader(downloadURLs []string, downloader FileDownloader, logger log.Logger) ArtifactDownloader {
-	return ConcurrentArtifactDownloader{
+	return &ConcurrentArtifactDownloader{
 		DownloadURLs: downloadURLs,
 		Downloader:   downloader,
 		Logger:       logger}
