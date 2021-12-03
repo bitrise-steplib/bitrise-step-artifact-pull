@@ -2,12 +2,10 @@ package downloader
 
 import (
 	"fmt"
+	"github.com/bitrise-io/go-utils/log"
 	"io"
 	"os"
 	"strings"
-	"sync"
-
-	"github.com/bitrise-io/go-utils/log"
 )
 
 const (
@@ -24,7 +22,6 @@ type ConcurrentArtifactDownloader struct {
 	DownloadURLs []string
 	Downloader   FileDownloader
 	Logger       log.Logger
-	valueMutex   sync.Mutex
 }
 
 type ArtifactDownloadResult struct {
@@ -63,14 +60,18 @@ func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]Ar
 
 	var downloadResults []ArtifactDownloadResult
 	for { // block until results are filled up
-		select {
-		case result := <-downloadResultChan:
-			downloadResults = append(downloadResults, result)
-			if len(downloadResults) == len(ad.DownloadURLs) {
-				return downloadResults, nil
-			}
+		result, ok := <-downloadResultChan
+		if !ok {
+			break
+		}
+
+		downloadResults = append(downloadResults, result)
+		if len(downloadResults) == len(ad.DownloadURLs) {
+			break
 		}
 	}
+
+	return downloadResults, nil
 }
 
 func (ad *ConcurrentArtifactDownloader) download(url, dir string) ArtifactDownloadResult {
