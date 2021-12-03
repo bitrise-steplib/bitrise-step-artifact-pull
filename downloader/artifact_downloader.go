@@ -100,7 +100,7 @@ func getTargetDir(dirName string) (string, error) {
 		return "", err
 	}
 
-	return pwd + "/" + dirName, nil
+	return fmt.Sprintf("%s/%s", pwd, dirName), nil
 }
 
 func NewConcurrentArtifactDownloader(downloadURLs []string, downloader FileDownloader, logger log.Logger) ArtifactDownloader {
