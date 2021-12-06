@@ -19,19 +19,19 @@ type BitriseAPIClient interface {
 	ShowBuildArtifact(appSlug, buildSlug, artifactSlug string) (ArtifactResponseItemModel, error)
 }
 
-type client struct {
+type DefaultBitriseAPIClient struct {
 	httpClient *http.Client
 	authToken  string
 	baseURL    string
 }
 
 // NewBitriseAPIClient ...
-func NewBitriseAPIClient(baseURL, authToken string) (BitriseAPIClient, error) {
+func NewDefaultBitriseAPIClient(baseURL, authToken string) (DefaultBitriseAPIClient, error) {
 	httpClient := &http.Client{
 		Timeout: time.Second * 30,
 	}
 
-	c := &client{
+	c := DefaultBitriseAPIClient{
 		httpClient: httpClient,
 		authToken:  authToken,
 		baseURL:    baseURL,
@@ -40,7 +40,7 @@ func NewBitriseAPIClient(baseURL, authToken string) (BitriseAPIClient, error) {
 	return c, nil
 }
 
-func (c client) get(endpoint, next string) (*http.Response, error) {
+func (c DefaultBitriseAPIClient) get(endpoint, next string) (*http.Response, error) {
 	url := fmt.Sprintf("%s/%s", c.baseURL, endpoint)
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -69,7 +69,7 @@ func (c client) get(endpoint, next string) (*http.Response, error) {
 }
 
 // ListBuildArtifacts gets the list of artifct details for a given build slug (also performs paging and calls the endpoint multiple times if needed)
-func (c *client) ListBuildArtifacts(appSlug, buildSlug string) ([]ArtifactListElementResponseModel, error) {
+func (c *DefaultBitriseAPIClient) ListBuildArtifacts(appSlug, buildSlug string) ([]ArtifactListElementResponseModel, error) {
 	var artifacts []ArtifactListElementResponseModel
 	requestPath := fmt.Sprintf("apps/%s/builds/%s/artifacts", appSlug, buildSlug)
 
@@ -105,7 +105,7 @@ func (c *client) ListBuildArtifacts(appSlug, buildSlug string) ([]ArtifactListEl
 }
 
 // ShowBuildArtifact gets the details of a given artifact identified by its slug
-func (c *client) ShowBuildArtifact(appSlug, buildSlug, artifactSlug string) (ArtifactResponseItemModel, error) {
+func (c *DefaultBitriseAPIClient) ShowBuildArtifact(appSlug, buildSlug, artifactSlug string) (ArtifactResponseItemModel, error) {
 	requestPath := fmt.Sprintf("apps/%s/builds/%s/artifacts/%s", appSlug, buildSlug, artifactSlug)
 
 	resp, err := c.get(requestPath, "") //nolint: bodyclose

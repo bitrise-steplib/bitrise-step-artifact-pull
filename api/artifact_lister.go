@@ -10,17 +10,17 @@ type ArtifactLister interface {
 	ListBuildArtifacts(appSlug string, buildSlugs []string) ([]ArtifactResponseItemModel, error)
 }
 
-type defaultArtifactLister struct {
+type DefaultArtifactLister struct {
 	apiClient BitriseAPIClient
 }
 
-func NewArtifactLister(client BitriseAPIClient) ArtifactLister {
-	return defaultArtifactLister{
+func NewArtifactLister(client BitriseAPIClient) DefaultArtifactLister {
+	return DefaultArtifactLister{
 		apiClient: client,
 	}
 }
 
-func (lister defaultArtifactLister) ListBuildArtifacts(appSlug string, buildSlugs []string) ([]ArtifactResponseItemModel, error) {
+func (lister DefaultArtifactLister) ListBuildArtifacts(appSlug string, buildSlugs []string) ([]ArtifactResponseItemModel, error) {
 	wg := &sync.WaitGroup{}
 	wg.Add(len(buildSlugs))
 	resultsChan := make(chan listArtifactsOfBuildResult, len(buildSlugs))
@@ -51,7 +51,7 @@ func (lister defaultArtifactLister) ListBuildArtifacts(appSlug string, buildSlug
 }
 
 // listArtifactsOfBuild gets details of all artifacts of a particular build using the Bitrise API
-func (lister defaultArtifactLister) listArtifactsOfBuild(appSlug, buildSlug string, resultsChan chan listArtifactsOfBuildResult, wg *sync.WaitGroup) {
+func (lister DefaultArtifactLister) listArtifactsOfBuild(appSlug, buildSlug string, resultsChan chan listArtifactsOfBuildResult, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	artifactListItems, err := lister.apiClient.ListBuildArtifacts(appSlug, buildSlug)
@@ -83,7 +83,7 @@ func (lister defaultArtifactLister) listArtifactsOfBuild(appSlug, buildSlug stri
 	}
 }
 
-func (lister defaultArtifactLister) showArtifact(appSlug, buildSlug, artifactSlug string, resultsChan chan showArtifactResult, wg *sync.WaitGroup) {
+func (lister DefaultArtifactLister) showArtifact(appSlug, buildSlug, artifactSlug string, resultsChan chan showArtifactResult, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	artifact, err := lister.apiClient.ShowBuildArtifact(appSlug, buildSlug, artifactSlug)
