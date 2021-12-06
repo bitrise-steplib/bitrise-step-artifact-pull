@@ -71,7 +71,7 @@ func (c DefaultBitriseAPIClient) get(endpoint, next string) (*http.Response, err
 // ListBuildArtifacts gets the list of artifct details for a given build slug (also performs paging and calls the endpoint multiple times if needed)
 func (c *DefaultBitriseAPIClient) ListBuildArtifacts(appSlug, buildSlug string) ([]ArtifactListElementResponseModel, error) {
 	var artifacts []ArtifactListElementResponseModel
-	requestPath := fmt.Sprintf("apps/%s/builds/%s/artifacts", appSlug, buildSlug)
+	requestPath := fmt.Sprintf("v0.2/apps/%s/builds/%s/artifacts", appSlug, buildSlug)
 
 	stillPaging := true
 	var next string
@@ -106,7 +106,7 @@ func (c *DefaultBitriseAPIClient) ListBuildArtifacts(appSlug, buildSlug string) 
 
 // ShowBuildArtifact gets the details of a given artifact identified by its slug
 func (c *DefaultBitriseAPIClient) ShowBuildArtifact(appSlug, buildSlug, artifactSlug string) (ArtifactResponseItemModel, error) {
-	requestPath := fmt.Sprintf("apps/%s/builds/%s/artifacts/%s", appSlug, buildSlug, artifactSlug)
+	requestPath := fmt.Sprintf("v0.2/apps/%s/builds/%s/artifacts/%s", appSlug, buildSlug, artifactSlug)
 
 	resp, err := c.get(requestPath, "") //nolint: bodyclose
 	if err != nil {

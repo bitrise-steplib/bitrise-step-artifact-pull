@@ -29,6 +29,7 @@ func (lister DefaultArtifactLister) ListBuildArtifacts(appSlug string, buildSlug
 		go lister.listArtifactsOfBuild(appSlug, buildSlug, resultsChan, wg)
 	}
 	wg.Wait()
+	close(resultsChan)
 
 	// process results
 	var (
@@ -68,6 +69,7 @@ func (lister DefaultArtifactLister) listArtifactsOfBuild(appSlug, buildSlug stri
 			go lister.showArtifact(appSlug, buildSlug, artifactListItem.Slug, showResultsChan, wg)
 		}
 		wg.Wait()
+		close(showResultsChan)
 
 		var artifacts []ArtifactResponseItemModel
 		for res := range showResultsChan {
