@@ -14,7 +14,7 @@ type DefaultArtifactLister struct {
 	apiClient BitriseAPIClient
 }
 
-func NewArtifactLister(client BitriseAPIClient) DefaultArtifactLister {
+func NewDefaultArtifactLister(client BitriseAPIClient) DefaultArtifactLister {
 	return DefaultArtifactLister{
 		apiClient: client,
 	}
