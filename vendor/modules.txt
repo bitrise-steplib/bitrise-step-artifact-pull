@@ -14,6 +14,20 @@ github.com/bitrise-io/go-utils/pointers
 # github.com/davecgh/go-spew v1.1.1
 ## explicit
 github.com/davecgh/go-spew/spew
+# github.com/gobuffalo/nulls v0.4.1
+## explicit; go 1.13
+github.com/gobuffalo/nulls
+# github.com/gobuffalo/pop v4.13.1+incompatible
+## explicit
+# github.com/gofrs/uuid v4.2.0+incompatible
+## explicit
+github.com/gofrs/uuid
+# github.com/markbates/pop v4.12.2+incompatible
+## explicit
+github.com/markbates/pop/nulls
+# github.com/pkg/errors v0.9.1
+## explicit
+github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 ## explicit
 github.com/pmezard/go-difflib/difflib
