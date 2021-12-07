@@ -96,7 +96,11 @@ func Test_listArtifactsOfBuild_returnsArtifactList(t *testing.T) {
 	assert.Equal(t, expectedArtifactList, res.artifacts)
 }
 
-func Test_ListBuildArtifacts_returnsArtifactListForMultipleBuilds(t *testing.T) {
+type listConcurrencyTestCase struct {
+	maxConcurrentListCalls, maxConcurrentShowCalls int
+}
+
+func Test_ListBuildArtifacts_concurrent_returnsArtifactListForMultipleBuilds(t *testing.T) {
 	mockArtifactList := []ArtifactListElementResponseModel{
 		{Slug: "artifact1"},
 		{Slug: "artifact2"},
@@ -114,11 +118,19 @@ func Test_ListBuildArtifacts_returnsArtifactListForMultipleBuilds(t *testing.T) 
 
 	mockClient.On("ShowBuildArtifact", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).Return(ArtifactResponseItemModel{}, nil)
 
-	lister := NewDefaultArtifactLister(mockClient)
-	artifacts, err := lister.ListBuildArtifacts("app-slug", mockBuildSlugs)
+	testCases := []listConcurrencyTestCase{
+		{1, 1}, {3, 3}, {10, 1}, {1, 10}, {10, 10},
+	}
+	for _, testCase := range testCases {
+		lister := NewDefaultArtifactLister(mockClient)
+		lister.maxConcurrentListArtifactAPICalls = testCase.maxConcurrentListCalls
+		lister.maxConcurrentShowArtifactAPICalls = testCase.maxConcurrentShowCalls
 
-	assert.NoError(t, err)
-	assert.Equal(t, len(mockBuildSlugs)*len(mockArtifactList), len(artifacts))
+		artifacts, err := lister.ListBuildArtifacts("app-slug", mockBuildSlugs)
+
+		assert.NoError(t, err)
+		assert.Equal(t, len(mockBuildSlugs)*len(mockArtifactList), len(artifacts))
+	}
 }
 
 func Test_ListBuildArtifacts_returnsErrorWhenApiCallFails(t *testing.T) {

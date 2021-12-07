@@ -6,22 +6,21 @@ import (
 	"sync"
 )
 
-const (
-	maxConcurrentListArtifactAPICalls = 3
-	maxConcurrentShowArtifactAPICalls = 3 // per list artifact call (so the total number of max API calls is maxConcurrentListArtifactAPICalls * maxConcurrentShowArtifactAPICalls)
-)
-
 type ArtifactLister interface {
 	ListBuildArtifacts(appSlug string, buildSlugs []string) ([]ArtifactResponseItemModel, error)
 }
 
 type DefaultArtifactLister struct {
-	apiClient BitriseAPIClient
+	apiClient                         BitriseAPIClient
+	maxConcurrentListArtifactAPICalls int
+	maxConcurrentShowArtifactAPICalls int
 }
 
 func NewDefaultArtifactLister(client BitriseAPIClient) DefaultArtifactLister {
 	return DefaultArtifactLister{
-		apiClient: client,
+		apiClient:                         client,
+		maxConcurrentListArtifactAPICalls: 3,
+		maxConcurrentShowArtifactAPICalls: 3, // per list artifact call (so the total number of max API calls is maxConcurrentListArtifactAPICalls * maxConcurrentShowArtifactAPICalls)
 	}
 }
 
@@ -35,7 +34,7 @@ func (lister DefaultArtifactLister) ListBuildArtifacts(appSlug string, buildSlug
 		concurrentCalls++
 		go lister.listArtifactsOfBuild(appSlug, buildSlug, resultsChan, wg)
 
-		if concurrentCalls >= maxConcurrentShowArtifactAPICalls {
+		if concurrentCalls >= lister.maxConcurrentListArtifactAPICalls {
 			wg.Wait()
 			concurrentCalls = 0
 		}
@@ -81,7 +80,7 @@ func (lister DefaultArtifactLister) listArtifactsOfBuild(appSlug, buildSlug stri
 			showWg.Add(1)
 			concurrentCalls++
 			go lister.showArtifact(appSlug, buildSlug, artifactListItem.Slug, showResultsChan, showWg)
-			if concurrentCalls >= maxConcurrentShowArtifactAPICalls {
+			if concurrentCalls >= lister.maxConcurrentShowArtifactAPICalls {
 				showWg.Wait()
 				concurrentCalls = 0
 			}
