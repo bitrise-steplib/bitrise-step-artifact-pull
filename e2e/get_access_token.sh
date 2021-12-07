@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 json_response=$(curl -X POST https://auth.services.bitrise.dev/auth/realms/bitrise-services/protocol/openid-connect/token -k \
     --data "client_id=artifact-pull" \
@@ -11,7 +11,6 @@ json_response=$(curl -X POST https://auth.services.bitrise.dev/auth/realms/bitri
     --data "claim_token_format=urn:ietf:params:oauth:token-type:jwt" \
     --data "audience=bitrise-api")
 
-acces_token=$(echo "$json_response" | jq .access_token)
+auth_token=$(echo $json_response | jq -r .access_token)
 
-envman add --key BITRISEIO_ARTIFACT_PULL_TOKEN --value "$access_token"
-echo "$access_token"
+envman add --key BITRISEIO_ARTIFACT_PULL_TOKEN --value $auth_token
