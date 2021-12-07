@@ -14,8 +14,6 @@ workflows:
   test_pull_single_artifact_success:
     before_run:
     - _setup
-    after_run:
-    - _check_downloaded_artifacts
     steps:
       # TODO: should be - path::./ for release (single point)
     - path::../:
@@ -23,6 +21,52 @@ workflows:
         inputs:
         - verbose: true
         - artifact_sources: "*"
+    - script:
+        title: Validate downloaded artifacts
+        is_always_run: true
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+            if [ ! -f ./_tmp/app-release-unsigned.apk ]; then
+              echo "Artifact.zip not found"
+              exit 1
+            fi
+            if [ ! -f ./_tmp/cat-illustration@3x.png ]; then
+              echo "Artifact.zip not found"
+              exit 1
+            fi
+            if [ ! -f ./_tmp/Test.xcresult.zip ]; then
+              echo "Artifact.zip not found"
+              exit 1
+            fi
+
+  test_download_specific_stage_artifacts:
+    before_run:
+    - _setup
+    steps:
+      # TODO: should be - path::./ for release (single point)
+    - path::../:
+        title: Execute step
+        inputs:
+        - verbose: true
+        - artifact_sources: "stage-1.*"
+    - script:
+        title: Validate downloaded artifacts
+        is_always_run: true
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+            if [ ! -f ./_tmp/generated_text_file.txt ]; then
+              echo "Artifact.zip not found"
+              exit 1
+            fi
+            fc=$(ls ./_tmp | wc -l | xargs)
+            if [ $fc -gt 1 ]; then
+              echo "There are more than 1 files"
+              exit 1
+            fi
 
   # test_pull_artifact_of_different_pipeline_fails:
   #   before_run:
@@ -51,23 +95,3 @@ workflows:
             #!/bin/env bash
             set -ex
             rm -rf ./_tmp
-    - change-workdir:
-        title: Switch working dir to _tmp
-        run_if: "true"
-        inputs:
-        - path: ./_tmp
-        - is_create_path: true
-
-  _check_downloaded_artifacts:
-    steps:
-    - script:
-        title: Validate downloaded artifacts
-        is_always_run: true
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            set -ex
-            if [ ! -f ./Artifact.zip ]; then
-              echo "Artifact.zip not found"
-              exit 1
-            fi

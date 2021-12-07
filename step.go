@@ -96,11 +96,6 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 		return Result{}, err
 	}
 
-	a.logger.Printf("Got artifact infos")
-	for _, artifact := range artifacts {
-		a.logger.Printf("%v - %v", artifact.Title, artifact.DownloadPath)
-	}
-
 	a.logger.Printf("Downloading artifacts")
 	fileDownloader := downloader.NewDefaultFileDownloader(a.logger)
 	artifactDownloader := downloader.NewConcurrentArtifactDownloader(artifacts, fileDownloader, a.logger)

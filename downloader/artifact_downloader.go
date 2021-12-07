@@ -77,8 +77,6 @@ func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]Ar
 }
 
 func (ad *ConcurrentArtifactDownloader) download(artifactInfo api.ArtifactResponseItemModel, dir string) ArtifactDownloadResult {
-	ad.Logger.Debugf("downloading %s into %s dir", artifactInfo.DownloadPath, dir)
-
 	dataReader, err := ad.Downloader.DownloadFileFromURL(artifactInfo.DownloadPath)
 	defer func() {
 		if dataReader != nil {
@@ -91,8 +89,6 @@ func (ad *ConcurrentArtifactDownloader) download(artifactInfo api.ArtifactRespon
 	if err != nil {
 		return ArtifactDownloadResult{DownloadError: err, DownloadURL: artifactInfo.DownloadPath}
 	}
-
-	ad.Logger.Debugf("%s download completed", artifactInfo.Title)
 
 	fileFullPath := fmt.Sprintf("%s/%s", dir, artifactInfo.Title)
 
@@ -109,8 +105,6 @@ func (ad *ConcurrentArtifactDownloader) download(artifactInfo api.ArtifactRespon
 	if _, err := io.Copy(out, dataReader); err != nil {
 		return ArtifactDownloadResult{DownloadError: err, DownloadURL: artifactInfo.DownloadPath}
 	}
-
-	ad.Logger.Debugf("downloaded %s into %s dir", artifactInfo.Title, fileFullPath)
 
 	return ArtifactDownloadResult{DownloadPath: fileFullPath, DownloadURL: artifactInfo.DownloadPath}
 }
