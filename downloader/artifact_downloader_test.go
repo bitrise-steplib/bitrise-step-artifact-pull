@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/bitrise-io/go-utils/log"
+	"github.com/bitrise-steplib/bitrise-step-artifact-pull/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -38,18 +39,24 @@ func Test_DownloadAndSaveArtifacts(t *testing.T) {
 		On("DownloadFileFromURL", mock.AnythingOfTypeArgument("string")).
 		Return(ioutil.NopCloser(bytes.NewReader([]byte("asd"))), nil)
 
-	downloadURLs := []string{
-		"https://nice-file.hu/1.txt",
-		"https://nice-file.hu/2.txt",
+	downloadURLs := []api.ArtifactResponseItemModel{
+		{
+			DownloadPath: "https://nice-file.hu/1.txt",
+			Title:        "1.txt",
+		},
+		{
+			DownloadPath: "https://nice-file.hu/2.txt",
+			Title:        "2.txt",
+		},
 	}
 	expectedDownloadResults := []ArtifactDownloadResult{
 		{
 			DownloadPath: getDownloadDir(relativeDownloadPath) + "/1.txt",
-			DownloadURL:  downloadURLs[0],
+			DownloadURL:  downloadURLs[0].DownloadPath,
 		},
 		{
 			DownloadPath: getDownloadDir(relativeDownloadPath) + "/2.txt",
-			DownloadURL:  downloadURLs[1],
+			DownloadURL:  downloadURLs[1].DownloadPath,
 		},
 	}
 

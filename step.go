@@ -98,7 +98,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 
 	a.logger.Printf("Got artifact infos")
 	for _, artifact := range artifacts {
-		a.logger.Printf("%v - %v", artifact.Title, *artifact.DownloadPath)
+		a.logger.Printf("%v - %v", artifact.Title, artifact.DownloadPath)
 	}
 
 	a.logger.Printf("Downloading artifacts")
