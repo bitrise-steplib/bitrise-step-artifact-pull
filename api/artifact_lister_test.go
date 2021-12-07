@@ -101,9 +101,11 @@ func Test_ListBuildArtifacts_returnsArtifactListForMultipleBuilds(t *testing.T) 
 		{Slug: "artifact1"},
 		{Slug: "artifact2"},
 		{Slug: "artifact3"},
+		{Slug: "artifact4"},
+		{Slug: "artifact5"},
 	}
 
-	mockBuildSlugs := []string{"build-slug", "build-slug", "build-slug"}
+	mockBuildSlugs := []string{"build-slug", "build-slug", "build-slug", "build-slug", "build-slug"}
 
 	mockClient := &MockBitriseAPIClient{}
 	mockClient.
