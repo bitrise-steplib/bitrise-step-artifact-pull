@@ -3,8 +3,8 @@ module github.com/bitrise-steplib/bitrise-step-artifact-pull
 go 1.17
 
 require (
-	github.com/bitrise-io/go-steputils v0.0.0-20211112094629-32e127e755f4
-	github.com/bitrise-io/go-utils v0.0.0-20211110205926-af3caef627ae
+	github.com/bitrise-io/go-steputils v0.0.0-20211205220451-e046db274afb
+	github.com/bitrise-io/go-utils v0.0.0-20211126092127-3a566ee3f420
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.3.0 // indirect
