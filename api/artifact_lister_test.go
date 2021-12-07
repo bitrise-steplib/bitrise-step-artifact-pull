@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"sync"
 	"testing"
 
@@ -93,4 +94,41 @@ func Test_listArtifactsOfBuild_returnsArtifactList(t *testing.T) {
 
 	assert.NoError(t, res.err)
 	assert.Equal(t, expectedArtifactList, res.artifacts)
+}
+
+func Test_ListBuildArtifacts_returnsArtifactListForMultipleBuilds(t *testing.T) {
+	mockArtifactList := []ArtifactListElementResponseModel{
+		{Slug: "artifact1"},
+		{Slug: "artifact2"},
+		{Slug: "artifact3"},
+	}
+
+	mockBuildSlugs := []string{"build-slug", "build-slug", "build-slug"}
+
+	mockClient := &MockBitriseAPIClient{}
+	mockClient.
+		On("ListBuildArtifacts", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).
+		Return(mockArtifactList, nil)
+
+	mockClient.On("ShowBuildArtifact", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).Return(ArtifactResponseItemModel{}, nil)
+
+	lister := NewDefaultArtifactLister(mockClient)
+	artifacts, err := lister.ListBuildArtifacts("app-slug", mockBuildSlugs)
+
+	assert.NoError(t, err)
+	assert.Equal(t, len(mockBuildSlugs)*len(mockArtifactList), len(artifacts))
+}
+
+func Test_ListBuildArtifacts_returnsErrorWhenApiCallFails(t *testing.T) {
+	mockBuildSlugs := []string{"build-slug", "build-slug", "build-slug"}
+
+	mockClient := &MockBitriseAPIClient{}
+	mockClient.
+		On("ListBuildArtifacts", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).
+		Return([]ArtifactListElementResponseModel{}, errors.New("API error"))
+
+	lister := NewDefaultArtifactLister(mockClient)
+	_, err := lister.ListBuildArtifacts("app-slug", mockBuildSlugs)
+
+	assert.EqualError(t, err, "failed to get artifact download links for build(s): build-slug, build-slug, build-slug")
 }
