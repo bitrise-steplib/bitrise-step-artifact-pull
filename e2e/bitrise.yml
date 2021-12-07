@@ -50,14 +50,14 @@ workflows:
         - content: |-
             #!/bin/env bash
             set -ex
-            rm -rf ./_tmp            
+            rm -rf ./_tmp
     - change-workdir:
         title: Switch working dir to _tmp
         run_if: "true"
         inputs:
         - path: ./_tmp
         - is_create_path: true
-            
+
   _check_downloaded_artifacts:
     steps:
     - script:
