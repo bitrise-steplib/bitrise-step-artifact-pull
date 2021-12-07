@@ -9,6 +9,7 @@ import (
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/env"
 	"github.com/bitrise-io/go-utils/log"
+	"github.com/bitrise-steplib/bitrise-step-artifact-pull/api"
 	"github.com/bitrise-steplib/bitrise-step-artifact-pull/model"
 )
 
@@ -60,15 +61,49 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 }
 
 func (a ArtifactPull) Run(cfg Config) (Result, error) {
-	a.logger.EnableDebugLog(cfg.Verbose)
-	buildIdGetter := NewDefaultBuildIDGetter(cfg.FinishedStages, cfg.ArtifactSources)
-	buildIDs, err := buildIdGetter.GetBuildIDs()
+	// a.logger.EnableDebugLog(cfg.Verbose)
+	// buildIdGetter := NewDefaultBuildIDGetter(cfg.FinishedStages, cfg.ArtifactSources)
+	// buildIDs, err := buildIdGetter.GetBuildIDs()
+	// if err != nil {
+	// 	return Result{}, err
+	// }
+
+	buildIDs := []string{"3fbc2f11-70c2-4a29-bd1a-5e4db6370da0"}
+	// "729d7df7-a7c3-4f97-a9d0-aca2388ced31"}
+	// ,
+	// 	"3fbc2f11-70c2-4a29-bd1a-5e4db6370da0",
+	// 	"52e85d8e-0c3d-436a-9e6b-57d26d9f031f",
+	// 	"4d8d21f2-3644-4f7a-be5a-46f10f155b41"}
+
+	// TODO: Do not print these build IDs, remove this line. It is just for the developer who will implement thed artifact download
+	a.logger.Printf("%+v", buildIDs)
+
+	authToken := a.envRepository.Get("BITRISEIO_ARTIFACT_PULL_TOKEN")
+	if authToken == "" {
+		return Result{}, fmt.Errorf("missing access token (BITRISEIO_ARTIFACT_PULL_TOKEN env var is not set)")
+	}
+
+	apiClient, err := api.NewDefaultBitriseAPIClient("https://api-staging.bitrise.io", authToken)
 	if err != nil {
 		return Result{}, err
 	}
 
-	// TODO: Do not print these build IDs, remove this line. It is just for the developer who will implement thed artifact download
-	a.logger.Printf("%+v", buildIDs)
+	a.logger.Printf("Getting artifact info")
+
+	appSlug := a.envRepository.Get("BITRISE_APP_SLUG")
+	if appSlug == "" {
+		return Result{}, fmt.Errorf("missing app slug (BITRISE_APP_SLUG env var is not set)")
+	}
+
+	artifactLister := api.NewDefaultArtifactLister(&apiClient)
+	artifacts, err := artifactLister.ListBuildArtifacts(appSlug, buildIDs) // TODO: how to get app slug?
+	if err != nil {
+		a.logger.Printf("failed", err)
+		return Result{}, err
+	}
+
+	a.logger.Printf("Got result: %v", artifacts)
+
 	// TODO
 	return Result{}, nil
 }
