@@ -1,11 +1,5 @@
 package api
 
-import (
-	"encoding/json"
-
-	"github.com/markbates/pop/nulls"
-)
-
 // ArtifactListResponseModel ...
 type ArtifactListResponseModel struct {
 	Data []ArtifactListElementResponseModel `json:"data"`
@@ -26,24 +20,15 @@ type ShowBuildArtifactResponse struct {
 
 // ArtifactResponseItemModel ...
 type ArtifactResponseItemModel struct {
-	Title                nulls.String    `json:"title"`
-	ArtifactType         nulls.String    `json:"artifact_type"`
-	ArtifactMeta         json.RawMessage `json:"artifact_meta"`
-	DownloadPath         *string         `json:"expiring_download_url"`
-	IsPublicPageEnabled  bool            `json:"is_public_page_enabled"`
-	Slug                 string          `json:"slug"`
-	PublicInstallPageURL string          `json:"public_install_page_url"`
-	FileSizeBytes        *int64          `json:"file_size_bytes"`
+	Title        string `json:"title"`
+	DownloadPath string `json:"expiring_download_url"`
+	Slug         string `json:"slug"`
 }
 
 // ArtifactListElementResponseModel ...
 type ArtifactListElementResponseModel struct {
-	Title               nulls.String    `json:"title"`
-	ArtifactType        nulls.String    `json:"artifact_type"`
-	ArtifactMeta        json.RawMessage `json:"artifact_meta"`
-	IsPublicPageEnabled bool            `json:"is_public_page_enabled"`
-	Slug                string          `json:"slug"`
-	FileSizeBytes       *int64          `json:"file_size_bytes"`
+	Title string `json:"title"`
+	Slug  string `json:"slug"`
 }
 
 type PagingModel struct {

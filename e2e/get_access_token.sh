@@ -7,7 +7,7 @@ json_response=$(curl -X POST https://auth.services.bitrise.dev/auth/realms/bitri
     --data "client_secret=$ARTIFACT_PULL_AUTH_CLIENT_SECRET" \
     --data "grant_type=urn:ietf:params:oauth:grant-type:uma-ticket" \
     --data "scope=build_artifact:read build:read app:read" \
-    --data "claim_token=eyJidWlsZF9pZHMiOlsiNzI5ZDdkZjctYTdjMy00Zjk3LWE5ZDAtYWNhMjM4OGNlZDMxIiwiM2ZiYzJmMTEtNzBjMi00YTI5LWJkMWEtNWU0ZGI2MzcwZGEwIiwiNTJlODVkOGUtMGMzZC00MzZhLTllNmItNTdkMjZkOWYwMzFmIiwiNGQ4ZDIxZjItMzY0NC00ZjdhLWJlNWEtNDZmMTBmMTU1YjQxIl0sInBpcGVsaW5lX2lkIjpbIjlkYTg2N2E5LTE5M2UtNDFiMS1iZjdmLTU4YTJlZDc0NTQ0MiJdICAgICAgICB9" \
+    --data "claim_token=eyJidWlsZF9pZHMiOlsiNzNkMzNmYjUtMzVjNi00OTVmLWJkODAtMDE1YWU2ODFkYjMzIiwiMzk0MDRiZWUtNTJiYS00Y2EyLTg1MDgtOTE0ODllN2Y2YWZhIiwiZWQwZGEwY2YtNjZjYy00MTA5LWIyM2YtOGExNTZkNjFiMGMzIiwiMDUxMzBjZTQtODI1Yi00Y2ExLWE5YmUtNGY1NDQxM2U1ZGNkIl0sInBpcGVsaW5lX2lkIjpbIjM2ZTg1NDBkLTQxYzctNDNjZS05NzRiLTgyNTQ5OTc2OTkxZSJdfQ==" \
     --data "claim_token_format=urn:ietf:params:oauth:token-type:jwt" \
     --data "audience=bitrise-api")
 
