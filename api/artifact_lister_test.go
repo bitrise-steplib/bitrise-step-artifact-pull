@@ -61,19 +61,25 @@ func Test_showArtifact_returnsArtifact(t *testing.T) {
 
 func Test_listArtifactsOfBuild_returnsArtifactList(t *testing.T) {
 	mockArtifactList := []ArtifactListElementResponseModel{
-		ArtifactListElementResponseModel{Slug: "artifact1"},
-		ArtifactListElementResponseModel{Slug: "artifact2"},
-		ArtifactListElementResponseModel{Slug: "artifact3"},
+		{Slug: "artifact1"},
+		{Slug: "artifact2"},
+		{Slug: "artifact3"},
 	}
-	mockDownloadPath := "http://download.com"
-	mockArtifact := ArtifactResponseItemModel{Title: nulls.NewString("artifact"), DownloadPath: &mockDownloadPath}
+
+	expectedArtifactList := []ArtifactResponseItemModel{
+		{Slug: "artifact1"},
+		{Slug: "artifact2"},
+		{Slug: "artifact3"},
+	}
+
 	mockClient := &MockBitriseAPIClient{}
 	mockClient.
 		On("ListBuildArtifacts", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).
 		Return(mockArtifactList, nil)
-	mockClient.
-		On("ShowBuildArtifact", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).
-		Return(mockArtifact, nil)
+	for _, a := range expectedArtifactList {
+		mockClient.On("ShowBuildArtifact", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).
+			Return(a, nil).Once()
+	}
 
 	lister := NewDefaultArtifactLister(mockClient)
 
@@ -86,5 +92,5 @@ func Test_listArtifactsOfBuild_returnsArtifactList(t *testing.T) {
 	res := <-resultsChan
 
 	assert.NoError(t, res.err)
-	assert.Equal(t, mockArtifactList, res.artifacts[0])
+	assert.Equal(t, expectedArtifactList, res.artifacts)
 }
