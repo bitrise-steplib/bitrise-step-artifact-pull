@@ -68,7 +68,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 	// 	return Result{}, err
 	// }
 
-	buildIDs := []string{"3fbc2f11-70c2-4a29-bd1a-5e4db6370da0"}
+	buildIDs := []string{"729d7df7-a7c3-4f97-a9d0-aca2388ced31", "52e85d8e-0c3d-436a-9e6b-57d26d9f031f"}
 	// "729d7df7-a7c3-4f97-a9d0-aca2388ced31"}
 	// ,
 	// 	"3fbc2f11-70c2-4a29-bd1a-5e4db6370da0",
@@ -102,7 +102,10 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 		return Result{}, err
 	}
 
-	a.logger.Printf("Got result: %v", artifacts)
+	a.logger.Printf("Got artifact infos")
+	for _, artifact := range artifacts {
+		a.logger.Printf("%v - %v", artifact.Title, *artifact.DownloadPath)
+	}
 
 	// TODO
 	return Result{}, nil

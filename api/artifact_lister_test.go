@@ -37,7 +37,7 @@ func (m *MockBitriseAPIClient) ShowBuildArtifact(appSlug, buildSlug, artifactSlu
 	return r0, r1
 }
 
-func Test_showArtifact(t *testing.T) {
+func Test_showArtifact_returnsArtifact(t *testing.T) {
 	mockDownloadPath := "http://download.com"
 	mockArtifact := ArtifactResponseItemModel{Title: nulls.NewString("artifact"), DownloadPath: &mockDownloadPath}
 	mockClient := &MockBitriseAPIClient{}
@@ -57,4 +57,34 @@ func Test_showArtifact(t *testing.T) {
 
 	assert.NoError(t, res.err)
 	assert.Equal(t, mockArtifact, res.artifact)
+}
+
+func Test_listArtifactsOfBuild_returnsArtifactList(t *testing.T) {
+	mockArtifactList := []ArtifactListElementResponseModel{
+		ArtifactListElementResponseModel{Slug: "artifact1"},
+		ArtifactListElementResponseModel{Slug: "artifact2"},
+		ArtifactListElementResponseModel{Slug: "artifact3"},
+	}
+	mockDownloadPath := "http://download.com"
+	mockArtifact := ArtifactResponseItemModel{Title: nulls.NewString("artifact"), DownloadPath: &mockDownloadPath}
+	mockClient := &MockBitriseAPIClient{}
+	mockClient.
+		On("ListBuildArtifacts", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).
+		Return(mockArtifactList, nil)
+	mockClient.
+		On("ShowBuildArtifact", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).
+		Return(mockArtifact, nil)
+
+	lister := NewDefaultArtifactLister(mockClient)
+
+	resultsChan := make(chan listArtifactsOfBuildResult, 1)
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	lister.listArtifactsOfBuild("app-slug", "build-slug", resultsChan, wg)
+	wg.Wait()
+
+	res := <-resultsChan
+
+	assert.NoError(t, res.err)
+	assert.Equal(t, mockArtifactList, res.artifacts[0])
 }
