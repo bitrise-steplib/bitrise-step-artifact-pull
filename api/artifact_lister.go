@@ -11,22 +11,33 @@ type ArtifactLister interface {
 }
 
 type DefaultArtifactLister struct {
-	apiClient BitriseAPIClient
+	apiClient                         BitriseAPIClient
+	maxConcurrentListArtifactAPICalls int
+	maxConcurrentShowArtifactAPICalls int
 }
 
 func NewDefaultArtifactLister(client BitriseAPIClient) DefaultArtifactLister {
 	return DefaultArtifactLister{
-		apiClient: client,
+		apiClient:                         client,
+		maxConcurrentListArtifactAPICalls: 3,
+		maxConcurrentShowArtifactAPICalls: 3, // per list artifact call (so the total number of max API calls is maxConcurrentListArtifactAPICalls * maxConcurrentShowArtifactAPICalls)
 	}
 }
 
 func (lister DefaultArtifactLister) ListBuildArtifacts(appSlug string, buildSlugs []string) ([]ArtifactResponseItemModel, error) {
 	wg := &sync.WaitGroup{}
-	wg.Add(len(buildSlugs))
 	resultsChan := make(chan listArtifactsOfBuildResult, len(buildSlugs))
 
+	concurrentCalls := 0
 	for _, buildSlug := range buildSlugs {
+		wg.Add(1)
+		concurrentCalls++
 		go lister.listArtifactsOfBuild(appSlug, buildSlug, resultsChan, wg)
+
+		if concurrentCalls >= lister.maxConcurrentListArtifactAPICalls {
+			wg.Wait()
+			concurrentCalls = 0
+		}
 	}
 	wg.Wait()
 	close(resultsChan)
@@ -61,14 +72,21 @@ func (lister DefaultArtifactLister) listArtifactsOfBuild(appSlug, buildSlug stri
 	} else if len(artifactListItems) == 0 {
 		resultsChan <- listArtifactsOfBuildResult{buildSlug: buildSlug}
 	} else {
-		wg := &sync.WaitGroup{}
-		wg.Add(len(artifactListItems))
+		showWg := &sync.WaitGroup{}
 		showResultsChan := make(chan showArtifactResult, len(artifactListItems))
 
+		concurrentCalls := 0
 		for _, artifactListItem := range artifactListItems {
-			go lister.showArtifact(appSlug, buildSlug, artifactListItem.Slug, showResultsChan, wg)
+			showWg.Add(1)
+			concurrentCalls++
+			go lister.showArtifact(appSlug, buildSlug, artifactListItem.Slug, showResultsChan, showWg)
+			if concurrentCalls >= lister.maxConcurrentShowArtifactAPICalls {
+				showWg.Wait()
+				concurrentCalls = 0
+			}
 		}
-		wg.Wait()
+
+		showWg.Wait()
 		close(showResultsChan)
 
 		var artifacts []ArtifactResponseItemModel
