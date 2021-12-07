@@ -6,7 +6,7 @@ app:
   # Shared envs for every test workflow
   - TEST_APP_URL: TODO
   - TEST_APP_BRANCH: TODO
-  - BITRISEIO_FINISHED_STAGES: '[{"id":"68df59e4-d108-4bc2-bfb7-a4c1eb402ff8","name":"stage-successful-1","workflows":[{"external_id":"6eea668f-9089-4047-8a66-c9001e88f2dc","finished_at":"2021-11-30T09:37:30Z","id":"a234e4d3-fc0a-4576-8bc9-240c68639f34","name":"successful-20s","started_at":"2021-11-30T09:37:02Z","status":"succeeded"}]},{"id":"59b55e9b-fa65-40ac-9b34-ffcf08f85bd9","name":"stage-successful-2","workflows":[{"external_id":"258d489b-c672-4f63-a508-9e736aacf67d","finished_at":"2021-11-30T09:41:22Z","id":"90896496-e084-4bce-9dbe-8e5ba955ec7a","name":"successful-20s","started_at":"2021-11-30T09:40:54Z","status":"succeeded"},{"external_id":"ea9f95cb-5ed6-42b3-ba14-21342029fd58","finished_at":"2021-11-30T09:44:34Z","id":"8a7ad0a2-b908-461d-a2f4-0ebc31e14974","name":"successful-30s","started_at":"2021-11-30T09:43:58Z","status":"succeeded"}]}]' # yamllint disable-line
+  - BITRISEIO_FINISHED_STAGES: '[{"id":"083aa861-55b1-4132-ba70-0dfcd48fe929","name":"stage-1","workflows":[{"external_id":"73d33fb5-35c6-495f-bd80-015ae681db33","finished_at":"2021-12-07T14:04:45Z","id":"b1c6f0a1-06e7-4f63-a172-ac541a467d71","name":"placeholder","started_at":"2021-12-07T14:04:27Z","status":"succeeded"},{"external_id":"39404bee-52ba-4ca2-8508-91489e7f6afa","finished_at":"2021-12-07T14:05:07Z","id":"f3bda7bb-37be-409f-9291-b377717cba60","name":"textfile_generator","started_at":"2021-12-07T14:04:48Z","status":"succeeded"}]},{"id":"4919fe0e-877a-45ca-ab25-7da2ddf54bce","name":"stage-2","workflows":[{"external_id":"ed0da0cf-66cc-4109-b23f-8a156d61b0c3","finished_at":"2021-12-07T14:06:41Z","id":"f572ca4e-2f06-40f1-a4cf-c208af15ff28","name":"deployer","started_at":"2021-12-07T14:06:13Z","status":"succeeded"},{"external_id":"05130ce4-825b-4ca1-a9be-4f54413e5dcd","finished_at":"2021-12-07T14:07:04Z","id":"861fd1be-48b1-4a6b-ae4c-ee5449eaa6b6","name":"textfile_generator","started_at":"2021-12-07T14:06:45Z","status":"succeeded"}]}]' # yamllint disable-line
   - BITRISE_APP_SLUG: 11abc8954aa46c5a
 
 workflows:
@@ -14,8 +14,6 @@ workflows:
   test_pull_single_artifact_success:
     before_run:
     - _setup
-    after_run:
-    - _check_downloaded_artifacts
     steps:
       # TODO: should be - path::./ for release (single point)
     - path::../:
@@ -23,6 +21,52 @@ workflows:
         inputs:
         - verbose: true
         - artifact_sources: "*"
+    - script:
+        title: Validate downloaded artifacts
+        is_always_run: true
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+            if [ ! -f ./_tmp/app-release-unsigned.apk ]; then
+              echo "Artifact.zip not found"
+              exit 1
+            fi
+            if [ ! -f ./_tmp/cat-illustration@3x.png ]; then
+              echo "Artifact.zip not found"
+              exit 1
+            fi
+            if [ ! -f ./_tmp/Test.xcresult.zip ]; then
+              echo "Artifact.zip not found"
+              exit 1
+            fi
+
+  test_download_specific_stage_artifacts:
+    before_run:
+    - _setup
+    steps:
+      # TODO: should be - path::./ for release (single point)
+    - path::../:
+        title: Execute step
+        inputs:
+        - verbose: true
+        - artifact_sources: "stage-1.*"
+    - script:
+        title: Validate downloaded artifacts
+        is_always_run: true
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+            if [ ! -f ./_tmp/generated_text_file.txt ]; then
+              echo "Artifact.zip not found"
+              exit 1
+            fi
+            fc=$(ls ./_tmp | wc -l | xargs)
+            if [ $fc -gt 1 ]; then
+              echo "There are more than 1 files"
+              exit 1
+            fi
 
   # test_pull_artifact_of_different_pipeline_fails:
   #   before_run:
@@ -50,24 +94,4 @@ workflows:
         - content: |-
             #!/bin/env bash
             set -ex
-            rm -rf ./_tmp            
-    - change-workdir:
-        title: Switch working dir to _tmp
-        run_if: "true"
-        inputs:
-        - path: ./_tmp
-        - is_create_path: true
-            
-  _check_downloaded_artifacts:
-    steps:
-    - script:
-        title: Validate downloaded artifacts
-        is_always_run: true
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash             
-            set -ex
-            if [ ! -f ./Artifact.zip ]; then
-              echo "Artifact.zip not found"
-              exit 1
-            fi
+            rm -rf ./_tmp

@@ -5,7 +5,6 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/gobuffalo/nulls"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -40,7 +39,7 @@ func (m *MockBitriseAPIClient) ShowBuildArtifact(appSlug, buildSlug, artifactSlu
 
 func Test_showArtifact_returnsArtifact(t *testing.T) {
 	mockDownloadPath := "http://download.com"
-	mockArtifact := ArtifactResponseItemModel{Title: nulls.NewString("artifact"), DownloadPath: &mockDownloadPath}
+	mockArtifact := ArtifactResponseItemModel{Title: "artifact", DownloadPath: mockDownloadPath}
 	mockClient := &MockBitriseAPIClient{}
 	mockClient.
 		On("ShowBuildArtifact", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).
