@@ -13,12 +13,6 @@ github.com/bitrise-io/go-utils/pathutil
 github.com/bitrise-io/go-utils/pointers
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/gobuffalo/nulls v0.4.1
-## explicit
-github.com/gobuffalo/nulls
-# github.com/gofrs/uuid v4.2.0+incompatible
-## explicit
-github.com/gofrs/uuid
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
