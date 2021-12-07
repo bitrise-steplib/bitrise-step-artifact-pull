@@ -23,7 +23,7 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 
 | Key | Description | Flags | Default |
 | --- | --- | --- | --- |
-| `verbose` | Enable logging additional information for debugging |  | `false` |
+| `example_input` | Step input summary | required | `default_value` |
 </details>
 
 <details>
