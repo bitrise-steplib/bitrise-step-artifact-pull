@@ -23,7 +23,7 @@ func (fd *DefaultFileDownloader) DownloadFileFromURL(url string) (io.ReadCloser,
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to download file from %s, status code: %d", url, resp.StatusCode)
+		return resp.Body, fmt.Errorf("failed to download file from %s, status code: %d", url, resp.StatusCode)
 	}
 
 	return resp.Body, nil

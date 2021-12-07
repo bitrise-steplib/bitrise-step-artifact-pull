@@ -2,10 +2,11 @@ package downloader
 
 import (
 	"fmt"
-	"github.com/bitrise-io/go-utils/log"
 	"io"
 	"os"
-	"strings"
+
+	"github.com/bitrise-io/go-utils/log"
+	"github.com/bitrise-steplib/bitrise-step-artifact-pull/api"
 )
 
 const (
@@ -19,9 +20,9 @@ type ArtifactDownloader interface {
 }
 
 type ConcurrentArtifactDownloader struct {
-	DownloadURLs []string
-	Downloader   FileDownloader
-	Logger       log.Logger
+	Artifacts  []api.ArtifactResponseItemModel
+	Downloader FileDownloader
+	Logger     log.Logger
 }
 
 type ArtifactDownloadResult struct {
@@ -46,16 +47,17 @@ func (ad *ConcurrentArtifactDownloader) DownloadAndSaveArtifacts() ([]ArtifactDo
 }
 
 func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]ArtifactDownloadResult, error) {
-	downloadResultChan := make(chan ArtifactDownloadResult)
+	downloadResultChan := make(chan ArtifactDownloadResult, len(ad.Artifacts))
 	defer close(downloadResultChan)
 
 	semaphore := make(chan struct{}, maxConcurrentDownloadThreads)
-	for _, url := range ad.DownloadURLs {
+	for _, artifact := range ad.Artifacts {
 		semaphore <- struct{}{} // acquire
-		go func(url string) {
-			downloadResultChan <- ad.download(url, targetDir)
+		go func(artifactInfo api.ArtifactResponseItemModel) {
+			downloadResultChan <- ad.download(artifactInfo, targetDir)
+
 			<-semaphore // release
-		}(url)
+		}(artifact)
 	}
 
 	var downloadResults []ArtifactDownloadResult
@@ -66,7 +68,7 @@ func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]Ar
 		}
 
 		downloadResults = append(downloadResults, result)
-		if len(downloadResults) == len(ad.DownloadURLs) {
+		if len(downloadResults) == len(ad.Artifacts) {
 			break
 		}
 	}
@@ -74,22 +76,29 @@ func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]Ar
 	return downloadResults, nil
 }
 
-func (ad *ConcurrentArtifactDownloader) download(url, dir string) ArtifactDownloadResult {
-	dataReader, err := ad.Downloader.DownloadFileFromURL(url)
-	if err != nil {
-		return ArtifactDownloadResult{DownloadError: err, DownloadURL: url}
-	}
+func (ad *ConcurrentArtifactDownloader) download(artifactInfo api.ArtifactResponseItemModel, dir string) ArtifactDownloadResult {
+	ad.Logger.Debugf("downloading %s into %s dir", *artifactInfo.DownloadPath, dir)
+
+	dataReader, err := ad.Downloader.DownloadFileFromURL(*artifactInfo.DownloadPath)
 	defer func() {
-		if err := dataReader.Close(); err != nil {
-			ad.Logger.Errorf("failed to close data reader")
+		if dataReader != nil {
+			if err := dataReader.Close(); err != nil {
+				ad.Logger.Errorf("failed to close data reader")
+			}
 		}
 	}()
 
-	fileFullPath := fmt.Sprintf("%s/%s", dir, getFileNameFromURL(url))
+	if err != nil {
+		return ArtifactDownloadResult{DownloadError: err, DownloadURL: *artifactInfo.DownloadPath}
+	}
+
+	ad.Logger.Debugf("%s download completed", artifactInfo.Title)
+
+	fileFullPath := fmt.Sprintf("%s/%s", dir, artifactInfo.Title)
 
 	out, err := os.Create(fileFullPath)
 	if err != nil {
-		return ArtifactDownloadResult{DownloadError: err, DownloadURL: url}
+		return ArtifactDownloadResult{DownloadError: err, DownloadURL: *artifactInfo.DownloadPath}
 	}
 	defer func() {
 		if err := out.Close(); err != nil {
@@ -98,16 +107,12 @@ func (ad *ConcurrentArtifactDownloader) download(url, dir string) ArtifactDownlo
 	}()
 
 	if _, err := io.Copy(out, dataReader); err != nil {
-		return ArtifactDownloadResult{DownloadError: err, DownloadURL: url}
+		return ArtifactDownloadResult{DownloadError: err, DownloadURL: *artifactInfo.DownloadPath}
 	}
 
-	return ArtifactDownloadResult{DownloadPath: fileFullPath, DownloadURL: url}
-}
+	ad.Logger.Debugf("downloaded %s into %s dir", artifactInfo.Title, fileFullPath)
 
-func getFileNameFromURL(url string) string {
-	parts := strings.Split(url, "/")
-
-	return parts[len(parts)-1]
+	return ArtifactDownloadResult{DownloadPath: fileFullPath, DownloadURL: *artifactInfo.DownloadPath}
 }
 
 func getTargetDir(dirName string) (string, error) {
@@ -119,10 +124,10 @@ func getTargetDir(dirName string) (string, error) {
 	return fmt.Sprintf("%s/%s", pwd, dirName), nil
 }
 
-func NewConcurrentArtifactDownloader(downloadURLs []string, downloader FileDownloader, logger log.Logger) ArtifactDownloader {
+func NewConcurrentArtifactDownloader(artifacts []api.ArtifactResponseItemModel, downloader FileDownloader, logger log.Logger) ArtifactDownloader {
 	return &ConcurrentArtifactDownloader{
-		DownloadURLs: downloadURLs,
-		Downloader:   downloader,
-		Logger:       logger,
+		Artifacts:  artifacts,
+		Downloader: downloader,
+		Logger:     logger,
 	}
 }
