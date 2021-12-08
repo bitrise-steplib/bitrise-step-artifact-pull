@@ -63,10 +63,10 @@ inputs:
 - finished_stage: $BITRISEIO_FINISHED_STAGES
   opts:
     title: The finished stages for which artifacts are available to download
-    summary: This is a JSON representation of the finished stages for which the step can download build artifacts.     
+    summary: This is a JSON representation of the finished stages for which the step can download build artifacts.
     is_required: true
 
-- bitrise_api_base_url: "https://api.bitrise.io"
+- bitrise_api_base_url: https://api.bitrise.io
   opts:
     title: Bitrise API base URL
     summary: The base URL of the Bitrise API used to process the download requests.
