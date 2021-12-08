@@ -20,7 +20,7 @@ workflows:
         inputs:
         - verbose: true
         - artifact_sources: "*"
-        - bitrise_api_base_url: "https://api-staging.bitrise.io"
+        - bitrise_api_base_url: https://api-staging.bitrise.io
     - script:
         title: Validate downloaded artifacts
         is_always_run: true
@@ -44,13 +44,13 @@ workflows:
   test_download_specific_stage_artifacts:
     before_run:
     - _setup
-    steps:      
+    steps:
     - path::./:
         title: Execute step
         inputs:
         - verbose: true
-        - artifact_sources: "stage-1.*"
-        - bitrise_api_base_url: "https://api-staging.bitrise.io"
+        - artifact_sources: stage-1.*
+        - bitrise_api_base_url: https://api-staging.bitrise.io
     - script:
         title: Validate downloaded artifacts
         is_always_run: true
