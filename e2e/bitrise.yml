@@ -11,7 +11,7 @@ app:
 
 workflows:
 
-  test_pull_single_artifact_success:
+  test_download_all_artifacts_of_build:
     before_run:
     - _setup
     steps:
@@ -30,15 +30,15 @@ workflows:
             #!/usr/bin/env bash
             set -ex
             if [ ! -f ./_tmp/app-release-unsigned.apk ]; then
-              echo "Artifact.zip not found"
+              echo "app-release-unsigned.apk not found"
               exit 1
             fi
             if [ ! -f ./_tmp/cat-illustration@3x.png ]; then
-              echo "Artifact.zip not found"
+              echo "cat-illustration@3x.png not found"
               exit 1
             fi
             if [ ! -f ./_tmp/Test.xcresult.zip ]; then
-              echo "Artifact.zip not found"
+              echo "Test.xcresult.zip not found"
               exit 1
             fi
 
@@ -61,7 +61,7 @@ workflows:
             #!/usr/bin/env bash
             set -ex
             if [ ! -f ./_tmp/generated_text_file.txt ]; then
-              echo "Artifact.zip not found"
+              echo "generated_text_file.txt not found"
               exit 1
             fi
             fc=$(ls ./_tmp | wc -l | xargs)
@@ -69,16 +69,6 @@ workflows:
               echo "There are more than 1 files"
               exit 1
             fi
-
-  # test_pull_artifact_of_different_pipeline_fails:
-  #   before_run:
-  #   - _setup
-  #   after_run:
-  #   steps:
-  #   - path::./:
-  #     title: Execute step
-  #     is_skippable: true
-  #     inputs:
 
   _setup:
     steps:
@@ -89,7 +79,6 @@ workflows:
             #!/bin/env bash
             set -ex
             bash ./get_access_token.sh
-            printenv
     - script:
         title: Clean _tmp folder
         inputs:
