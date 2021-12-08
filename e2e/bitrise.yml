@@ -6,38 +6,124 @@ app:
   # Shared envs for every test workflow
   - TEST_APP_URL: TODO
   - TEST_APP_BRANCH: TODO
-  - BITRISEIO_FINISHED_STAGES: '[{"id":"68df59e4-d108-4bc2-bfb7-a4c1eb402ff8","name":"stage-successful-1","workflows":[{"external_id":"6eea668f-9089-4047-8a66-c9001e88f2dc","finished_at":"2021-11-30T09:37:30Z","id":"a234e4d3-fc0a-4576-8bc9-240c68639f34","name":"successful-20s","started_at":"2021-11-30T09:37:02Z","status":"succeeded"}]},{"id":"59b55e9b-fa65-40ac-9b34-ffcf08f85bd9","name":"stage-successful-2","workflows":[{"external_id":"258d489b-c672-4f63-a508-9e736aacf67d","finished_at":"2021-11-30T09:41:22Z","id":"90896496-e084-4bce-9dbe-8e5ba955ec7a","name":"successful-20s","started_at":"2021-11-30T09:40:54Z","status":"succeeded"},{"external_id":"ea9f95cb-5ed6-42b3-ba14-21342029fd58","finished_at":"2021-11-30T09:44:34Z","id":"8a7ad0a2-b908-461d-a2f4-0ebc31e14974","name":"successful-30s","started_at":"2021-11-30T09:43:58Z","status":"succeeded"}]}]' # yamllint disable-line
+  - BITRISEIO_FINISHED_STAGES: '[{"id":"083aa861-55b1-4132-ba70-0dfcd48fe929","name":"stage-1","workflows":[{"external_id":"73d33fb5-35c6-495f-bd80-015ae681db33","finished_at":"2021-12-07T14:04:45Z","id":"b1c6f0a1-06e7-4f63-a172-ac541a467d71","name":"placeholder","started_at":"2021-12-07T14:04:27Z","status":"succeeded"},{"external_id":"39404bee-52ba-4ca2-8508-91489e7f6afa","finished_at":"2021-12-07T14:05:07Z","id":"f3bda7bb-37be-409f-9291-b377717cba60","name":"textfile_generator","started_at":"2021-12-07T14:04:48Z","status":"succeeded"}]},{"id":"4919fe0e-877a-45ca-ab25-7da2ddf54bce","name":"stage-2","workflows":[{"external_id":"ed0da0cf-66cc-4109-b23f-8a156d61b0c3","finished_at":"2021-12-07T14:06:41Z","id":"f572ca4e-2f06-40f1-a4cf-c208af15ff28","name":"deployer","started_at":"2021-12-07T14:06:13Z","status":"succeeded"},{"external_id":"05130ce4-825b-4ca1-a9be-4f54413e5dcd","finished_at":"2021-12-07T14:07:04Z","id":"861fd1be-48b1-4a6b-ae4c-ee5449eaa6b6","name":"textfile_generator","started_at":"2021-12-07T14:06:45Z","status":"succeeded"}]}]' # yamllint disable-line
+  - BITRISE_APP_SLUG: 11abc8954aa46c5a
+  - BITRISE_AUTH_SERVICE_ARTIFACT_PULL_CLIENT_SECRET: $BITRISE_AUTH_SERVICE_ARTIFACT_PULL_CLIENT_SECRET
 
 workflows:
 
-  test_something:
+  test_download_all_artifacts_of_build:
     before_run:
     - _setup
     steps:
+    - path::./:
+        title: Execute step
+        inputs:
+        - verbose: true
+        - artifact_sources: "*"
+        - bitrise_api_base_url: https://api-staging.bitrise.io
+    - script:
+        title: Validate downloaded artifacts
+        is_always_run: true
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+
+            if [ ! -f ./_tmp/app-release-unsigned.apk ]; then
+              echo "app-release-unsigned.apk not found"
+              exit 1
+            fi
+            if [ ! -f ./_tmp/cat-illustration@3x.png ]; then
+              echo "cat-illustration@3x.png not found"
+              exit 1
+            fi
+            if [ ! -f ./_tmp/Test.xcresult.zip ]; then
+              echo "Test.xcresult.zip not found"
+              exit 1
+            fi
+            if [[ -z "${PULLED_ARTIFACT_LOCATIONS}" ]]; then
+              echo "Exported PULLED_ARTIFACT_LOCATIONS output variable does not exist"
+              exit 1
+            fi
+
+            array=( "_tmp/example.csv" "_tmp/export_options.plist" "_tmp/test.json" "_tmp/xcode-test-results-ios-simple-objc.html" "_tmp/lipsum.txt" "_tmp/generated_text_file.txt" "_tmp/Test.xcresult.zip" "_tmp/ios-simple-objcTests.ipa" "_tmp/cat-illustration@3x.png" "_tmp/xcodebuild-archive.log" "_tmp/app-release-unsigned.apk")
+            for i in "${array[@]}"
+            do
+              if [[ "$PULLED_ARTIFACT_LOCATIONS" != *"$i"* ]]; then
+                echo "PULLED_ARTIFACT_LOCATIONS not contains the $i file"
+                exit 1
+              fi
+            done
 
 
-  test_another_thing:
+  test_download_specific_stage_artifacts:
     before_run:
     - _setup
     steps:
+    - path::./:
+        title: Execute step
+        inputs:
+        - verbose: true
+        - artifact_sources: stage-1.*
+        - bitrise_api_base_url: https://api-staging.bitrise.io
+    - script:
+        title: Validate downloaded artifacts
+        is_always_run: true
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+            if [ ! -f ./_tmp/generated_text_file.txt ]; then
+              echo "generated_text_file.txt not found"
+              exit 1
+            fi
+            fc=$(ls ./_tmp | wc -l | xargs)
+            if [ $fc -gt 1 ]; then
+              echo "There are more than 1 files"
+              exit 1
+            fi
+
+            if [[ -z "${PULLED_ARTIFACT_LOCATIONS}" ]]; then
+              echo "Exported PULLED_ARTIFACT_LOCATIONS output variable does not exist"
+              exit 1
+            fi
+
+            array=( "_tmp/generated_text_file.txt")
+            for i in "${array[@]}"
+            do
+              if [[ "$PULLED_ARTIFACT_LOCATIONS" != *"$i"* ]]; then
+                echo "PULLED_ARTIFACT_LOCATIONS not contains the $i file"
+                exit 1
+              fi
+            done
 
   _setup:
     steps:
     - script:
-        title: Remove _tmp folder
+        title: Get access token
+        inputs:
+        - content: |-
+            #!/bin/env bash
+            set -ex
+
+            json_response=$(curl --fail -X POST https://auth.services.bitrise.dev/auth/realms/bitrise-services/protocol/openid-connect/token -k \
+                --data "client_id=artifact-pull" \
+                --data "client_secret=$BITRISE_AUTH_SERVICE_ARTIFACT_PULL_CLIENT_SECRET" \
+                --data "grant_type=urn:ietf:params:oauth:grant-type:uma-ticket" \
+                --data "scope=build_artifact:read build:read app:read" \
+                --data "claim_token=eyJidWlsZF9pZHMiOlsiNzNkMzNmYjUtMzVjNi00OTVmLWJkODAtMDE1YWU2ODFkYjMzIiwiMzk0MDRiZWUtNTJiYS00Y2EyLTg1MDgtOTE0ODllN2Y2YWZhIiwiZWQwZGEwY2YtNjZjYy00MTA5LWIyM2YtOGExNTZkNjFiMGMzIiwiMDUxMzBjZTQtODI1Yi00Y2ExLWE5YmUtNGY1NDQxM2U1ZGNkIl0sInBpcGVsaW5lX2lkIjpbIjM2ZTg1NDBkLTQxYzctNDNjZS05NzRiLTgyNTQ5OTc2OTkxZSJdfQ==" \
+                --data "claim_token_format=urn:ietf:params:oauth:token-type:jwt" \
+                --data "audience=bitrise-api")
+
+            auth_token=$(echo $json_response | jq -r .access_token)
+
+            envman add --key BITRISEIO_ARTIFACT_PULL_TOKEN --value $auth_token
+
+    - script:
+        title: Clean _tmp folder
         inputs:
         - content: |-
             #!/bin/env bash
             set -ex
             rm -rf ./_tmp
-#    - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git@master:
-#        title: Clone sample app
-#        inputs:
-#        - repository_url: $TEST_APP_URL
-#        - branch: $TEST_APP_BRANCH
-#        - clone_into_dir: ./_tmp
-    - path::./:
-        title: Execute step
-        inputs:
-        - verbose: false
-        - artifact_sources: "*"
