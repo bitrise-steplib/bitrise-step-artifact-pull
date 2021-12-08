@@ -61,7 +61,8 @@ func Test_ListBuildArtifacts_no_paging_returnsListOfArtifacts(t *testing.T) {
 		}
 		result, err := json.Marshal(response)
 		assert.NoError(t, err)
-		w.Write(result)
+		_, err = w.Write(result)
+		assert.NoError(t, err)
 	}))
 	defer svr.Close()
 
