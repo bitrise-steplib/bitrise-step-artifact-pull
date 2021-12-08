@@ -2,6 +2,7 @@ package downloader
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -38,26 +39,16 @@ func Test_DownloadAndSaveArtifacts(t *testing.T) {
 	mockDownloader.
 		On("DownloadFileFromURL", mock.AnythingOfTypeArgument("string")).
 		Return(ioutil.NopCloser(bytes.NewReader([]byte("asd"))), nil)
-
-	downloadURLs := []api.ArtifactResponseItemModel{
-		{
-			DownloadPath: "https://nice-file.hu/1.txt",
-			Title:        "1.txt",
-		},
-		{
-			DownloadPath: "https://nice-file.hu/2.txt",
-			Title:        "2.txt",
-		},
-	}
-	expectedDownloadResults := []ArtifactDownloadResult{
-		{
-			DownloadPath: getDownloadDir(relativeDownloadPath) + "/1.txt",
-			DownloadURL:  downloadURLs[0].DownloadPath,
-		},
-		{
-			DownloadPath: getDownloadDir(relativeDownloadPath) + "/2.txt",
-			DownloadURL:  downloadURLs[1].DownloadPath,
-		},
+  
+	var downloadURLs []string
+	var expectedDownloadResults []ArtifactDownloadResult
+	for i := 1; i <= 11; i++ {
+		downloadURL := fmt.Sprintf("https://nice-file.hu/%d.txt", i)
+		downloadURLs = append(downloadURLs, downloadURL)
+		expectedDownloadResults = append(expectedDownloadResults, ArtifactDownloadResult{
+			DownloadPath: getDownloadDir(relativeDownloadPath) + fmt.Sprintf("/%d.txt", i),
+			DownloadURL:  downloadURL,
+		})
 	}
 
 	artifactDownloader := NewConcurrentArtifactDownloader(downloadURLs, mockDownloader, log.NewLogger())
