@@ -62,7 +62,7 @@ func (c DefaultBitriseAPIClient) get(endpoint, next string) (*http.Response, err
 	}
 
 	if resp.StatusCode >= 300 || resp.StatusCode < 200 {
-		err = errors.Errorf("status code should be 2XX (%d)", resp.StatusCode)
+		err = errors.Errorf("request to %v failed - status code should be 2XX (%d)", req.URL, resp.StatusCode)
 	}
 
 	return resp, err
