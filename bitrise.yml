@@ -4,7 +4,7 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 workflows:
   check:
     steps:
-    - git::https://github.com/bitrise-steplib/steps-check.git: {}
+    - git::https://github.com/bitrise-steplib/steps-check.git: { }
 
   e2e:
     steps:
@@ -16,5 +16,5 @@ workflows:
     steps:
     - git::https://github.com/bitrise-steplib/steps-readme-generator.git@main:
         inputs:
-          - contrib_section: docs/contribution.md
-          - example_section: docs/examples.md
+        - contrib_section: docs/contribution.md
+        - example_section: docs/examples.md
