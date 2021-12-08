@@ -31,6 +31,7 @@ type Config struct {
 }
 
 type Result struct {
+	ArtifactLocations []string
 }
 
 type ArtifactPull struct {
@@ -107,19 +108,23 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 		return Result{}, err
 	}
 
+	var downloadedArtifactLocatins []string
 	for _, downloadResult := range downloadResults {
 		if downloadResult.DownloadError != nil {
 			a.logger.Errorf("failed to download artifact from %s, error: %s", downloadResult.DownloadURL, downloadResult.DownloadError.Error())
 		} else {
 			a.logger.Printf("artifact downloaded: %s", downloadResult.DownloadPath)
+			downloadedArtifactLocatins = append(downloadedArtifactLocatins, downloadResult.DownloadPath)
 		}
 	}
 
-	// TODO
-	return Result{}, nil
+	return Result{ArtifactLocations: downloadedArtifactLocatins}, nil
 }
 
 func (a ArtifactPull) Export(result Result) error {
-	// TODO
+	if err := a.envRepository.Set("PULLED_ARTIFACT_LOCATIONS", strings.Join(result.ArtifactLocations, "\n")); err != nil {
+		return fmt.Errorf("failed to export pulled artifact locations, error: %s", err)
+	}
+
 	return nil
 }
