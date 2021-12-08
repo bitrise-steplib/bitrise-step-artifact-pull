@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
+	"sync"
 
 	"github.com/bitrise-io/go-utils/log"
-	"github.com/bitrise-steplib/bitrise-step-artifact-pull/api"
 )
 
 const (
-	filePermission               = 0755
+	filePermission               = 0o755
 	maxConcurrentDownloadThreads = 10
 	relativeDownloadPath         = "_tmp"
 )
@@ -49,6 +50,21 @@ func (ad *ConcurrentArtifactDownloader) DownloadAndSaveArtifacts() ([]ArtifactDo
 func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]ArtifactDownloadResult, error) {
 	downloadResultChan := make(chan ArtifactDownloadResult, len(ad.Artifacts))
 	defer close(downloadResultChan)
+	var downloadResults []ArtifactDownloadResult
+
+	var wg sync.WaitGroup
+	wg.Add(len(ad.DownloadURLs))
+	go func() {
+		for { // block until results are filled up
+			result := <-downloadResultChan
+
+			downloadResults = append(downloadResults, result)
+			wg.Done()
+			if len(downloadResults) == len(ad.DownloadURLs) {
+				break
+			}
+		}
+	}()
 
 	semaphore := make(chan struct{}, maxConcurrentDownloadThreads)
 	for _, artifact := range ad.Artifacts {
@@ -60,19 +76,8 @@ func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]Ar
 		}(artifact)
 	}
 
-	var downloadResults []ArtifactDownloadResult
-	for { // block until results are filled up
-		result, ok := <-downloadResultChan
-		if !ok {
-			break
-		}
-
-		downloadResults = append(downloadResults, result)
-		if len(downloadResults) == len(ad.Artifacts) {
-			break
-		}
-	}
-
+	wg.Wait()
+  
 	return downloadResults, nil
 }
 
