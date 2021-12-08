@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 	"sync"
 
 	"github.com/bitrise-io/go-utils/log"
+	"github.com/bitrise-steplib/bitrise-step-artifact-pull/api"
 )
 
 const (
@@ -53,14 +53,14 @@ func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]Ar
 	var downloadResults []ArtifactDownloadResult
 
 	var wg sync.WaitGroup
-	wg.Add(len(ad.DownloadURLs))
+	wg.Add(len(ad.Artifacts))
 	go func() {
 		for { // block until results are filled up
 			result := <-downloadResultChan
 
 			downloadResults = append(downloadResults, result)
 			wg.Done()
-			if len(downloadResults) == len(ad.DownloadURLs) {
+			if len(downloadResults) == len(ad.Artifacts) {
 				break
 			}
 		}
@@ -77,7 +77,7 @@ func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]Ar
 	}
 
 	wg.Wait()
-  
+
 	return downloadResults, nil
 }
 
