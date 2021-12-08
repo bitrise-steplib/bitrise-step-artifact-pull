@@ -2,10 +2,6 @@ format_version: "11"
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 workflows:
-#  sample:
-#    steps:
-#    ...
-
   check:
     steps:
     - git::https://github.com/bitrise-steplib/steps-check.git: { }
@@ -19,6 +15,6 @@ workflows:
   generate_readme:
     steps:
     - git::https://github.com/bitrise-steplib/steps-readme-generator.git@main:
-#        inputs:
-#        - contrib_section: docs/contribution.md
-#        - example_section: docs/examples.md
+        inputs:
+        - contrib_section: docs/contribution.md
+        - example_section: docs/examples.md

@@ -16,7 +16,9 @@ func Test_GivenInputs_WhenCreatingConfig_ThenMappingIsCorrect(t *testing.T) {
 	envRepository := new(mockenv.Repository)
 	envRepository.On("Get", "verbose").Return("true")
 	envRepository.On("Get", "artifact_sources").Return("*")
-	envRepository.On("Get", "BITRISEIO_FINISHED_STAGES").Return("")
+	envRepository.On("Get", "finished_stage").Return("")
+	envRepository.On("Get", "bitrise_api_base_url").Return("")
+	envRepository.On("Get", "bitrise_api_access_token").Return("")
 	inputParser := stepconf.NewInputParser(envRepository)
 	cmdFactory := command.NewFactory(envRepository)
 	step := ArtifactPull{
@@ -31,5 +33,5 @@ func Test_GivenInputs_WhenCreatingConfig_ThenMappingIsCorrect(t *testing.T) {
 
 	// Then
 	assert.NoError(t, err)
-	assert.Equal(t, true, config.Verbose)
+	assert.Equal(t, true, config.VerboseLogging)
 }

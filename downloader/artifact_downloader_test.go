@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/bitrise-io/go-utils/log"
+	"github.com/bitrise-steplib/bitrise-step-artifact-pull/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -39,18 +40,18 @@ func Test_DownloadAndSaveArtifacts(t *testing.T) {
 		On("DownloadFileFromURL", mock.AnythingOfTypeArgument("string")).
 		Return(ioutil.NopCloser(bytes.NewReader([]byte("asd"))), nil)
 
-	var downloadURLs []string
+	var artifacts []api.ArtifactResponseItemModel
 	var expectedDownloadResults []ArtifactDownloadResult
 	for i := 1; i <= 11; i++ {
 		downloadURL := fmt.Sprintf("https://nice-file.hu/%d.txt", i)
-		downloadURLs = append(downloadURLs, downloadURL)
+		artifacts = append(artifacts, api.ArtifactResponseItemModel{DownloadPath: downloadURL, Title: fmt.Sprintf("%d.txt", i)})
 		expectedDownloadResults = append(expectedDownloadResults, ArtifactDownloadResult{
 			DownloadPath: getDownloadDir(relativeDownloadPath) + fmt.Sprintf("/%d.txt", i),
 			DownloadURL:  downloadURL,
 		})
 	}
 
-	artifactDownloader := NewConcurrentArtifactDownloader(downloadURLs, mockDownloader, log.NewLogger())
+	artifactDownloader := NewConcurrentArtifactDownloader(artifacts, mockDownloader, log.NewLogger())
 
 	downloadResults, err := artifactDownloader.DownloadAndSaveArtifacts()
 

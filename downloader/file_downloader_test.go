@@ -40,7 +40,7 @@ func Test_DownloadFileFromURL_UnauthorizedError(t *testing.T) {
 	c := NewDefaultFileDownloader(log.NewLogger())
 	res, err := c.DownloadFileFromURL(svr.URL)
 
-	assert.Nil(t, res)
+	assert.Equal(t, http.NoBody, res)
 	assert.EqualError(t, err, fmt.Sprintf("failed to download file from %s, status code: 401", svr.URL))
 }
 
