@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+
+	"github.com/bitrise-io/go-utils/log"
 )
 
 type ArtifactLister interface {
@@ -12,13 +14,15 @@ type ArtifactLister interface {
 
 type DefaultArtifactLister struct {
 	apiClient                         BitriseAPIClient
+	logger                            log.Logger
 	maxConcurrentListArtifactAPICalls int
 	maxConcurrentShowArtifactAPICalls int
 }
 
-func NewDefaultArtifactLister(client BitriseAPIClient) DefaultArtifactLister {
+func NewDefaultArtifactLister(client BitriseAPIClient, logger log.Logger) DefaultArtifactLister {
 	return DefaultArtifactLister{
 		apiClient:                         client,
+		logger:                            logger,
 		maxConcurrentListArtifactAPICalls: 3,
 		maxConcurrentShowArtifactAPICalls: 3, // per list artifact call (so the total number of max API calls is maxConcurrentListArtifactAPICalls * maxConcurrentShowArtifactAPICalls)
 	}
@@ -66,6 +70,8 @@ func (lister DefaultArtifactLister) ListBuildArtifacts(appSlug string, buildSlug
 func (lister DefaultArtifactLister) listArtifactsOfBuild(appSlug, buildSlug string, resultsChan chan listArtifactsOfBuildResult, wg *sync.WaitGroup) {
 	defer wg.Done()
 
+	lister.logger.Debugf("listing artifacts for build %v", buildSlug)
+
 	artifactListItems, err := lister.apiClient.ListBuildArtifacts(appSlug, buildSlug)
 	if err != nil {
 		resultsChan <- listArtifactsOfBuildResult{buildSlug: buildSlug, err: err}
@@ -105,6 +111,8 @@ func (lister DefaultArtifactLister) listArtifactsOfBuild(appSlug, buildSlug stri
 
 func (lister DefaultArtifactLister) showArtifact(appSlug, buildSlug, artifactSlug string, resultsChan chan showArtifactResult, wg *sync.WaitGroup) {
 	defer wg.Done()
+
+	lister.logger.Debugf("getting artifact details for artifact %v", artifactSlug)
 
 	artifact, err := lister.apiClient.ShowBuildArtifact(appSlug, buildSlug, artifactSlug)
 	if err != nil {

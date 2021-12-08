@@ -23,7 +23,7 @@ type Input struct {
 }
 
 type Config struct {
-	Verbose               bool
+	VerboseLogging        bool
 	ArtifactSources       []string
 	FinishedStages        model.FinishedStages
 	BitriseAPIAccessToken string
@@ -59,7 +59,7 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 
 	// TODO: validate inputs here and possibly convert from string to a concrete type
 	return Config{
-		Verbose:               input.Verbose,
+		VerboseLogging:        input.Verbose,
 		ArtifactSources:       strings.Split(input.ArtifactSources, ","),
 		FinishedStages:        finishedStagesModel,
 		BitriseAPIAccessToken: input.BitriseAPIAccessToken,
@@ -68,36 +68,36 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 }
 
 func (a ArtifactPull) Run(cfg Config) (Result, error) {
-	a.logger.EnableDebugLog(cfg.Verbose)
+	a.logger.EnableDebugLog(cfg.VerboseLogging)
 	buildIdGetter := NewDefaultBuildIDGetter(cfg.FinishedStages, cfg.ArtifactSources)
 	buildIDs, err := buildIdGetter.GetBuildIDs()
 	if err != nil {
 		return Result{}, err
 	}
 
-	// TODO: Do not print these build IDs, remove this line. It is just for the developer who will implement thed artifact download
-	a.logger.Printf("%+v", buildIDs)
+	a.logger.Debugf("Downloading artifacts for builds %+v", buildIDs)
 
 	apiClient, err := api.NewDefaultBitriseAPIClient(cfg.BitriseAPIBaseURL, cfg.BitriseAPIAccessToken)
 	if err != nil {
 		return Result{}, err
 	}
 
-	a.logger.Printf("Getting artifact info")
+	a.logger.Printf("getting the list of artifacts of %d builds", len(buildIDs))
 
 	appSlug := a.envRepository.Get("BITRISE_APP_SLUG")
 	if appSlug == "" {
 		return Result{}, fmt.Errorf("missing app slug (BITRISE_APP_SLUG env var is not set)")
 	}
 
-	artifactLister := api.NewDefaultArtifactLister(&apiClient)
-	artifacts, err := artifactLister.ListBuildArtifacts(appSlug, buildIDs) // TODO: how to get app slug?
+	artifactLister := api.NewDefaultArtifactLister(&apiClient, a.logger)
+	artifacts, err := artifactLister.ListBuildArtifacts(appSlug, buildIDs)
 	if err != nil {
 		a.logger.Printf("failed", err)
 		return Result{}, err
 	}
 
-	a.logger.Printf("Downloading artifacts")
+	a.logger.Printf("downloading %d artifacts", len(artifacts))
+
 	fileDownloader := downloader.NewDefaultFileDownloader(a.logger)
 	artifactDownloader := downloader.NewConcurrentArtifactDownloader(artifacts, fileDownloader, a.logger)
 
@@ -107,7 +107,6 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 		return Result{}, err
 	}
 
-	a.logger.Printf("Download result")
 	for _, downloadResult := range downloadResults {
 		if downloadResult.DownloadError != nil {
 			a.logger.Errorf("failed to download artifact from %s, error: %s", downloadResult.DownloadURL, downloadResult.DownloadError.Error())

@@ -31,5 +31,5 @@ func Test_GivenInputs_WhenCreatingConfig_ThenMappingIsCorrect(t *testing.T) {
 
 	// Then
 	assert.NoError(t, err)
-	assert.Equal(t, true, config.Verbose)
+	assert.Equal(t, true, config.VerboseLogging)
 }
