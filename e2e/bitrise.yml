@@ -8,6 +8,7 @@ app:
   - TEST_APP_BRANCH: TODO
   - BITRISEIO_FINISHED_STAGES: '[{"id":"083aa861-55b1-4132-ba70-0dfcd48fe929","name":"stage-1","workflows":[{"external_id":"73d33fb5-35c6-495f-bd80-015ae681db33","finished_at":"2021-12-07T14:04:45Z","id":"b1c6f0a1-06e7-4f63-a172-ac541a467d71","name":"placeholder","started_at":"2021-12-07T14:04:27Z","status":"succeeded"},{"external_id":"39404bee-52ba-4ca2-8508-91489e7f6afa","finished_at":"2021-12-07T14:05:07Z","id":"f3bda7bb-37be-409f-9291-b377717cba60","name":"textfile_generator","started_at":"2021-12-07T14:04:48Z","status":"succeeded"}]},{"id":"4919fe0e-877a-45ca-ab25-7da2ddf54bce","name":"stage-2","workflows":[{"external_id":"ed0da0cf-66cc-4109-b23f-8a156d61b0c3","finished_at":"2021-12-07T14:06:41Z","id":"f572ca4e-2f06-40f1-a4cf-c208af15ff28","name":"deployer","started_at":"2021-12-07T14:06:13Z","status":"succeeded"},{"external_id":"05130ce4-825b-4ca1-a9be-4f54413e5dcd","finished_at":"2021-12-07T14:07:04Z","id":"861fd1be-48b1-4a6b-ae4c-ee5449eaa6b6","name":"textfile_generator","started_at":"2021-12-07T14:06:45Z","status":"succeeded"}]}]' # yamllint disable-line
   - BITRISE_APP_SLUG: 11abc8954aa46c5a
+  - BITRISE_AUTH_SERVICE_ARTIFACT_PULL_CLIENT_SECRET: $BITRISE_AUTH_SERVICE_ARTIFACT_PULL_CLIENT_SECRET
 
 workflows:
 
