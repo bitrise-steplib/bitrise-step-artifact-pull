@@ -15,8 +15,7 @@ workflows:
     before_run:
     - _setup
     steps:
-      # TODO: should be - path::./ for release (single point)
-    - path::../:
+    - path::./:
         title: Execute step
         inputs:
         - verbose: true
@@ -45,9 +44,8 @@ workflows:
   test_download_specific_stage_artifacts:
     before_run:
     - _setup
-    steps:
-      # TODO: should be - path::./ for release (single point)
-    - path::../:
+    steps:      
+    - path::./:
         title: Execute step
         inputs:
         - verbose: true
@@ -78,7 +76,7 @@ workflows:
         - content: |-
             #!/bin/env bash
             set -ex
-            bash ./get_access_token.sh
+            bash e2e/get_access_token.sh
     - script:
         title: Clean _tmp folder
         inputs:
