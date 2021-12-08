@@ -28,6 +28,7 @@ workflows:
         - content: |-
             #!/usr/bin/env bash
             set -ex
+
             if [ ! -f ./_tmp/app-release-unsigned.apk ]; then
               echo "app-release-unsigned.apk not found"
               exit 1
@@ -40,6 +41,84 @@ workflows:
               echo "Test.xcresult.zip not found"
               exit 1
             fi
+            if [[ -z "${PULLED_ARTIFACT_LOCATIONS}" ]]; then
+              echo "Exported PULLED_ARTIFACT_LOCATIONS output variable does not exist"
+              exit 1
+            fi
+
+            file1='_tmp/example.csv'
+            file2='_tmp/export_options.plist'
+            file3='_tmp/test.json'
+            file4='_tmp/xcode-test-results-ios-simple-objc.html'
+            file5='_tmp/lipsum.txt'
+            file6='_tmp/generated_text_file.txt'
+            file7='_tmp/Test.xcresult.zip'
+            file8='_tmp/generated_text_file.txt'
+            file9='_tmp/ios-simple-objcTests.ipa'
+            file10='_tmp/cat-illustration@3x.png'
+            file11='_tmp/xcodebuild-archive.log'
+            file12='_tmp/app-release-unsigned.apk'
+
+            if [[ "$PULLED_ARTIFACT_LOCATIONS" != *"$file1"* ]]; then
+              echo "PULLED_ARTIFACT_LOCATIONS not contains the expected file"
+              exit 1
+            fi
+
+            if [[ "$PULLED_ARTIFACT_LOCATIONS" != *"$file2"* ]]; then
+              echo "PULLED_ARTIFACT_LOCATIONS not contains the expected file"
+              exit 1
+            fi
+
+            if [[ "$PULLED_ARTIFACT_LOCATIONS" != *"$file3"* ]]; then
+              echo "PULLED_ARTIFACT_LOCATIONS not contains the expected file"
+              exit 1
+            fi
+
+            if [[ "$PULLED_ARTIFACT_LOCATIONS" != *"$file4"* ]]; then
+              echo "PULLED_ARTIFACT_LOCATIONS not contains the expected file"
+              exit 1
+            fi
+
+            if [[ "$PULLED_ARTIFACT_LOCATIONS" != *"$file5"* ]]; then
+              echo "PULLED_ARTIFACT_LOCATIONS not contains the expected file"
+              exit 1
+            fi
+
+            if [[ "$PULLED_ARTIFACT_LOCATIONS" != *"$file6"* ]]; then
+              echo "PULLED_ARTIFACT_LOCATIONS not contains the expected file"
+              exit 1
+            fi
+
+            if [[ "$PULLED_ARTIFACT_LOCATIONS" != *"$file7"* ]]; then
+              echo "PULLED_ARTIFACT_LOCATIONS not contains the expected file"
+              exit 1
+            fi
+
+            if [[ "$PULLED_ARTIFACT_LOCATIONS" != *"$file8"* ]]; then
+              echo "PULLED_ARTIFACT_LOCATIONS not contains the expected file"
+              exit 1
+            fi
+
+            if [[ "$PULLED_ARTIFACT_LOCATIONS" != *"$file9"* ]]; then
+              echo "PULLED_ARTIFACT_LOCATIONS not contains the expected file"
+              exit 1
+            fi
+
+            if [[ "$PULLED_ARTIFACT_LOCATIONS" != *"$file10"* ]]; then
+              echo "PULLED_ARTIFACT_LOCATIONS not contains the expected file"
+              exit 1
+            fi
+
+            if [[ "$PULLED_ARTIFACT_LOCATIONS" != *"$file11"* ]]; then
+              echo "PULLED_ARTIFACT_LOCATIONS not contains the expected file"
+              exit 1
+            fi
+
+            if [[ "$PULLED_ARTIFACT_LOCATIONS" != *"$file12"* ]]; then
+              echo "PULLED_ARTIFACT_LOCATIONS not contains the expected file"
+              exit 1
+            fi
+
 
   test_download_specific_stage_artifacts:
     before_run:
