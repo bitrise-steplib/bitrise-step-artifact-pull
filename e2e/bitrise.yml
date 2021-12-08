@@ -3,29 +3,29 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
-  # Shared envs for every test workflow
-  - TEST_APP_URL: TODO
-  - TEST_APP_BRANCH: TODO
-  - BITRISEIO_FINISHED_STAGES: '[{"id":"083aa861-55b1-4132-ba70-0dfcd48fe929","name":"stage-1","workflows":[{"external_id":"73d33fb5-35c6-495f-bd80-015ae681db33","finished_at":"2021-12-07T14:04:45Z","id":"b1c6f0a1-06e7-4f63-a172-ac541a467d71","name":"placeholder","started_at":"2021-12-07T14:04:27Z","status":"succeeded"},{"external_id":"39404bee-52ba-4ca2-8508-91489e7f6afa","finished_at":"2021-12-07T14:05:07Z","id":"f3bda7bb-37be-409f-9291-b377717cba60","name":"textfile_generator","started_at":"2021-12-07T14:04:48Z","status":"succeeded"}]},{"id":"4919fe0e-877a-45ca-ab25-7da2ddf54bce","name":"stage-2","workflows":[{"external_id":"ed0da0cf-66cc-4109-b23f-8a156d61b0c3","finished_at":"2021-12-07T14:06:41Z","id":"f572ca4e-2f06-40f1-a4cf-c208af15ff28","name":"deployer","started_at":"2021-12-07T14:06:13Z","status":"succeeded"},{"external_id":"05130ce4-825b-4ca1-a9be-4f54413e5dcd","finished_at":"2021-12-07T14:07:04Z","id":"861fd1be-48b1-4a6b-ae4c-ee5449eaa6b6","name":"textfile_generator","started_at":"2021-12-07T14:06:45Z","status":"succeeded"}]}]' # yamllint disable-line
-  - BITRISE_APP_SLUG: 11abc8954aa46c5a
+    # Shared envs for every test workflow
+    - TEST_APP_URL: TODO
+    - TEST_APP_BRANCH: TODO
+    - BITRISEIO_FINISHED_STAGES: '[{"id":"083aa861-55b1-4132-ba70-0dfcd48fe929","name":"stage-1","workflows":[{"external_id":"73d33fb5-35c6-495f-bd80-015ae681db33","finished_at":"2021-12-07T14:04:45Z","id":"b1c6f0a1-06e7-4f63-a172-ac541a467d71","name":"placeholder","started_at":"2021-12-07T14:04:27Z","status":"succeeded"},{"external_id":"39404bee-52ba-4ca2-8508-91489e7f6afa","finished_at":"2021-12-07T14:05:07Z","id":"f3bda7bb-37be-409f-9291-b377717cba60","name":"textfile_generator","started_at":"2021-12-07T14:04:48Z","status":"succeeded"}]},{"id":"4919fe0e-877a-45ca-ab25-7da2ddf54bce","name":"stage-2","workflows":[{"external_id":"ed0da0cf-66cc-4109-b23f-8a156d61b0c3","finished_at":"2021-12-07T14:06:41Z","id":"f572ca4e-2f06-40f1-a4cf-c208af15ff28","name":"deployer","started_at":"2021-12-07T14:06:13Z","status":"succeeded"},{"external_id":"05130ce4-825b-4ca1-a9be-4f54413e5dcd","finished_at":"2021-12-07T14:07:04Z","id":"861fd1be-48b1-4a6b-ae4c-ee5449eaa6b6","name":"textfile_generator","started_at":"2021-12-07T14:06:45Z","status":"succeeded"}]}]' # yamllint disable-line
+    - BITRISE_APP_SLUG: 11abc8954aa46c5a
 
 workflows:
 
   test_download_all_artifacts_of_build:
     before_run:
-    - _setup
+      - _setup
     steps:
-    - path::./:
+      - path::./:
         title: Execute step
         inputs:
-        - verbose: true
-        - artifact_sources: "*"
-        - bitrise_api_base_url: https://api-staging.bitrise.io
-    - script:
+          - verbose: true
+          - artifact_sources: "*"
+          - bitrise_api_base_url: https://api-staging.bitrise.io
+      - script:
         title: Validate downloaded artifacts
         is_always_run: true
         inputs:
-        - content: |-
+          - content: |-
             #!/usr/bin/env bash
             set -ex
 
@@ -58,15 +58,15 @@ workflows:
 
   test_download_specific_stage_artifacts:
     before_run:
-    - _setup
+      - _setup
     steps:
-    - path::./:
+      - path::./:
         title: Execute step
         inputs:
-        - verbose: true
-        - artifact_sources: stage-1.*
-        - bitrise_api_base_url: https://api-staging.bitrise.io
-    - script:
+          - verbose: true
+          - artifact_sources: stage-1.*
+          - bitrise_api_base_url: https://api-staging.bitrise.io
+      - script:
         title: Validate downloaded artifacts
         is_always_run: true
         inputs:
