@@ -1,19 +1,23 @@
 package main
 
 import (
+	"os"
+
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/env"
 	"github.com/bitrise-io/go-utils/log"
-	"os"
 )
 
 func main() {
-	os.Exit(run())
+	logger := log.NewLogger()
+	if err := run(logger); err != nil {
+		logger.Errorf(err.Error())
+		os.Exit(1)
+	}
 }
 
-func run() int {
-	logger := log.NewLogger()
+func run(logger log.Logger) error {
 	envRepository := env.NewRepository()
 	cmdFactory := command.NewFactory(envRepository)
 	inputParser := stepconf.NewInputParser(envRepository)
@@ -21,26 +25,23 @@ func run() int {
 	artifactPull := ArtifactPull{
 		inputParser:   inputParser,
 		envRepository: envRepository,
-		cmdFactory: cmdFactory,
+		cmdFactory:    cmdFactory,
 		logger:        logger,
 	}
 
 	config, err := artifactPull.ProcessConfig()
 	if err != nil {
-		logger.Errorf(err.Error())
-		return 1
+		return err
 	}
 
 	result, err := artifactPull.Run(config)
 	if err != nil {
-		logger.Errorf(err.Error())
-		return 1
+		return err
 	}
 
 	if err := artifactPull.Export(result); err != nil {
-		logger.Errorf(err.Error())
-		return 1
+		return err
 	}
 
-	return 0
+	return nil
 }
