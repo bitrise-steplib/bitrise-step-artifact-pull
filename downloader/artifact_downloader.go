@@ -2,14 +2,16 @@ package downloader
 
 import (
 	"fmt"
-	"github.com/bitrise-io/go-utils/log"
 	"io"
 	"os"
 	"strings"
+	"sync"
+
+	"github.com/bitrise-io/go-utils/log"
 )
 
 const (
-	filePermission               = 0755
+	filePermission               = 0o755
 	maxConcurrentDownloadThreads = 10
 	relativeDownloadPath         = "_tmp"
 )
@@ -48,6 +50,21 @@ func (ad *ConcurrentArtifactDownloader) DownloadAndSaveArtifacts() ([]ArtifactDo
 func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]ArtifactDownloadResult, error) {
 	downloadResultChan := make(chan ArtifactDownloadResult)
 	defer close(downloadResultChan)
+	var downloadResults []ArtifactDownloadResult
+
+	var wg sync.WaitGroup
+	wg.Add(len(ad.DownloadURLs))
+	go func() {
+		for { // block until results are filled up
+			result := <-downloadResultChan
+
+			downloadResults = append(downloadResults, result)
+			wg.Done()
+			if len(downloadResults) == len(ad.DownloadURLs) {
+				break
+			}
+		}
+	}()
 
 	semaphore := make(chan struct{}, maxConcurrentDownloadThreads)
 	for _, url := range ad.DownloadURLs {
@@ -58,19 +75,7 @@ func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]Ar
 		}(url)
 	}
 
-	var downloadResults []ArtifactDownloadResult
-	for { // block until results are filled up
-		result, ok := <-downloadResultChan
-		if !ok {
-			break
-		}
-
-		downloadResults = append(downloadResults, result)
-		if len(downloadResults) == len(ad.DownloadURLs) {
-			break
-		}
-	}
-
+	wg.Wait()
 	return downloadResults, nil
 }
 
