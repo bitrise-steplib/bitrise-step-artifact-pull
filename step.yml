@@ -61,7 +61,7 @@ inputs:
     is_required: true
     is_dont_change_value: true
 
-- bitrise_api_access_token: $BITRISE_AUTH_SERVICE_ARTIFACT_PULL_CLIENT_SECRET
+- bitrise_api_access_token: $BITRISEIO_ARTIFACT_PULL_TOKEN
   opts:
     title: Access token to call the Bitrise API
     summary: The OAuth access token that authorizes to call the Bitrise API.
