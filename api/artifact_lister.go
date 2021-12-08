@@ -8,10 +8,6 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 )
 
-type ArtifactLister interface {
-	ListBuildArtifacts(appSlug string, buildSlugs []string) ([]ArtifactResponseItemModel, error)
-}
-
 type DefaultArtifactLister struct {
 	apiClient                         BitriseAPIClient
 	logger                            log.Logger
