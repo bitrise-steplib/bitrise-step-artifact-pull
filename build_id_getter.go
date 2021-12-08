@@ -13,7 +13,7 @@ type BuildIDGetter struct {
 	TargetNames    []string
 }
 
-func NewDefaultBuildIDGetter(finishedStages model.FinishedStages, targetNames []string) BuildIDGetter {
+func NewBuildIDGetter(finishedStages model.FinishedStages, targetNames []string) BuildIDGetter {
 	return BuildIDGetter{
 		FinishedStages: finishedStages,
 		TargetNames:    targetNames,
