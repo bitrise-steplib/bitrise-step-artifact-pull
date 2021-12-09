@@ -89,6 +89,13 @@ func Test_GetBuildIDs_without_wildcards(t *testing.T) {
 			expectedBuildIDs:     []string{"build1", "build2", "build3", "build4"},
 			expectedErrorMessage: "",
 		},
+		{
+			desc:                 "when given stage name not found",
+			targetNames:          []string{"wrong_stage_name"},
+			finishedStages:       finishedStages,
+			expectedBuildIDs:     []string{},
+			expectedErrorMessage: "",
+		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
