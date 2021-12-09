@@ -14,8 +14,16 @@ func Test_GetBuildIDs_without_wildcards(t *testing.T) {
 			Name: "stage1",
 			Workflows: []model.Workflow{
 				{
-					Name:       "workflow1",
-					ExternalId: "build1",
+					Name:       "workflow1_1",
+					ExternalId: "build1_1",
+				},
+				{
+					Name:       "workflow1_2", // we have two of these workflow names in this stage
+					ExternalId: "build1_2a",
+				},
+				{
+					Name:       "workflow1_2",
+					ExternalId: "build1_2b",
 				},
 			},
 		},
@@ -32,7 +40,7 @@ func Test_GetBuildIDs_without_wildcards(t *testing.T) {
 			Name: "stage3",
 			Workflows: []model.Workflow{
 				{
-					Name:       "workflow1",
+					Name:       "workflow1_1",
 					ExternalId: "build3",
 				},
 			},
@@ -58,21 +66,21 @@ func Test_GetBuildIDs_without_wildcards(t *testing.T) {
 			desc:                 "when user defines stage names, it return the build IDs",
 			targetNames:          []string{"stage1*", "stage2*"},
 			finishedStages:       finishedStages,
-			expectedBuildIDs:     []string{"build1", "build2"},
+			expectedBuildIDs:     []string{"build1_1", "build1_2a", "build1_2b", "build2"},
 			expectedErrorMessage: "",
 		},
 		{
 			desc:                 "when user defines workflow names, it return the build IDs",
-			targetNames:          []string{"*workflow1", "*workflow2"},
+			targetNames:          []string{"*workflow1_1", "*workflow2"},
 			finishedStages:       finishedStages,
-			expectedBuildIDs:     []string{"build1", "build3", "build2"},
+			expectedBuildIDs:     []string{"build1_1", "build3", "build2"},
 			expectedErrorMessage: "",
 		},
 		{
 			desc:                 "when user wants to query all generated artifacts",
 			targetNames:          []string{"*"},
 			finishedStages:       finishedStages,
-			expectedBuildIDs:     []string{"build1", "build2", "build3", "build4"},
+			expectedBuildIDs:     []string{"build1_1", "build1_2a", "build1_2b", "build2", "build3", "build4"},
 			expectedErrorMessage: "",
 		},
 		{
@@ -86,7 +94,7 @@ func Test_GetBuildIDs_without_wildcards(t *testing.T) {
 			desc:                 "when user does not define target names, it returns with all build ids",
 			targetNames:          []string{},
 			finishedStages:       finishedStages,
-			expectedBuildIDs:     []string{"build1", "build2", "build3", "build4"},
+			expectedBuildIDs:     []string{"build1_1", "build1_2a", "build1_2b", "build2", "build3", "build4"},
 			expectedErrorMessage: "",
 		},
 	}
