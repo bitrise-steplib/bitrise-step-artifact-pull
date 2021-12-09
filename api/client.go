@@ -11,14 +11,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// BitriseAPIClient ...
-type BitriseAPIClient interface {
-	// List all build artifacts that have been generated for an app’s build - https://api-docs.bitrise.io/#/build-artifact/artifact-list
-	ListBuildArtifacts(appSlug, buildSlug string) ([]ArtifactListElementResponseModel, error)
-	// Retrieve data of a specific build artifact - https://api-docs.bitrise.io/#/build-artifact/artifact-show
-	ShowBuildArtifact(appSlug, buildSlug, artifactSlug string) (ArtifactResponseItemModel, error)
-}
-
 type DefaultBitriseAPIClient struct {
 	httpClient *http.Client
 	authToken  string
