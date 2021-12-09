@@ -8,23 +8,19 @@ import (
 
 const DELIMITER = "."
 
-type BuildIDGetter interface {
-	GetBuildIDs() ([]string, error)
-}
-
-type DefaultBuildIDGetter struct {
+type BuildIDGetter struct {
 	FinishedStages model.FinishedStages
 	TargetNames    []string
 }
 
-func NewDefaultBuildIDGetter(finishedStages model.FinishedStages, targetNames []string) BuildIDGetter {
-	return DefaultBuildIDGetter{
+func NewBuildIDGetter(finishedStages model.FinishedStages, targetNames []string) BuildIDGetter {
+	return BuildIDGetter{
 		FinishedStages: finishedStages,
 		TargetNames:    targetNames,
 	}
 }
 
-func (bg DefaultBuildIDGetter) GetBuildIDs() ([]string, error) {
+func (bg BuildIDGetter) GetBuildIDs() ([]string, error) {
 	buildIDsSet := make(map[string]bool)
 
 	stageWorkflowMap := bg.createWorkflowMap()
@@ -63,7 +59,7 @@ func convertKeySetToArray(set map[string]bool) []string {
 	return ids
 }
 
-func (bg DefaultBuildIDGetter) createWorkflowMap() map[string]string {
+func (bg BuildIDGetter) createWorkflowMap() map[string]string {
 	stageWorkflowMap := map[string]string{}
 	for _, stage := range bg.FinishedStages {
 		for _, wf := range stage.Workflows {
