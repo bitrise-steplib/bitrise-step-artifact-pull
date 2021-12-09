@@ -93,7 +93,7 @@ func Test_GetBuildIDs_without_wildcards(t *testing.T) {
 			desc:                 "when given stage name not found",
 			targetNames:          []string{"wrong_stage_name"},
 			finishedStages:       finishedStages,
-			expectedBuildIDs:     []string{},
+			expectedBuildIDs:     nil,
 			expectedErrorMessage: "",
 		},
 	}

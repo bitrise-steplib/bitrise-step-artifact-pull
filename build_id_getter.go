@@ -54,7 +54,7 @@ func (bg DefaultBuildIDGetter) GetBuildIDs() ([]string, error) {
 }
 
 func convertKeySetToArray(set map[string]bool) []string {
-	ids := []string{}
+	var ids []string
 
 	for k := range set {
 		ids = append(ids, k)
