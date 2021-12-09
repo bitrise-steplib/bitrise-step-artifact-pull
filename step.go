@@ -71,7 +71,7 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 
 func (a ArtifactPull) Run(cfg Config) (Result, error) {
 	a.logger.EnableDebugLog(cfg.VerboseLogging)
-	buildIdGetter := NewDefaultBuildIDGetter(cfg.FinishedStages, cfg.ArtifactSources)
+	buildIdGetter := NewBuildIDGetter(cfg.FinishedStages, cfg.ArtifactSources)
 	buildIDs, err := buildIdGetter.GetBuildIDs()
 	if err != nil {
 		return Result{}, err

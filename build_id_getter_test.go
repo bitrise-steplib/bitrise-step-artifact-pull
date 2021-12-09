@@ -92,7 +92,7 @@ func Test_GetBuildIDs_without_wildcards(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			buildIDGetter := NewDefaultBuildIDGetter(tC.finishedStages, tC.targetNames)
+			buildIDGetter := NewBuildIDGetter(tC.finishedStages, tC.targetNames)
 
 			buildIDs, err := buildIDGetter.GetBuildIDs()
 			if tC.expectedErrorMessage != "" {
