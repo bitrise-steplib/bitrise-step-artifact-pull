@@ -42,16 +42,16 @@ workflows:
               echo "Test.xcresult.zip not found"
               exit 1
             fi
-            if [[ -z "${PULLED_ARTIFACT_LOCATIONS}" ]]; then
-              echo "Exported PULLED_ARTIFACT_LOCATIONS output variable does not exist"
+            if [[ -z "${ARTIFACT_PATHS}" ]]; then
+              echo "Exported ARTIFACT_PATHS output variable does not exist"
               exit 1
             fi
 
             array=( "_tmp/example.csv" "_tmp/export_options.plist" "_tmp/test.json" "_tmp/xcode-test-results-ios-simple-objc.html" "_tmp/lipsum.txt" "_tmp/generated_text_file.txt" "_tmp/Test.xcresult.zip" "_tmp/ios-simple-objcTests.ipa" "_tmp/cat-illustration@3x.png" "_tmp/xcodebuild-archive.log" "_tmp/app-release-unsigned.apk")
             for i in "${array[@]}"
             do
-              if [[ "$PULLED_ARTIFACT_LOCATIONS" != *"$i"* ]]; then
-                echo "PULLED_ARTIFACT_LOCATIONS not contains the $i file"
+              if [[ "$ARTIFACT_PATHS" != *"$i"* ]]; then
+                echo "ARTIFACT_PATHS not contains the $i file"
                 exit 1
               fi
             done
@@ -84,16 +84,16 @@ workflows:
               exit 1
             fi
 
-            if [[ -z "${PULLED_ARTIFACT_LOCATIONS}" ]]; then
-              echo "Exported PULLED_ARTIFACT_LOCATIONS output variable does not exist"
+            if [[ -z "${ARTIFACT_PATHS}" ]]; then
+              echo "Exported ARTIFACT_PATHS output variable does not exist"
               exit 1
             fi
 
             array=( "_tmp/generated_text_file.txt")
             for i in "${array[@]}"
             do
-              if [[ "$PULLED_ARTIFACT_LOCATIONS" != *"$i"* ]]; then
-                echo "PULLED_ARTIFACT_LOCATIONS not contains the $i file"
+              if [[ "$ARTIFACT_PATHS" != *"$i"* ]]; then
+                echo "ARTIFACT_PATHS not contains the $i file"
                 exit 1
               fi
             done
