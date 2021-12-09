@@ -16,11 +16,12 @@ type FileDownloader interface {
 }
 
 type DefaultFileDownloader struct {
-	Logger log.Logger
+	Logger  log.Logger
+	Timeout time.Duration
 }
 
 func (fd *DefaultFileDownloader) DownloadFileFromURL(url string) ([]byte, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), fd.Timeout)
 	defer cancel()
 
 	downloader := filedownloader.NewWithContext(ctx, retry.NewHTTPClient().StandardClient())
@@ -37,6 +38,6 @@ func (fd *DefaultFileDownloader) DownloadFileFromURL(url string) ([]byte, error)
 	return contents, nil
 }
 
-func NewDefaultFileDownloader(logger log.Logger) FileDownloader {
-	return &DefaultFileDownloader{Logger: logger}
+func NewDefaultFileDownloader(logger log.Logger, timeout time.Duration) FileDownloader {
+	return &DefaultFileDownloader{Logger: logger, Timeout: timeout}
 }
