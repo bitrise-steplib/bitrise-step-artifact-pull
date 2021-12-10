@@ -95,7 +95,7 @@ func Test_listArtifactsOfBuild_returnsArtifactList(t *testing.T) {
 	res := <-listResults
 
 	assert.NoError(t, res.err)
-	assert.Equal(t, expectedArtifactList, res.artifacts)
+	assert.ElementsMatch(t, expectedArtifactList, res.artifacts)
 }
 
 type listConcurrencyTestCase struct {
