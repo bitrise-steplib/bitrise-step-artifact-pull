@@ -17,7 +17,6 @@ type DefaultBitriseAPIClient struct {
 	baseURL    string
 }
 
-// NewBitriseAPIClient ...
 func NewDefaultBitriseAPIClient(baseURL, authToken string) (DefaultBitriseAPIClient, error) {
 	httpClient := retry.NewHTTPClient().StandardClient()
 	httpClient.Timeout = time.Second * 30
@@ -59,7 +58,7 @@ func (c DefaultBitriseAPIClient) get(endpoint, next string) (*http.Response, err
 	return resp, err
 }
 
-// ListBuildArtifacts gets the list of artifct details for a given build slug (also performs paging and calls the endpoint multiple times if needed)
+// ListBuildArtifacts gets the list of artifact details for a given build slug (also performs paging and calls the endpoint multiple times if needed)
 func (c *DefaultBitriseAPIClient) ListBuildArtifacts(appSlug, buildSlug string) ([]ArtifactListElementResponseModel, error) {
 	var artifacts []ArtifactListElementResponseModel
 	requestPath := fmt.Sprintf("v0.2/apps/%s/builds/%s/artifacts", appSlug, buildSlug)

@@ -1,24 +1,20 @@
 package api
 
-// ListBuildArtifactsResponse ...
 type ListBuildArtifactsResponse struct {
 	Data   []ArtifactListElementResponseModel `json:"data"`
 	Paging PagingModel                        `json:"paging"`
 }
 
-// ShowBuildArtifact ...
 type ShowBuildArtifactResponse struct {
 	Data ArtifactResponseItemModel `json:"data"`
 }
 
-// ArtifactResponseItemModel ...
 type ArtifactResponseItemModel struct {
 	Title        string `json:"title"`
 	DownloadPath string `json:"expiring_download_url"`
 	Slug         string `json:"slug"`
 }
 
-// ArtifactListElementResponseModel ...
 type ArtifactListElementResponseModel struct {
 	Title string `json:"title"`
 	Slug  string `json:"slug"`
