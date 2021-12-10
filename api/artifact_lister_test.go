@@ -84,13 +84,15 @@ func Test_listArtifactsOfBuild_returnsArtifactList(t *testing.T) {
 
 	lister := NewArtifactLister(mockClient, log.NewLogger())
 
-	resultsChan := make(chan listArtifactsOfBuildResult, 1)
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	lister.listArtifactsOfBuild("app-slug", "build-slug", resultsChan, wg)
-	wg.Wait()
+	listResults := make(chan listArtifactsResult, 1)
+	listJobs := make(chan string, 1)
 
-	res := <-resultsChan
+	go lister.listArtifactsWorker("app-slug", listJobs, listResults)
+
+	listJobs <- "build-slug"
+	close(listJobs)
+
+	res := <-listResults
 
 	assert.NoError(t, res.err)
 	assert.Equal(t, expectedArtifactList, res.artifacts)
