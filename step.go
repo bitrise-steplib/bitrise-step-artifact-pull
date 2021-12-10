@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-utils/command"
@@ -111,7 +112,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 		return Result{}, err
 	}
 
-	fileDownloader := downloader.NewDefaultFileDownloader(a.logger)
+	fileDownloader := downloader.NewDefaultFileDownloader(a.logger, 5*time.Minute)
 	artifactDownloader := downloader.NewConcurrentArtifactDownloader(artifacts, fileDownloader, targetDir, a.logger)
 
 	downloadResults, err := artifactDownloader.DownloadAndSaveArtifacts()
@@ -143,7 +144,7 @@ func getTargetDir(dirName string) (string, error) {
 }
 
 func (a ArtifactPull) Export(result Result) error {
-	if err := a.envRepository.Set("PULLED_ARTIFACT_LOCATIONS", strings.Join(result.ArtifactLocations, ",")); err != nil {
+	if err := a.envRepository.Set("BITRISE_ARTIFACT_PATHS", strings.Join(result.ArtifactLocations, ",")); err != nil {
 		return fmt.Errorf("failed to export pulled artifact locations, error: %s", err)
 	}
 

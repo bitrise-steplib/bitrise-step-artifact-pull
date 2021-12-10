@@ -30,7 +30,7 @@ workflows:
             #!/usr/bin/env bash
             set -ex
 
-            IFS=',' read -ra FILES <<< "$PULLED_ARTIFACT_LOCATIONS"
+            IFS=',' read -ra FILES <<< "$BITRISE_ARTIFACT_PATHS"
             for i in "${FILES[@]}"; do
               # process "$i"
               if [ ! -f $i ]; then
@@ -42,8 +42,8 @@ workflows:
             array=( "example.csv" "export_options.plist" "test.json" "xcode-test-results-ios-simple-objc.html" "lipsum.txt" "generated_text_file.txt" "Test.xcresult.zip" "ios-simple-objcTests.ipa" "cat-illustration@3x.png" "xcodebuild-archive.log" "app-release-unsigned.apk")
             for i in "${array[@]}"
             do
-              if [[ "$PULLED_ARTIFACT_LOCATIONS" != *"$i"* ]]; then
-                echo "PULLED_ARTIFACT_LOCATIONS not contains the $i file"
+              if [[ "$BITRISE_ARTIFACT_PATHS" != *"$i"* ]]; then
+                echo "BITRISE_ARTIFACT_PATHS not contains the $i file"
                 exit 1
               fi
             done
@@ -82,16 +82,16 @@ workflows:
               exit 1
             fi
 
-            if [[ -z "${PULLED_ARTIFACT_LOCATIONS}" ]]; then
-              echo "Exported PULLED_ARTIFACT_LOCATIONS output variable does not exist"
+            if [[ -z "${BITRISE_ARTIFACT_PATHS}" ]]; then
+              echo "Exported BITRISE_ARTIFACT_PATHS output variable does not exist"
               exit 1
             fi
 
             array=( "generated_text_file.txt")
             for i in "${array[@]}"
             do
-              if [[ "$PULLED_ARTIFACT_LOCATIONS" != *"$i"* ]]; then
-                echo "PULLED_ARTIFACT_LOCATIONS not contains the $i file"
+              if [[ "$BITRISE_ARTIFACT_PATHS" != *"$i"* ]]; then
+                echo "BITRISE_ARTIFACT_PATHS not contains the $i file"
                 exit 1
               fi
             done

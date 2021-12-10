@@ -3,10 +3,8 @@ package downloader
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/bitrise-io/go-utils/log"
@@ -22,10 +20,10 @@ type MockDownloader struct {
 	mock.Mock
 }
 
-func (m *MockDownloader) DownloadFileFromURL(_ string) (io.ReadCloser, error) {
+func (m *MockDownloader) DownloadFileFromURL(_ string) ([]byte, error) {
 	args := m.Called()
 	// as it is used concurrently we need to give back new return value every time
-	return io.NopCloser(strings.NewReader("shiny!")), args.Error(1)
+	return []byte("shiny!"), args.Error(1)
 }
 
 func getDownloadDir(dirName string) (string, error) {
