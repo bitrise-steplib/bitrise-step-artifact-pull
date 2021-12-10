@@ -86,18 +86,17 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 
 	a.logger.Debugf("Downloading artifacts for builds %+v", buildIDs)
 
-	apiClient, err := api.NewDefaultBitriseAPIClient(cfg.BitriseAPIBaseURL, cfg.BitriseAPIAccessToken)
-	if err != nil {
-		return Result{}, err
-	}
-
 	a.logger.Printf("getting the list of artifacts of %d builds", len(buildIDs))
 
-	artifactLister := api.NewArtifactLister(&apiClient, a.logger)
-	artifacts, err := artifactLister.ListBuildArtifacts(cfg.AppSlug, buildIDs)
+	artifactLister, err := api.NewArtifactLister(cfg.BitriseAPIBaseURL, cfg.BitriseAPIAccessToken, a.logger)
+	if err != nil {
+		a.logger.Debugf("failed to create artifact lister", err)
+		return Result{}, err
+	}
+	artifacts, err := artifactLister.ListBuildArtifactDetails(cfg.AppSlug, buildIDs)
 
 	if err != nil {
-		a.logger.Printf("failed", err)
+		a.logger.Debugf("failed to list artifacts", err)
 		return Result{}, err
 	}
 
