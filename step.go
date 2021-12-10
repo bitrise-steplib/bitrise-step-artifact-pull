@@ -125,6 +125,8 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 	for _, downloadResult := range downloadResults {
 		if downloadResult.DownloadError != nil {
 			a.logger.Errorf("failed to download artifact from %s, error: %s", downloadResult.DownloadURL, downloadResult.DownloadError.Error())
+
+			return Result{}, downloadResult.DownloadError
 		} else {
 			a.logger.Printf("artifact downloaded: %s", downloadResult.DownloadPath)
 			downloadedArtifactLocatins = append(downloadedArtifactLocatins, downloadResult.DownloadPath)
