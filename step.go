@@ -91,7 +91,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 		return Result{}, fmt.Errorf("missing app slug (BITRISE_APP_SLUG env var is not set)")
 	}
 
-	artifactLister := api.NewDefaultArtifactLister(&apiClient, a.logger)
+	artifactLister := api.NewArtifactLister(&apiClient, a.logger)
 	artifacts, err := artifactLister.ListBuildArtifacts(appSlug, buildIDs)
 	if err != nil {
 		a.logger.Printf("failed", err)
