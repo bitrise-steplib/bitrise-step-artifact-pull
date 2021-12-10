@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
-	"github.com/bitrise-io/go-steputils/stepenv"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/env"
 	"github.com/bitrise-io/go-utils/log"
@@ -93,8 +92,9 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 
 	a.logger.Printf("getting the list of artifacts of %d builds", len(buildIDs))
 
-	artifactLister := api.NewDefaultArtifactLister(&apiClient, a.logger)
+	artifactLister := api.NewArtifactLister(&apiClient, a.logger)
 	artifacts, err := artifactLister.ListBuildArtifacts(cfg.AppSlug, buildIDs)
+
 	if err != nil {
 		a.logger.Printf("failed", err)
 		return Result{}, err
@@ -125,8 +125,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 }
 
 func (a ArtifactPull) Export(result Result) error {
-	repo := stepenv.NewRepository(a.envRepository)
-	if err := repo.Set("PULLED_ARTIFACT_LOCATIONS", strings.Join(result.ArtifactLocations, "\n")); err != nil {
+	if err := a.envRepository.Set("PULLED_ARTIFACT_LOCATIONS", strings.Join(result.ArtifactLocations, ",")); err != nil {
 		return fmt.Errorf("failed to export pulled artifact locations, error: %s", err)
 	}
 

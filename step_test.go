@@ -36,3 +36,49 @@ func Test_GivenInputs_WhenCreatingConfig_ThenMappingIsCorrect(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, true, config.VerboseLogging)
 }
+
+func Test_Export(t *testing.T) {
+	envRepository := new(mockenv.Repository)
+
+	testCases := []struct {
+		desc                string
+		inputResult         Result
+		expectedExportValue string
+	}{
+		{
+			desc: "when there are more than one result, it exports a coma separated list",
+			inputResult: Result{
+				ArtifactLocations: []string{"aa.txt", "bb.txt"},
+			},
+			expectedExportValue: "aa.txt,bb.txt",
+		},
+		{
+			desc: "when there is a result element",
+			inputResult: Result{
+				ArtifactLocations: []string{"aa.txt"},
+			},
+			expectedExportValue: "aa.txt",
+		},
+		{
+			desc: "when there is no result element",
+			inputResult: Result{
+				ArtifactLocations: []string{},
+			},
+			expectedExportValue: "",
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			step := ArtifactPull{
+				envRepository: envRepository,
+			}
+
+			envRepository.On("Set", "PULLED_ARTIFACT_LOCATIONS", tC.expectedExportValue).Return(nil)
+
+			err := step.Export(tC.inputResult)
+
+			envRepository.AssertExpectations(t)
+			assert.NoError(t, err)
+		})
+	}
+}
