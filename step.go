@@ -100,7 +100,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 
 	a.logger.Printf("downloading %d artifacts", len(artifacts))
 
-	fileDownloader := downloader.NewDefaultFileDownloader(a.logger, 5*time.Second)
+	fileDownloader := downloader.NewDefaultFileDownloader(a.logger, 30*time.Second)
 	artifactDownloader := downloader.NewConcurrentArtifactDownloader(artifacts, fileDownloader, a.logger)
 
 	downloadResults, err := artifactDownloader.DownloadAndSaveArtifacts()
