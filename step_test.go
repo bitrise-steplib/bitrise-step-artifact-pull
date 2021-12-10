@@ -14,6 +14,7 @@ import (
 func Test_GivenInputs_WhenCreatingConfig_ThenMappingIsCorrect(t *testing.T) {
 	// Given
 	envRepository := new(mockenv.Repository)
+	envRepository.On("Get", "BITRISE_APP_SLUG").Return("app-slug")
 	envRepository.On("Get", "verbose").Return("true")
 	envRepository.On("Get", "artifact_sources").Return("*")
 	envRepository.On("Get", "finished_stage").Return("")
