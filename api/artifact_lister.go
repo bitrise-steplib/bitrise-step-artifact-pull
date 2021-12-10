@@ -3,7 +3,6 @@ package api
 import (
 	"fmt"
 	"strings"
-	"sync"
 
 	"github.com/bitrise-io/go-utils/log"
 )
@@ -33,29 +32,25 @@ func NewArtifactLister(client BitriseAPIClient, logger log.Logger) ArtifactListe
 }
 
 func (lister ArtifactLister) ListBuildArtifacts(appSlug string, buildSlugs []string) ([]ArtifactResponseItemModel, error) {
-	wg := &sync.WaitGroup{}
-	resultsChan := make(chan listArtifactsOfBuildResult, len(buildSlugs))
+	listJobs := make(chan string, len(buildSlugs))
+	listResults := make(chan listArtifactsResult, len(buildSlugs))
 
-	concurrentCalls := 0
-	for _, buildSlug := range buildSlugs {
-		wg.Add(1)
-		concurrentCalls++
-		go lister.listArtifactsOfBuild(appSlug, buildSlug, resultsChan, wg)
-
-		if concurrentCalls >= lister.maxConcurrentListArtifactAPICalls {
-			wg.Wait()
-			concurrentCalls = 0
-		}
+	for w := 1; w <= lister.maxConcurrentListArtifactAPICalls; w++ {
+		go lister.listArtifactsWorker(appSlug, listJobs, listResults)
 	}
-	wg.Wait()
-	close(resultsChan)
+
+	for _, buildSlug := range buildSlugs {
+		listJobs <- buildSlug
+	}
+	close(listJobs)
 
 	// process results
 	var (
 		failedBuildSlugs []string
 		artifacts        []ArtifactResponseItemModel
 	)
-	for res := range resultsChan {
+	for i := 1; i <= len(buildSlugs); i++ {
+		res := <-listResults
 		if res.err != nil {
 			failedBuildSlugs = append(failedBuildSlugs, res.buildSlug)
 		} else {
@@ -70,63 +65,58 @@ func (lister ArtifactLister) ListBuildArtifacts(appSlug string, buildSlugs []str
 	return artifacts, nil
 }
 
-// listArtifactsOfBuild gets details of all artifacts of a particular build using the Bitrise API
-func (lister ArtifactLister) listArtifactsOfBuild(appSlug, buildSlug string, resultsChan chan listArtifactsOfBuildResult, wg *sync.WaitGroup) {
-	defer wg.Done()
+// listArtifactsWorker gets details of all artifacts of a particular build using the Bitrise API
+func (lister ArtifactLister) listArtifactsWorker(appSlug string, buildSlugs chan string, results chan listArtifactsResult) {
+	for buildSlug := range buildSlugs {
+		lister.logger.Debugf("listing artifacts for build %v", buildSlug)
+		artifactListItems, err := lister.apiClient.ListBuildArtifacts(appSlug, buildSlug)
+		if err != nil {
+			results <- listArtifactsResult{buildSlug: buildSlug, err: err}
+		} else if len(artifactListItems) == 0 {
+			results <- listArtifactsResult{buildSlug: buildSlug}
+		} else {
+			showJobs := make(chan string, len(artifactListItems))
+			showResults := make(chan showArtifactResult, len(artifactListItems))
 
-	lister.logger.Debugf("listing artifacts for build %v", buildSlug)
-
-	artifactListItems, err := lister.apiClient.ListBuildArtifacts(appSlug, buildSlug)
-	if err != nil {
-		resultsChan <- listArtifactsOfBuildResult{buildSlug: buildSlug, err: err}
-	} else if len(artifactListItems) == 0 {
-		resultsChan <- listArtifactsOfBuildResult{buildSlug: buildSlug}
-	} else {
-		showWg := &sync.WaitGroup{}
-		showResultsChan := make(chan showArtifactResult, len(artifactListItems))
-
-		concurrentCalls := 0
-		for _, artifactListItem := range artifactListItems {
-			showWg.Add(1)
-			concurrentCalls++
-			go lister.showArtifact(appSlug, buildSlug, artifactListItem.Slug, showResultsChan, showWg)
-			if concurrentCalls >= lister.maxConcurrentShowArtifactAPICalls {
-				showWg.Wait()
-				concurrentCalls = 0
+			for w := 1; w <= lister.maxConcurrentShowArtifactAPICalls; w++ {
+				go lister.showArtifactWorker(appSlug, buildSlug, showJobs, showResults)
 			}
-		}
 
-		showWg.Wait()
-		close(showResultsChan)
-
-		var artifacts []ArtifactResponseItemModel
-		for res := range showResultsChan {
-			if res.err != nil {
-				resultsChan <- listArtifactsOfBuildResult{buildSlug: buildSlug, err: err}
-				return
-			} else {
-				artifacts = append(artifacts, res.artifact)
+			for _, artifactListItem := range artifactListItems {
+				showJobs <- artifactListItem.Slug
 			}
-		}
+			close(showJobs)
 
-		resultsChan <- listArtifactsOfBuildResult{buildSlug: buildSlug, artifacts: artifacts}
+			var artifacts []ArtifactResponseItemModel
+			for i := 0; i < len(artifactListItems); i++ {
+				res := <-showResults
+				if res.err != nil {
+					results <- listArtifactsResult{buildSlug: buildSlug, err: err}
+					return
+				} else {
+					artifacts = append(artifacts, res.artifact)
+				}
+			}
+
+			results <- listArtifactsResult{buildSlug: buildSlug, artifacts: artifacts}
+		}
 	}
 }
 
-func (lister ArtifactLister) showArtifact(appSlug, buildSlug, artifactSlug string, resultsChan chan showArtifactResult, wg *sync.WaitGroup) {
-	defer wg.Done()
+func (lister ArtifactLister) showArtifactWorker(appSlug, buildSlug string, artifactSlugs chan string, results chan showArtifactResult) {
+	for artifactSlug := range artifactSlugs {
+		lister.logger.Debugf("getting artifact details for artifact %v", artifactSlug)
 
-	lister.logger.Debugf("getting artifact details for artifact %v", artifactSlug)
-
-	artifact, err := lister.apiClient.ShowBuildArtifact(appSlug, buildSlug, artifactSlug)
-	if err != nil {
-		resultsChan <- showArtifactResult{buildSlug: buildSlug, err: err}
-	} else {
-		resultsChan <- showArtifactResult{buildSlug: buildSlug, artifact: artifact}
+		artifact, err := lister.apiClient.ShowBuildArtifact(appSlug, buildSlug, artifactSlug)
+		if err != nil {
+			results <- showArtifactResult{buildSlug: buildSlug, err: err}
+		} else {
+			results <- showArtifactResult{buildSlug: buildSlug, artifact: artifact}
+		}
 	}
 }
 
-type listArtifactsOfBuildResult struct {
+type listArtifactsResult struct {
 	buildSlug string
 	artifacts []ArtifactResponseItemModel
 	err       error
