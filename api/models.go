@@ -1,12 +1,5 @@
 package api
 
-// ArtifactListResponseModel ...
-type ArtifactListResponseModel struct {
-	Data []ArtifactListElementResponseModel `json:"data"`
-	// pagination
-	Paging PagingModel `json:"paging"`
-}
-
 // ListBuildArtifactsResponse ...
 type ListBuildArtifactsResponse struct {
 	Data   []ArtifactListElementResponseModel `json:"data"`
@@ -41,7 +34,4 @@ type PagingModel struct {
 	// to get the next page. Empty/not included if there's no "next" page.
 	// Stop paging when there's no "Next" item in the response!
 	Next string `json:"next,omitempty"`
-}
-
-type GetBuildArtifactsResponse struct {
 }

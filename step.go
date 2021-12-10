@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-utils/command"
@@ -102,7 +103,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 
 	a.logger.Printf("downloading %d artifacts", len(artifacts))
 
-	fileDownloader := downloader.NewDefaultFileDownloader(a.logger)
+	fileDownloader := downloader.NewDefaultFileDownloader(a.logger, 5*time.Minute)
 	artifactDownloader := downloader.NewConcurrentArtifactDownloader(artifacts, fileDownloader, a.logger)
 
 	downloadResults, err := artifactDownloader.DownloadAndSaveArtifacts()
@@ -115,6 +116,8 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 	for _, downloadResult := range downloadResults {
 		if downloadResult.DownloadError != nil {
 			a.logger.Errorf("failed to download artifact from %s, error: %s", downloadResult.DownloadURL, downloadResult.DownloadError.Error())
+
+			return Result{}, downloadResult.DownloadError
 		} else {
 			a.logger.Printf("artifact downloaded: %s", downloadResult.DownloadPath)
 			downloadedArtifactLocatins = append(downloadedArtifactLocatins, downloadResult.DownloadPath)
@@ -125,7 +128,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 }
 
 func (a ArtifactPull) Export(result Result) error {
-	if err := a.envRepository.Set("PULLED_ARTIFACT_LOCATIONS", strings.Join(result.ArtifactLocations, ",")); err != nil {
+	if err := a.envRepository.Set("BITRISE_ARTIFACT_PATHS", strings.Join(result.ArtifactLocations, ",")); err != nil {
 		return fmt.Errorf("failed to export pulled artifact locations, error: %s", err)
 	}
 
