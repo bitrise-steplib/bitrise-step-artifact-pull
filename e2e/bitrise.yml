@@ -67,7 +67,7 @@ workflows:
             #!/usr/bin/env bash
             set -ex
 
-            IFS=',' read -ra FILES <<< "$PULLED_ARTIFACT_LOCATIONS"
+            IFS=',' read -ra FILES <<< "$BITRISE_ARTIFACT_PATHS"
             for i in "${FILES[@]}"; do
               # process "$i"
               if [ ! -f $i ]; then
@@ -76,7 +76,7 @@ workflows:
               fi
             done
 
-            fc=$(ls $PULLED_ARTIFACT_LOCATIONS | wc -l | xargs)
+            fc=$(ls $BITRISE_ARTIFACT_PATHS | wc -l | xargs)
             if [ $fc -gt 1 ]; then
               echo "There are more than 1 files"
               exit 1
