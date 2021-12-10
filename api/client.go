@@ -7,8 +7,6 @@ import (
 	"log"
 	"net/http"
 	"time"
-
-	"github.com/pkg/errors"
 )
 
 type DefaultBitriseAPIClient struct {
@@ -54,7 +52,7 @@ func (c DefaultBitriseAPIClient) get(endpoint, next string) (*http.Response, err
 	}
 
 	if resp.StatusCode >= 300 || resp.StatusCode < 200 {
-		err = errors.Errorf("request to %v failed - status code should be 2XX (%d)", req.URL, resp.StatusCode)
+		err = fmt.Errorf("request to %s failed - status code should be 2XX (%d)", req.URL.String(), resp.StatusCode)
 	}
 
 	return resp, err
