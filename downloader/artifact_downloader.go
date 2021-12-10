@@ -2,7 +2,6 @@ package downloader
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"sync"
 
@@ -82,14 +81,7 @@ func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]Ar
 }
 
 func (ad *ConcurrentArtifactDownloader) download(artifactInfo api.ArtifactResponseItemModel, dir string) ArtifactDownloadResult {
-	dataReader, err := ad.Downloader.DownloadFileFromURL(artifactInfo.DownloadPath)
-	defer func() {
-		if dataReader != nil {
-			if err := dataReader.Close(); err != nil {
-				ad.Logger.Errorf("failed to close data reader")
-			}
-		}
-	}()
+	fileContent, err := ad.Downloader.DownloadFileFromURL(artifactInfo.DownloadPath)
 
 	if err != nil {
 		return ArtifactDownloadResult{DownloadError: err, DownloadURL: artifactInfo.DownloadPath}
@@ -107,7 +99,7 @@ func (ad *ConcurrentArtifactDownloader) download(artifactInfo api.ArtifactRespon
 		}
 	}()
 
-	if _, err := io.Copy(out, dataReader); err != nil {
+	if _, err := out.Write(fileContent); err != nil {
 		return ArtifactDownloadResult{DownloadError: err, DownloadURL: artifactInfo.DownloadPath}
 	}
 

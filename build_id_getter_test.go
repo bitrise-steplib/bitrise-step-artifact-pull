@@ -62,6 +62,13 @@ func Test_GetBuildIDs_without_wildcards(t *testing.T) {
 			expectedErrorMessage: "",
 		},
 		{
+			desc:                 "when user defines targets and the result has common subset, it filters the duplications",
+			targetNames:          []string{"stage1*", "*workflow1"},
+			finishedStages:       finishedStages,
+			expectedBuildIDs:     []string{"build1", "build3"},
+			expectedErrorMessage: "",
+		},
+		{
 			desc:                 "when user defines workflow names, it return the build IDs",
 			targetNames:          []string{"*workflow1", "*workflow2"},
 			finishedStages:       finishedStages,
@@ -87,6 +94,13 @@ func Test_GetBuildIDs_without_wildcards(t *testing.T) {
 			targetNames:          []string{},
 			finishedStages:       finishedStages,
 			expectedBuildIDs:     []string{"build1", "build2", "build3", "build4"},
+			expectedErrorMessage: "",
+		},
+		{
+			desc:                 "when given stage name not found",
+			targetNames:          []string{"wrong_stage_name"},
+			finishedStages:       finishedStages,
+			expectedBuildIDs:     nil,
 			expectedErrorMessage: "",
 		},
 	}

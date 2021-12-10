@@ -21,16 +21,16 @@ func NewBuildIDGetter(finishedStages model.FinishedStages, targetNames []string)
 }
 
 func (bg BuildIDGetter) GetBuildIDs() ([]string, error) {
-	var buildIDs []string
+	buildIDsSet := make(map[string]bool)
 
 	stageWorkflowMap := bg.createWorkflowMap()
 
 	if len(bg.TargetNames) == 0 {
 		for _, v := range stageWorkflowMap {
-			buildIDs = append(buildIDs, v)
+			buildIDsSet[v] = true
 		}
 
-		return buildIDs, nil
+		return convertKeySetToArray(buildIDsSet), nil
 	}
 
 	for _, target := range bg.TargetNames {
@@ -41,12 +41,22 @@ func (bg BuildIDGetter) GetBuildIDs() ([]string, error) {
 			}
 
 			if matched {
-				buildIDs = append(buildIDs, v)
+				buildIDsSet[v] = true
 			}
 		}
 	}
 
-	return buildIDs, nil
+	return convertKeySetToArray(buildIDsSet), nil
+}
+
+func convertKeySetToArray(set map[string]bool) []string {
+	var ids []string
+
+	for k := range set {
+		ids = append(ids, k)
+	}
+
+	return ids
 }
 
 func (bg BuildIDGetter) createWorkflowMap() map[string]string {
