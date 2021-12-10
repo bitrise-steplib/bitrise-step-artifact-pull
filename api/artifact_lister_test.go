@@ -46,7 +46,7 @@ func Test_showArtifact_returnsArtifact(t *testing.T) {
 		On("ShowBuildArtifact", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).
 		Return(mockArtifact, nil)
 
-	lister := NewDefaultArtifactLister(mockClient, log.NewLogger())
+	lister := NewArtifactLister(mockClient, log.NewLogger())
 
 	showResultChan := make(chan showArtifactResult, 1)
 	wg := &sync.WaitGroup{}
@@ -82,7 +82,7 @@ func Test_listArtifactsOfBuild_returnsArtifactList(t *testing.T) {
 			Return(a, nil).Once()
 	}
 
-	lister := NewDefaultArtifactLister(mockClient, log.NewLogger())
+	lister := NewArtifactLister(mockClient, log.NewLogger())
 
 	resultsChan := make(chan listArtifactsOfBuildResult, 1)
 	wg := &sync.WaitGroup{}
@@ -122,7 +122,7 @@ func Test_ListBuildArtifacts_concurrent_returnsArtifactListForMultipleBuilds(t *
 		{1, 1}, {3, 3}, {10, 1}, {1, 10}, {10, 10},
 	}
 	for _, testCase := range testCases {
-		lister := NewDefaultArtifactLister(mockClient, log.NewLogger())
+		lister := NewArtifactLister(mockClient, log.NewLogger())
 		lister.maxConcurrentListArtifactAPICalls = testCase.maxConcurrentListCalls
 		lister.maxConcurrentShowArtifactAPICalls = testCase.maxConcurrentShowCalls
 
@@ -141,7 +141,7 @@ func Test_ListBuildArtifacts_returnsErrorWhenApiCallFails(t *testing.T) {
 		On("ListBuildArtifacts", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).
 		Return([]ArtifactListElementResponseModel{}, errors.New("API error"))
 
-	lister := NewDefaultArtifactLister(mockClient, log.NewLogger())
+	lister := NewArtifactLister(mockClient, log.NewLogger())
 	_, err := lister.ListBuildArtifacts("app-slug", mockBuildSlugs)
 
 	assert.EqualError(t, err, "failed to get artifact download links for build(s): build-slug, build-slug, build-slug")
