@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
-	"github.com/bitrise-io/go-steputils/stepenv"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/env"
 	"github.com/bitrise-io/go-utils/log"
@@ -141,8 +140,7 @@ func getTargetDir(dirName string) (string, error) {
 }
 
 func (a ArtifactPull) Export(result Result) error {
-	repo := stepenv.NewRepository(a.envRepository)
-	if err := repo.Set("PULLED_ARTIFACT_LOCATIONS", strings.Join(result.ArtifactLocations, "\n")); err != nil {
+	if err := a.envRepository.Set("PULLED_ARTIFACT_LOCATIONS", strings.Join(result.ArtifactLocations, ",")); err != nil {
 		return fmt.Errorf("failed to export pulled artifact locations, error: %s", err)
 	}
 
