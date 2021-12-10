@@ -124,7 +124,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 
 func (a ArtifactPull) Export(result Result) error {
 	repo := stepenv.NewRepository(a.envRepository)
-	if err := repo.Set("ARTIFACT_PATHS", strings.Join(result.ArtifactLocations, "\n")); err != nil {
+	if err := repo.Set("BITRISE_ARTIFACT_PATHS", strings.Join(result.ArtifactLocations, "\n")); err != nil {
 		return fmt.Errorf("failed to export pulled artifact locations, error: %s", err)
 	}
 

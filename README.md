@@ -58,7 +58,7 @@ Use the `artifact_sources` input variable to limit the downloads to a set of sta
 
 | Environment Variable | Description |
 | --- | --- |
-| `ARTIFACT_PATHS` | An absolute path list of the downloaded artifacts. The list is separated with newlines (\n) |
+| `BITRISE_ARTIFACT_PATHS` | An absolute path list of the downloaded artifacts. The list is separated with newlines (\n) |
 </details>
 
 ## 🙋 Contributing
