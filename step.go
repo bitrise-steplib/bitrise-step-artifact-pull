@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-utils/command"
@@ -102,7 +103,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 
 	a.logger.Printf("downloading %d artifacts", len(artifacts))
 
-	fileDownloader := downloader.NewDefaultFileDownloader(a.logger)
+	fileDownloader := downloader.NewDefaultFileDownloader(a.logger, 5*time.Minute)
 	artifactDownloader := downloader.NewConcurrentArtifactDownloader(artifacts, fileDownloader, a.logger)
 
 	downloadResults, err := artifactDownloader.DownloadAndSaveArtifacts()
