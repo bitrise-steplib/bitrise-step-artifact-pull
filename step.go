@@ -10,10 +10,13 @@ import (
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/env"
 	"github.com/bitrise-io/go-utils/log"
+	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-steplib/bitrise-step-artifact-pull/api"
 	"github.com/bitrise-steplib/bitrise-step-artifact-pull/downloader"
 	"github.com/bitrise-steplib/bitrise-step-artifact-pull/model"
 )
+
+const relativeDownloadPath = "_tmp"
 
 type Input struct {
 	Verbose               bool   `env:"verbose,required"`
@@ -100,8 +103,14 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 
 	a.logger.Printf("downloading %d artifacts", len(artifacts))
 
+	targetDir, err := getTargetDir(relativeDownloadPath)
+	if err != nil {
+		a.logger.Printf("failed to determine target artifact download directory", err)
+		return Result{}, err
+	}
+
 	fileDownloader := downloader.NewDefaultFileDownloader(a.logger)
-	artifactDownloader := downloader.NewConcurrentArtifactDownloader(artifacts, fileDownloader, a.logger)
+	artifactDownloader := downloader.NewConcurrentArtifactDownloader(artifacts, fileDownloader, targetDir, a.logger)
 
 	downloadResults, err := artifactDownloader.DownloadAndSaveArtifacts()
 	if err != nil {
@@ -120,6 +129,15 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 	}
 
 	return Result{ArtifactLocations: downloadedArtifactLocatins}, nil
+}
+
+func getTargetDir(dirName string) (string, error) {
+	tempPath, err := pathutil.NormalizedOSTempDirPath(dirName)
+	if err != nil {
+		return "", err
+	}
+
+	return tempPath, nil
 }
 
 func (a ArtifactPull) Export(result Result) error {

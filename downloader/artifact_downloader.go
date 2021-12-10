@@ -13,7 +13,6 @@ import (
 const (
 	filePermission               = 0o755
 	maxConcurrentDownloadThreads = 10
-	relativeDownloadPath         = "_tmp"
 )
 
 type ArtifactDownloader interface {
@@ -24,6 +23,7 @@ type ConcurrentArtifactDownloader struct {
 	Artifacts  []api.ArtifactResponseItemModel
 	Downloader FileDownloader
 	Logger     log.Logger
+	TargetDir  string
 }
 
 type ArtifactDownloadResult struct {
@@ -33,21 +33,16 @@ type ArtifactDownloadResult struct {
 }
 
 func (ad *ConcurrentArtifactDownloader) DownloadAndSaveArtifacts() ([]ArtifactDownloadResult, error) {
-	targetDir, err := getTargetDir(relativeDownloadPath)
-	if err != nil {
-		return nil, err
-	}
-
-	if _, err := os.Stat(targetDir); os.IsNotExist(err) {
-		if err := os.Mkdir(targetDir, filePermission); err != nil {
+	if _, err := os.Stat(ad.TargetDir); os.IsNotExist(err) {
+		if err := os.Mkdir(ad.TargetDir, filePermission); err != nil {
 			return nil, err
 		}
 	}
 
-	return ad.downloadParallel(targetDir)
+	return ad.downloadParallel()
 }
 
-func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]ArtifactDownloadResult, error) {
+func (ad *ConcurrentArtifactDownloader) downloadParallel() ([]ArtifactDownloadResult, error) {
 	downloadResultChan := make(chan ArtifactDownloadResult, len(ad.Artifacts))
 	defer close(downloadResultChan)
 	var downloadResults []ArtifactDownloadResult
@@ -70,7 +65,7 @@ func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]Ar
 	for _, artifact := range ad.Artifacts {
 		semaphore <- struct{}{} // acquire
 		go func(artifactInfo api.ArtifactResponseItemModel) {
-			downloadResultChan <- ad.download(artifactInfo, targetDir)
+			downloadResultChan <- ad.download(artifactInfo, ad.TargetDir)
 
 			<-semaphore // release
 		}(artifact)
@@ -114,19 +109,11 @@ func (ad *ConcurrentArtifactDownloader) download(artifactInfo api.ArtifactRespon
 	return ArtifactDownloadResult{DownloadPath: fileFullPath, DownloadURL: artifactInfo.DownloadPath}
 }
 
-func getTargetDir(dirName string) (string, error) {
-	pwd, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("%s/%s", pwd, dirName), nil
-}
-
-func NewConcurrentArtifactDownloader(artifacts []api.ArtifactResponseItemModel, downloader FileDownloader, logger log.Logger) ArtifactDownloader {
+func NewConcurrentArtifactDownloader(artifacts []api.ArtifactResponseItemModel, downloader FileDownloader, targetDir string, logger log.Logger) *ConcurrentArtifactDownloader {
 	return &ConcurrentArtifactDownloader{
 		Artifacts:  artifacts,
 		Downloader: downloader,
 		Logger:     logger,
+		TargetDir:  targetDir,
 	}
 }
