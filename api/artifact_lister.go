@@ -8,15 +8,23 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 )
 
-type DefaultArtifactLister struct {
+// BitriseAPIClient ...
+type BitriseAPIClient interface {
+	// List all build artifacts that have been generated for an app’s build - https://api-docs.bitrise.io/#/build-artifact/artifact-list
+	ListBuildArtifacts(appSlug, buildSlug string) ([]ArtifactListElementResponseModel, error)
+	// Retrieve data of a specific build artifact - https://api-docs.bitrise.io/#/build-artifact/artifact-show
+	ShowBuildArtifact(appSlug, buildSlug, artifactSlug string) (ArtifactResponseItemModel, error)
+}
+
+type ArtifactLister struct {
 	apiClient                         BitriseAPIClient
 	logger                            log.Logger
 	maxConcurrentListArtifactAPICalls int
 	maxConcurrentShowArtifactAPICalls int
 }
 
-func NewDefaultArtifactLister(client BitriseAPIClient, logger log.Logger) DefaultArtifactLister {
-	return DefaultArtifactLister{
+func NewArtifactLister(client BitriseAPIClient, logger log.Logger) ArtifactLister {
+	return ArtifactLister{
 		apiClient:                         client,
 		logger:                            logger,
 		maxConcurrentListArtifactAPICalls: 3,
@@ -24,7 +32,7 @@ func NewDefaultArtifactLister(client BitriseAPIClient, logger log.Logger) Defaul
 	}
 }
 
-func (lister DefaultArtifactLister) ListBuildArtifacts(appSlug string, buildSlugs []string) ([]ArtifactResponseItemModel, error) {
+func (lister ArtifactLister) ListBuildArtifacts(appSlug string, buildSlugs []string) ([]ArtifactResponseItemModel, error) {
 	wg := &sync.WaitGroup{}
 	resultsChan := make(chan listArtifactsOfBuildResult, len(buildSlugs))
 
@@ -63,7 +71,7 @@ func (lister DefaultArtifactLister) ListBuildArtifacts(appSlug string, buildSlug
 }
 
 // listArtifactsOfBuild gets details of all artifacts of a particular build using the Bitrise API
-func (lister DefaultArtifactLister) listArtifactsOfBuild(appSlug, buildSlug string, resultsChan chan listArtifactsOfBuildResult, wg *sync.WaitGroup) {
+func (lister ArtifactLister) listArtifactsOfBuild(appSlug, buildSlug string, resultsChan chan listArtifactsOfBuildResult, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	lister.logger.Debugf("listing artifacts for build %v", buildSlug)
@@ -105,7 +113,7 @@ func (lister DefaultArtifactLister) listArtifactsOfBuild(appSlug, buildSlug stri
 	}
 }
 
-func (lister DefaultArtifactLister) showArtifact(appSlug, buildSlug, artifactSlug string, resultsChan chan showArtifactResult, wg *sync.WaitGroup) {
+func (lister ArtifactLister) showArtifact(appSlug, buildSlug, artifactSlug string, resultsChan chan showArtifactResult, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	lister.logger.Debugf("getting artifact details for artifact %v", artifactSlug)
