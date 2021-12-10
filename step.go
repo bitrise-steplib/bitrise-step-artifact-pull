@@ -31,6 +31,7 @@ type Config struct {
 	FinishedStages        model.FinishedStages
 	BitriseAPIAccessToken string
 	BitriseAPIBaseURL     string
+	AppSlug               string
 }
 
 type Result struct {
@@ -61,6 +62,11 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 		}
 	}
 
+	appSlug := a.envRepository.Get("BITRISE_APP_SLUG")
+	if err != nil {
+		return Config{}, fmt.Errorf("app slug (BITRISE_APP_SLUG env var) not found")
+	}
+
 	// TODO: validate inputs here and possibly convert from string to a concrete type
 	return Config{
 		VerboseLogging:        input.Verbose,
@@ -68,6 +74,7 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 		FinishedStages:        finishedStagesModel,
 		BitriseAPIAccessToken: input.BitriseAPIAccessToken,
 		BitriseAPIBaseURL:     input.BitriseAPIBaseURL,
+		AppSlug:               appSlug,
 	}, nil
 }
 
@@ -88,13 +95,9 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 
 	a.logger.Printf("getting the list of artifacts of %d builds", len(buildIDs))
 
-	appSlug := a.envRepository.Get("BITRISE_APP_SLUG")
-	if appSlug == "" {
-		return Result{}, fmt.Errorf("missing app slug (BITRISE_APP_SLUG env var is not set)")
-	}
+	artifactLister := api.NewArtifactLister(&apiClient, a.logger)
+	artifacts, err := artifactLister.ListBuildArtifacts(cfg.AppSlug, buildIDs)
 
-	artifactLister := api.NewDefaultArtifactLister(&apiClient, a.logger)
-	artifacts, err := artifactLister.ListBuildArtifacts(appSlug, buildIDs)
 	if err != nil {
 		a.logger.Printf("failed", err)
 		return Result{}, err
