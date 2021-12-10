@@ -72,7 +72,7 @@ func Test_Export(t *testing.T) {
 				envRepository: envRepository,
 			}
 
-			envRepository.On("Set", "PULLED_ARTIFACT_LOCATIONS", tC.expectedExportValue).Return(nil)
+			envRepository.On("Set", "BITRISE_ARTIFACT_PATHS", tC.expectedExportValue).Return(nil)
 
 			err := step.Export(tC.inputResult)
 
