@@ -14,6 +14,7 @@ import (
 func Test_GivenInputs_WhenCreatingConfig_ThenMappingIsCorrect(t *testing.T) {
 	// Given
 	envRepository := new(mockenv.Repository)
+	envRepository.On("Get", "BITRISE_APP_SLUG").Return("app-slug")
 	envRepository.On("Get", "verbose").Return("true")
 	envRepository.On("Get", "artifact_sources").Return("*")
 	envRepository.On("Get", "finished_stage").Return("")
@@ -34,4 +35,50 @@ func Test_GivenInputs_WhenCreatingConfig_ThenMappingIsCorrect(t *testing.T) {
 	// Then
 	assert.NoError(t, err)
 	assert.Equal(t, true, config.VerboseLogging)
+}
+
+func Test_Export(t *testing.T) {
+	envRepository := new(mockenv.Repository)
+
+	testCases := []struct {
+		desc                string
+		inputResult         Result
+		expectedExportValue string
+	}{
+		{
+			desc: "when there are more than one result, it exports a coma separated list",
+			inputResult: Result{
+				ArtifactLocations: []string{"aa.txt", "bb.txt"},
+			},
+			expectedExportValue: "aa.txt,bb.txt",
+		},
+		{
+			desc: "when there is a result element",
+			inputResult: Result{
+				ArtifactLocations: []string{"aa.txt"},
+			},
+			expectedExportValue: "aa.txt",
+		},
+		{
+			desc: "when there is no result element",
+			inputResult: Result{
+				ArtifactLocations: []string{},
+			},
+			expectedExportValue: "",
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			step := ArtifactPull{
+				envRepository: envRepository,
+			}
+
+			envRepository.On("Set", "BITRISE_ARTIFACT_PATHS", tC.expectedExportValue).Return(nil)
+
+			err := step.Export(tC.inputResult)
+
+			envRepository.AssertExpectations(t)
+			assert.NoError(t, err)
+		})
+	}
 }

@@ -1,31 +1,20 @@
 package api
 
-// ArtifactListResponseModel ...
-type ArtifactListResponseModel struct {
-	Data []ArtifactListElementResponseModel `json:"data"`
-	// pagination
-	Paging PagingModel `json:"paging"`
-}
-
-// ListBuildArtifactsResponse ...
 type ListBuildArtifactsResponse struct {
 	Data   []ArtifactListElementResponseModel `json:"data"`
 	Paging PagingModel                        `json:"paging"`
 }
 
-// ShowBuildArtifact ...
 type ShowBuildArtifactResponse struct {
 	Data ArtifactResponseItemModel `json:"data"`
 }
 
-// ArtifactResponseItemModel ...
 type ArtifactResponseItemModel struct {
 	Title        string `json:"title"`
 	DownloadPath string `json:"expiring_download_url"`
 	Slug         string `json:"slug"`
 }
 
-// ArtifactListElementResponseModel ...
 type ArtifactListElementResponseModel struct {
 	Title string `json:"title"`
 	Slug  string `json:"slug"`
@@ -41,7 +30,4 @@ type PagingModel struct {
 	// to get the next page. Empty/not included if there's no "next" page.
 	// Stop paging when there's no "Next" item in the response!
 	Next string `json:"next,omitempty"`
-}
-
-type GetBuildArtifactsResponse struct {
 }

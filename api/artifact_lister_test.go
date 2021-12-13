@@ -2,7 +2,6 @@ package api
 
 import (
 	"errors"
-	"sync"
 	"testing"
 
 	"github.com/bitrise-io/go-utils/log"
@@ -38,64 +37,6 @@ func (m *MockBitriseAPIClient) ShowBuildArtifact(appSlug, buildSlug, artifactSlu
 	return r0, r1
 }
 
-func Test_showArtifact_returnsArtifact(t *testing.T) {
-	mockDownloadPath := "http://download.com"
-	mockArtifact := ArtifactResponseItemModel{Title: "artifact", DownloadPath: mockDownloadPath}
-	mockClient := &MockBitriseAPIClient{}
-	mockClient.
-		On("ShowBuildArtifact", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).
-		Return(mockArtifact, nil)
-
-	lister := NewDefaultArtifactLister(mockClient, log.NewLogger())
-
-	showResultChan := make(chan showArtifactResult, 1)
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	lister.showArtifact("app-slug", "build-slug", "artifact-slug", showResultChan, wg)
-	wg.Wait()
-
-	res := <-showResultChan
-
-	assert.NoError(t, res.err)
-	assert.Equal(t, mockArtifact, res.artifact)
-}
-
-func Test_listArtifactsOfBuild_returnsArtifactList(t *testing.T) {
-	mockArtifactList := []ArtifactListElementResponseModel{
-		{Slug: "artifact1"},
-		{Slug: "artifact2"},
-		{Slug: "artifact3"},
-	}
-
-	expectedArtifactList := []ArtifactResponseItemModel{
-		{Slug: "artifact1"},
-		{Slug: "artifact2"},
-		{Slug: "artifact3"},
-	}
-
-	mockClient := &MockBitriseAPIClient{}
-	mockClient.
-		On("ListBuildArtifacts", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).
-		Return(mockArtifactList, nil)
-	for _, a := range expectedArtifactList {
-		mockClient.On("ShowBuildArtifact", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).
-			Return(a, nil).Once()
-	}
-
-	lister := NewDefaultArtifactLister(mockClient, log.NewLogger())
-
-	resultsChan := make(chan listArtifactsOfBuildResult, 1)
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	lister.listArtifactsOfBuild("app-slug", "build-slug", resultsChan, wg)
-	wg.Wait()
-
-	res := <-resultsChan
-
-	assert.NoError(t, res.err)
-	assert.Equal(t, expectedArtifactList, res.artifacts)
-}
-
 type listConcurrencyTestCase struct {
 	maxConcurrentListCalls, maxConcurrentShowCalls int
 }
@@ -107,9 +48,11 @@ func Test_ListBuildArtifacts_concurrent_returnsArtifactListForMultipleBuilds(t *
 		{Slug: "artifact3"},
 		{Slug: "artifact4"},
 		{Slug: "artifact5"},
+		{Slug: "artifact6"},
+		{Slug: "artifact7"},
 	}
 
-	mockBuildSlugs := []string{"build-slug", "build-slug", "build-slug", "build-slug", "build-slug"}
+	mockBuildSlugs := []string{"build-slug", "build-slug", "build-slug", "build-slug", "build-slug", "build-slug", "build-slug"}
 
 	mockClient := &MockBitriseAPIClient{}
 	mockClient.
@@ -122,7 +65,7 @@ func Test_ListBuildArtifacts_concurrent_returnsArtifactListForMultipleBuilds(t *
 		{1, 1}, {3, 3}, {10, 1}, {1, 10}, {10, 10},
 	}
 	for _, testCase := range testCases {
-		lister := NewDefaultArtifactLister(mockClient, log.NewLogger())
+		lister := NewArtifactLister(mockClient, log.NewLogger())
 		lister.maxConcurrentListArtifactAPICalls = testCase.maxConcurrentListCalls
 		lister.maxConcurrentShowArtifactAPICalls = testCase.maxConcurrentShowCalls
 
@@ -141,7 +84,7 @@ func Test_ListBuildArtifacts_returnsErrorWhenApiCallFails(t *testing.T) {
 		On("ListBuildArtifacts", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).
 		Return([]ArtifactListElementResponseModel{}, errors.New("API error"))
 
-	lister := NewDefaultArtifactLister(mockClient, log.NewLogger())
+	lister := NewArtifactLister(mockClient, log.NewLogger())
 	_, err := lister.ListBuildArtifacts("app-slug", mockBuildSlugs)
 
 	assert.EqualError(t, err, "failed to get artifact download links for build(s): build-slug, build-slug, build-slug")

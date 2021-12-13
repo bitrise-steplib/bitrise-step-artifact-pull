@@ -8,16 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/pkg/errors"
+	"github.com/bitrise-io/go-utils/retry"
 )
-
-// BitriseAPIClient ...
-type BitriseAPIClient interface {
-	// List all build artifacts that have been generated for an app’s build - https://api-docs.bitrise.io/#/build-artifact/artifact-list
-	ListBuildArtifacts(appSlug, buildSlug string) ([]ArtifactListElementResponseModel, error)
-	// Retrieve data of a specific build artifact - https://api-docs.bitrise.io/#/build-artifact/artifact-show
-	ShowBuildArtifact(appSlug, buildSlug, artifactSlug string) (ArtifactResponseItemModel, error)
-}
 
 type DefaultBitriseAPIClient struct {
 	httpClient *http.Client
@@ -25,11 +17,9 @@ type DefaultBitriseAPIClient struct {
 	baseURL    string
 }
 
-// NewBitriseAPIClient ...
 func NewDefaultBitriseAPIClient(baseURL, authToken string) (DefaultBitriseAPIClient, error) {
-	httpClient := &http.Client{
-		Timeout: time.Second * 30,
-	}
+	httpClient := retry.NewHTTPClient().StandardClient()
+	httpClient.Timeout = time.Second * 30
 
 	c := DefaultBitriseAPIClient{
 		httpClient: httpClient,
@@ -62,13 +52,13 @@ func (c DefaultBitriseAPIClient) get(endpoint, next string) (*http.Response, err
 	}
 
 	if resp.StatusCode >= 300 || resp.StatusCode < 200 {
-		err = errors.Errorf("request to %v failed - status code should be 2XX (%d)", req.URL, resp.StatusCode)
+		err = fmt.Errorf("request to %s failed - status code should be 2XX (%d)", req.URL.String(), resp.StatusCode)
 	}
 
 	return resp, err
 }
 
-// ListBuildArtifacts gets the list of artifct details for a given build slug (also performs paging and calls the endpoint multiple times if needed)
+// ListBuildArtifacts gets the list of artifact details for a given build slug (also performs paging and calls the endpoint multiple times if needed)
 func (c *DefaultBitriseAPIClient) ListBuildArtifacts(appSlug, buildSlug string) ([]ArtifactListElementResponseModel, error) {
 	var artifacts []ArtifactListElementResponseModel
 	requestPath := fmt.Sprintf("v0.2/apps/%s/builds/%s/artifacts", appSlug, buildSlug)

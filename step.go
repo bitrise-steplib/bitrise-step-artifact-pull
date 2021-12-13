@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
-	"github.com/bitrise-io/go-steputils/stepenv"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/env"
 	"github.com/bitrise-io/go-utils/log"
@@ -29,6 +29,7 @@ type Config struct {
 	FinishedStages        model.FinishedStages
 	BitriseAPIAccessToken string
 	BitriseAPIBaseURL     string
+	AppSlug               string
 }
 
 type Result struct {
@@ -59,6 +60,11 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 		}
 	}
 
+	appSlug := a.envRepository.Get("BITRISE_APP_SLUG")
+	if err != nil {
+		return Config{}, fmt.Errorf("app slug (BITRISE_APP_SLUG env var) not found")
+	}
+
 	// TODO: validate inputs here and possibly convert from string to a concrete type
 	return Config{
 		VerboseLogging:        input.Verbose,
@@ -66,6 +72,7 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 		FinishedStages:        finishedStagesModel,
 		BitriseAPIAccessToken: input.BitriseAPIAccessToken,
 		BitriseAPIBaseURL:     input.BitriseAPIBaseURL,
+		AppSlug:               appSlug,
 	}, nil
 }
 
@@ -86,13 +93,9 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 
 	a.logger.Printf("getting the list of artifacts of %d builds", len(buildIDs))
 
-	appSlug := a.envRepository.Get("BITRISE_APP_SLUG")
-	if appSlug == "" {
-		return Result{}, fmt.Errorf("missing app slug (BITRISE_APP_SLUG env var is not set)")
-	}
+	artifactLister := api.NewArtifactLister(&apiClient, a.logger)
+	artifacts, err := artifactLister.ListBuildArtifacts(cfg.AppSlug, buildIDs)
 
-	artifactLister := api.NewDefaultArtifactLister(&apiClient, a.logger)
-	artifacts, err := artifactLister.ListBuildArtifacts(appSlug, buildIDs)
 	if err != nil {
 		a.logger.Printf("failed", err)
 		return Result{}, err
@@ -100,7 +103,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 
 	a.logger.Printf("downloading %d artifacts", len(artifacts))
 
-	fileDownloader := downloader.NewDefaultFileDownloader(a.logger)
+	fileDownloader := downloader.NewDefaultFileDownloader(a.logger, 5*time.Minute)
 	artifactDownloader := downloader.NewConcurrentArtifactDownloader(artifacts, fileDownloader, a.logger)
 
 	downloadResults, err := artifactDownloader.DownloadAndSaveArtifacts()
@@ -113,6 +116,8 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 	for _, downloadResult := range downloadResults {
 		if downloadResult.DownloadError != nil {
 			a.logger.Errorf("failed to download artifact from %s, error: %s", downloadResult.DownloadURL, downloadResult.DownloadError.Error())
+
+			return Result{}, downloadResult.DownloadError
 		} else {
 			a.logger.Printf("artifact downloaded: %s", downloadResult.DownloadPath)
 			downloadedArtifactLocatins = append(downloadedArtifactLocatins, downloadResult.DownloadPath)
@@ -123,8 +128,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 }
 
 func (a ArtifactPull) Export(result Result) error {
-	repo := stepenv.NewRepository(a.envRepository)
-	if err := repo.Set("PULLED_ARTIFACT_LOCATIONS", strings.Join(result.ArtifactLocations, "\n")); err != nil {
+	if err := a.envRepository.Set("BITRISE_ARTIFACT_PATHS", strings.Join(result.ArtifactLocations, ",")); err != nil {
 		return fmt.Errorf("failed to export pulled artifact locations, error: %s", err)
 	}
 

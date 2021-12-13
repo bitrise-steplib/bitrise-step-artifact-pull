@@ -82,11 +82,20 @@ func Test_ListBuildArtifacts_paging_returnsListOfArtifacts(t *testing.T) {
 	}
 	var nextPageIndex int64
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		queryValues := r.URL.Query()
+		nextQueryValue, ok := queryValues["next"]
+
+		if nextPageIndex == 0 {
+			assert.False(t, ok)
+		} else {
+			assert.Equal(t, fmt.Sprintf("%d", nextPageIndex), nextQueryValue[0])
+		}
+
 		nextPageIndex++
 
-		nextPage := "some page index"
-		if nextPageIndex == int64(len(expectedArtifactList)) {
-			nextPage = ""
+		var nextPage string
+		if nextPageIndex < int64(len(expectedArtifactList)) {
+			nextPage = fmt.Sprintf("%d", nextPageIndex)
 		}
 
 		response := ListBuildArtifactsResponse{
