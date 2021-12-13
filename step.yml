@@ -39,7 +39,7 @@ inputs:
     description: |-
       A comma separated list of workflows and stage
       paths, which can generate artifacts.
-      You need to use the {stage}.{workflow} syntax.
+      You need to use the `{stage}.{workflow}` syntax.
       The "dot" character is the delimiter between
       the stage and the workflow.
       You can use wildcards in the expression.

@@ -13,6 +13,11 @@ type BuildIDGetter struct {
 	TargetNames    []string
 }
 
+type keyValuePair struct {
+	key   string
+	value string
+}
+
 func NewBuildIDGetter(finishedStages model.FinishedStages, targetNames []string) BuildIDGetter {
 	return BuildIDGetter{
 		FinishedStages: finishedStages,
@@ -23,25 +28,25 @@ func NewBuildIDGetter(finishedStages model.FinishedStages, targetNames []string)
 func (bg BuildIDGetter) GetBuildIDs() ([]string, error) {
 	buildIDsSet := make(map[string]bool)
 
-	stageWorkflowMap := bg.createWorkflowMap()
+	kvpSlice := bg.createKeyValuePairSlice()
 
 	if len(bg.TargetNames) == 0 {
-		for _, v := range stageWorkflowMap {
-			buildIDsSet[v] = true
+		for _, kvPair := range kvpSlice  {
+			buildIDsSet[kvPair.value] = true
 		}
 
 		return convertKeySetToArray(buildIDsSet), nil
 	}
 
 	for _, target := range bg.TargetNames {
-		for k, v := range stageWorkflowMap {
-			matched, err := filepath.Match(target, k)
+		for _, kvPair := range kvpSlice {
+			matched, err := filepath.Match(target, kvPair.key)
 			if err != nil {
 				return nil, err
 			}
 
 			if matched {
-				buildIDsSet[v] = true
+				buildIDsSet[kvPair.value] = true
 			}
 		}
 	}
@@ -59,11 +64,14 @@ func convertKeySetToArray(set map[string]bool) []string {
 	return ids
 }
 
-func (bg BuildIDGetter) createWorkflowMap() map[string]string {
-	stageWorkflowMap := map[string]string{}
+func (bg BuildIDGetter) createKeyValuePairSlice() []keyValuePair {
+	var stageWorkflowMap []keyValuePair
 	for _, stage := range bg.FinishedStages {
 		for _, wf := range stage.Workflows {
-			stageWorkflowMap[stage.Name+DELIMITER+wf.Name] = wf.ExternalId
+			stageWorkflowMap = append(stageWorkflowMap, keyValuePair{
+				key:   stage.Name + DELIMITER + wf.Name,
+				value: wf.ExternalId,
+			})
 		}
 	}
 

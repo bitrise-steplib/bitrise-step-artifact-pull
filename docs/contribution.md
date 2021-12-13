@@ -1,7 +1,1 @@
-Please note that this step is configured to be run in Bitrise's internal environment. Running the step, including its E2E tests, is not supported for external developers.
-
-### E2E Tests
-
-To be able to run tests locally, create `.bitrise.secrets.yml` with the contents of the Bitrise internal LastPass secret `bitrise-step-artifact-pull-secrets`.
-
-Tests use the following staging Bitrise app https://app-staging.bitrise.io/app/11abc8954aa46c5a
+Note: this step's end-to-end tests (defined in e2e/bitrise.yml) are working with secrets which are intentionally not stored in this repo. External contributors won't be able to run those tests. Don't worry, if you open a PR with your contribution, we will help with running tests and make sure that they pass.
