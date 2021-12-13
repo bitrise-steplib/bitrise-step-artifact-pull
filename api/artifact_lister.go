@@ -76,7 +76,7 @@ func (lister ArtifactLister) ListBuildArtifactDetails(appSlug string, buildSlugs
 // listArtifactsWorker gets details of all artifacts of a particular build using the Bitrise API
 func (lister ArtifactLister) listArtifactsWorker(appSlug string, buildSlugs chan string, results chan listArtifactsResult) {
 	for buildSlug := range buildSlugs {
-		lister.logger.Debugf("listing artifacts for build %v", buildSlug)
+		lister.logger.Debugf("listing artifacts for build: https://app.bitrise.io/build/%v", buildSlug)
 		artifactListItems, err := lister.apiClient.ListBuildArtifacts(appSlug, buildSlug)
 		if err != nil {
 			results <- listArtifactsResult{buildSlug: buildSlug, err: err}

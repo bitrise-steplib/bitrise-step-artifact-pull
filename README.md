@@ -47,7 +47,7 @@ Use the `artifact_sources` input variable to limit the downloads to a set of sta
 | Key | Description | Flags | Default |
 | --- | --- | --- | --- |
 | `verbose` | Enable logging additional information for debugging | required | `false` |
-| `artifact_sources` | A comma separated list of workflows and stage paths, which can generate artifacts. You need to use the {stage}.{workflow} syntax. The "dot" character is the delimiter between the stage and the workflow. You can use wildcards in the expression. If you leave it empty, the default value will be the "*" (star), which means, it will get every artifact from every workflow. |  |  |
+| `artifact_sources` | A comma separated list of workflows and stage paths, which can generate artifacts. You need to use the `{stage}.{workflow}` syntax. The "dot" character is the delimiter between the stage and the workflow. You can use wildcards in the expression. If you leave it empty, the default value will be the "*" (star), which means, it will get every artifact from every workflow. |  |  |
 | `finished_stage` | This is a JSON representation of the finished stages for which the step can download build artifacts. | required | `$BITRISEIO_FINISHED_STAGES` |
 | `bitrise_api_base_url` | The base URL of the Bitrise API used to process the download requests. | required | `https://api.bitrise.io` |
 | `bitrise_api_access_token` | The OAuth access token that authorizes to call the Bitrise API. | sensitive | `$BITRISEIO_ARTIFACT_PULL_TOKEN` |
@@ -67,14 +67,7 @@ We welcome [pull requests](https://github.com/bitrise-steplib/steps-artifact-pul
 
 For pull requests, work on your changes in a forked repository and use the Bitrise CLI to [run step tests locally](https://devcenter.bitrise.io/bitrise-cli/run-your-first-build/).
 
-Please note that this step is configured to be run in Bitrise's internal environment. Running the step, including its E2E tests, is not supported for external developers.
-
-### E2E Tests
-
-To be able to run tests locally, create `.bitrise.secrets.yml` with the contents of the Bitrise internal LastPass secret `bitrise-step-artifact-pull-secrets`.
-
-Tests use the following staging Bitrise app https://app-staging.bitrise.io/app/11abc8954aa46c5a
-
+Note: this step's end-to-end tests (defined in e2e/bitrise.yml) are working with secrets which are intentionally not stored in this repo. External contributors won't be able to run those tests. Don't worry, if you open a PR with your contribution, we will help with running tests and make sure that they pass.
 
 Learn more about developing steps:
 
