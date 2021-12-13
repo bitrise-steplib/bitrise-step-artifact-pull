@@ -13,10 +13,6 @@ const (
 	maxConcurrentDownloadThreads = 10
 )
 
-type ArtifactDownloader interface {
-	DownloadAndSaveArtifacts() ([]ArtifactDownloadResult, error)
-}
-
 type ConcurrentArtifactDownloader struct {
 	Artifacts  []api.ArtifactResponseItemModel
 	Downloader FileDownloader
