@@ -5,10 +5,9 @@ import (
 
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-utils/command"
+	mockenv "github.com/bitrise-io/go-utils/env/mocks"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/stretchr/testify/assert"
-
-	mockenv "github.com/bitrise-io/go-utils/env/mocks"
 )
 
 func Test_GivenInputs_WhenCreatingConfig_ThenMappingIsCorrect(t *testing.T) {

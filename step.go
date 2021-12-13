@@ -64,7 +64,7 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 	}
 
 	appSlug := a.envRepository.Get("BITRISE_APP_SLUG")
-	if err != nil {
+	if appSlug == "" {
 		return Config{}, fmt.Errorf("app slug (BITRISE_APP_SLUG env var) not found")
 	}
 
@@ -120,7 +120,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 		return Result{}, err
 	}
 
-	var downloadedArtifactLocatins []string
+	var downloadedArtifactLocations []string
 	for _, downloadResult := range downloadResults {
 		if downloadResult.DownloadError != nil {
 			a.logger.Errorf("failed to download artifact from %s, error: %s", downloadResult.DownloadURL, downloadResult.DownloadError.Error())
@@ -128,11 +128,11 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 			return Result{}, downloadResult.DownloadError
 		} else {
 			a.logger.Printf("artifact downloaded: %s", downloadResult.DownloadPath)
-			downloadedArtifactLocatins = append(downloadedArtifactLocatins, downloadResult.DownloadPath)
+			downloadedArtifactLocations = append(downloadedArtifactLocations, downloadResult.DownloadPath)
 		}
 	}
 
-	return Result{ArtifactLocations: downloadedArtifactLocatins}, nil
+	return Result{ArtifactLocations: downloadedArtifactLocations}, nil
 }
 
 func dirNamePrefix(dirName string) (string, error) {
