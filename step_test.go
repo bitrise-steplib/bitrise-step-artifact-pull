@@ -15,7 +15,7 @@ func Test_GivenInputs_WhenCreatingConfig_ThenMappingIsCorrect(t *testing.T) {
 	envRepository := new(mockenv.Repository)
 	envRepository.On("Get", "BITRISE_APP_SLUG").Return("app-slug")
 	envRepository.On("Get", "verbose").Return("true")
-	envRepository.On("Get", "artifact_sources").Return("*")
+	envRepository.On("Get", "artifact_sources").Return("stage1.workflow1,stage2.*")
 	envRepository.On("Get", "finished_stage").Return("")
 	envRepository.On("Get", "bitrise_api_base_url").Return("")
 	envRepository.On("Get", "bitrise_api_access_token").Return("")
@@ -34,6 +34,7 @@ func Test_GivenInputs_WhenCreatingConfig_ThenMappingIsCorrect(t *testing.T) {
 	// Then
 	assert.NoError(t, err)
 	assert.Equal(t, true, config.VerboseLogging)
+	assert.Equal(t, []string{"stage1.workflow1", "stage2.*"}, config.ArtifactSources)
 }
 
 func Test_Export(t *testing.T) {

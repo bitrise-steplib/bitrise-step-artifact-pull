@@ -19,11 +19,11 @@ import (
 const downloadDirPrefix = "_artifact_pull"
 
 type Input struct {
-	Verbose               bool   `env:"verbose,required"`
-	ArtifactSources       string `env:"artifact_sources"`
-	FinishedStages        string `env:"finished_stage"`
-	BitriseAPIAccessToken string `env:"bitrise_api_access_token"`
-	BitriseAPIBaseURL     string `env:"bitrise_api_base_url"`
+	Verbose               bool            `env:"verbose,required"`
+	ArtifactSources       string          `env:"artifact_sources"`
+	FinishedStages        string          `env:"finished_stage"`
+	BitriseAPIAccessToken stepconf.Secret `env:"bitrise_api_access_token"`
+	BitriseAPIBaseURL     string          `env:"bitrise_api_base_url"`
 }
 
 type Config struct {
@@ -68,12 +68,11 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 		return Config{}, fmt.Errorf("app slug (BITRISE_APP_SLUG env var) not found")
 	}
 
-	// TODO: validate inputs here and possibly convert from string to a concrete type
 	return Config{
 		VerboseLogging:        input.Verbose,
 		ArtifactSources:       strings.Split(input.ArtifactSources, ","),
 		FinishedStages:        finishedStagesModel,
-		BitriseAPIAccessToken: input.BitriseAPIAccessToken,
+		BitriseAPIAccessToken: string(input.BitriseAPIAccessToken),
 		BitriseAPIBaseURL:     input.BitriseAPIBaseURL,
 		AppSlug:               appSlug,
 	}, nil
@@ -120,7 +119,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 		return Result{}, err
 	}
 
-	var downloadedArtifactLocations []string
+	var downloadedArtifactPaths []string
 	for _, downloadResult := range downloadResults {
 		if downloadResult.DownloadError != nil {
 			a.logger.Errorf("failed to download artifact from %s, error: %s", downloadResult.DownloadURL, downloadResult.DownloadError.Error())
@@ -128,11 +127,11 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 			return Result{}, downloadResult.DownloadError
 		} else {
 			a.logger.Printf("artifact downloaded: %s", downloadResult.DownloadPath)
-			downloadedArtifactLocations = append(downloadedArtifactLocations, downloadResult.DownloadPath)
+			downloadedArtifactPaths = append(downloadedArtifactPaths, downloadResult.DownloadPath)
 		}
 	}
 
-	return Result{ArtifactLocations: downloadedArtifactLocations}, nil
+	return Result{ArtifactLocations: downloadedArtifactPaths}, nil
 }
 
 func dirNamePrefix(dirName string) (string, error) {
