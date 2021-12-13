@@ -16,7 +16,7 @@ import (
 	"github.com/bitrise-steplib/bitrise-step-artifact-pull/model"
 )
 
-const relativeDownloadPath = "_tmp"
+const downloadDirPrefix = "_artifact_pull"
 
 type Input struct {
 	Verbose               bool   `env:"verbose,required"`
@@ -106,7 +106,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 
 	a.logger.Printf("downloading %d artifacts", len(artifacts))
 
-	targetDir, err := getTargetDir(relativeDownloadPath)
+	targetDir, err := dirNamePrefix(downloadDirPrefix)
 	if err != nil {
 		a.logger.Printf("failed to determine target artifact download directory", err)
 		return Result{}, err
@@ -136,7 +136,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 	return Result{ArtifactLocations: downloadedArtifactLocatins}, nil
 }
 
-func getTargetDir(dirName string) (string, error) {
+func dirNamePrefix(dirName string) (string, error) {
 	tempPath, err := pathutil.NormalizedOSTempDirPath(dirName)
 	if err != nil {
 		return "", err

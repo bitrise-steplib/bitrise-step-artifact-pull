@@ -124,4 +124,4 @@ workflows:
         - content: |-
             #!/bin/env bash
             set -ex
-            rm -rf ./_tmp
+            rm -rf ./_artifact_pull
