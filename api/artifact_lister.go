@@ -7,7 +7,7 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 )
 
-type BitriseAPIClient interface {
+type bitriseAPIClient interface {
 	// ListBuildArtifacts lists all build artifacts that have been generated for an app’s build - https://api-docs.bitrise.io/#/build-artifact/artifact-list
 	ListBuildArtifacts(appSlug, buildSlug string) ([]ArtifactListElementResponseModel, error)
 	// ShowBuildArtifact retrieves data of a specific build artifact - https://api-docs.bitrise.io/#/build-artifact/artifact-show
@@ -15,13 +15,22 @@ type BitriseAPIClient interface {
 }
 
 type ArtifactLister struct {
-	apiClient                         BitriseAPIClient
+	apiClient                         bitriseAPIClient
 	logger                            log.Logger
 	maxConcurrentListArtifactAPICalls int
 	maxConcurrentShowArtifactAPICalls int
 }
 
-func NewArtifactLister(client BitriseAPIClient, logger log.Logger) ArtifactLister {
+func NewArtifactLister(apiBaseURL, authToken string, logger log.Logger) (ArtifactLister, error) {
+	client, err := NewDefaultBitriseAPIClient(apiBaseURL, authToken)
+	if err != nil {
+		return ArtifactLister{}, err
+	}
+
+	return newArtifactLister(&client, logger), nil
+}
+
+func newArtifactLister(client bitriseAPIClient, logger log.Logger) ArtifactLister {
 	return ArtifactLister{
 		apiClient:                         client,
 		logger:                            logger,
@@ -30,7 +39,7 @@ func NewArtifactLister(client BitriseAPIClient, logger log.Logger) ArtifactListe
 	}
 }
 
-func (lister ArtifactLister) ListBuildArtifacts(appSlug string, buildSlugs []string) ([]ArtifactResponseItemModel, error) {
+func (lister ArtifactLister) ListBuildArtifactDetails(appSlug string, buildSlugs []string) ([]ArtifactResponseItemModel, error) {
 	listJobs := make(chan string, len(buildSlugs))
 	listResults := make(chan listArtifactsResult, len(buildSlugs))
 
