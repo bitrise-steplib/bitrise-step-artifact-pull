@@ -3,7 +3,6 @@ package downloader
 import (
 	"fmt"
 	"os"
-	"sync"
 
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-steplib/bitrise-step-artifact-pull/api"
@@ -31,6 +30,11 @@ type ArtifactDownloadResult struct {
 	DownloadURL   string
 }
 
+type downloadJob struct {
+	ResponseModel api.ArtifactResponseItemModel
+	TargetDir     string
+}
+
 func (ad *ConcurrentArtifactDownloader) DownloadAndSaveArtifacts() ([]ArtifactDownloadResult, error) {
 	if _, err := os.Stat(ad.TargetDir); os.IsNotExist(err) {
 		if err := os.Mkdir(ad.TargetDir, filePermission); err != nil {
@@ -38,67 +42,60 @@ func (ad *ConcurrentArtifactDownloader) DownloadAndSaveArtifacts() ([]ArtifactDo
 		}
 	}
 
-	return ad.downloadParallel()
+	return ad.downloadParallel(ad.TargetDir)
 }
 
-func (ad *ConcurrentArtifactDownloader) downloadParallel() ([]ArtifactDownloadResult, error) {
-	downloadResultChan := make(chan ArtifactDownloadResult, len(ad.Artifacts))
-	defer close(downloadResultChan)
+func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]ArtifactDownloadResult, error) {
 	var downloadResults []ArtifactDownloadResult
 
-	var wg sync.WaitGroup
-	wg.Add(len(ad.Artifacts))
-	go func() {
-		for { // block until results are filled up
-			result := <-downloadResultChan
+	jobs := make(chan downloadJob, len(ad.Artifacts))
+	results := make(chan ArtifactDownloadResult, len(ad.Artifacts))
 
-			downloadResults = append(downloadResults, result)
-			wg.Done()
-			if len(downloadResults) == len(ad.Artifacts) {
-				break
-			}
-		}
-	}()
-
-	semaphore := make(chan struct{}, maxConcurrentDownloadThreads)
-	for _, artifact := range ad.Artifacts {
-		semaphore <- struct{}{} // acquire
-		go func(artifactInfo api.ArtifactResponseItemModel) {
-			downloadResultChan <- ad.download(artifactInfo, ad.TargetDir)
-
-			<-semaphore // release
-		}(artifact)
+	for i := 0; i < maxConcurrentDownloadThreads; i++ {
+		go ad.download(jobs, results)
 	}
 
-	wg.Wait()
+	for _, artifact := range ad.Artifacts {
+		jobs <- downloadJob{
+			ResponseModel: artifact,
+			TargetDir:     targetDir,
+		}
+	}
+	close(jobs)
+
+	for i := 0; i < len(ad.Artifacts); i++ {
+		res := <-results
+		downloadResults = append(downloadResults, res)
+	}
 
 	return downloadResults, nil
 }
 
-func (ad *ConcurrentArtifactDownloader) download(artifactInfo api.ArtifactResponseItemModel, dir string) ArtifactDownloadResult {
-	fileContent, err := ad.Downloader.DownloadFileFromURL(artifactInfo.DownloadPath)
+func (ad *ConcurrentArtifactDownloader) download(jobs <-chan downloadJob, results chan<- ArtifactDownloadResult) {
+	for j := range jobs {
+		fileContent, err := ad.Downloader.DownloadFileFromURL(j.ResponseModel.DownloadPath)
 
-	if err != nil {
-		return ArtifactDownloadResult{DownloadError: err, DownloadURL: artifactInfo.DownloadPath}
-	}
+		if err != nil {
+			results <- ArtifactDownloadResult{DownloadError: err, DownloadURL: j.ResponseModel.DownloadPath}
+		}
 
-	fileFullPath := fmt.Sprintf("%s/%s", dir, artifactInfo.Title)
+		fileFullPath := fmt.Sprintf("%s/%s", j.TargetDir, j.ResponseModel.Title)
 
-	out, err := os.Create(fileFullPath)
-	if err != nil {
-		return ArtifactDownloadResult{DownloadError: err, DownloadURL: artifactInfo.DownloadPath}
-	}
-	defer func() {
+		out, err := os.Create(fileFullPath)
+		if err != nil {
+			results <- ArtifactDownloadResult{DownloadError: err, DownloadURL: j.ResponseModel.DownloadPath}
+		}
+
+		if _, err := out.Write(fileContent); err != nil {
+			results <- ArtifactDownloadResult{DownloadError: err, DownloadURL: j.ResponseModel.DownloadPath}
+		}
+
 		if err := out.Close(); err != nil {
 			ad.Logger.Errorf("couldn't close file: %s", out.Name())
 		}
-	}()
 
-	if _, err := out.Write(fileContent); err != nil {
-		return ArtifactDownloadResult{DownloadError: err, DownloadURL: artifactInfo.DownloadPath}
+		results <- ArtifactDownloadResult{DownloadPath: fileFullPath, DownloadURL: j.ResponseModel.DownloadPath}
 	}
-
-	return ArtifactDownloadResult{DownloadPath: fileFullPath, DownloadURL: artifactInfo.DownloadPath}
 }
 
 func NewConcurrentArtifactDownloader(artifacts []api.ArtifactResponseItemModel, downloader FileDownloader, targetDir string, logger log.Logger) *ConcurrentArtifactDownloader {
