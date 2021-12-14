@@ -126,7 +126,10 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 
 			return Result{}, downloadResult.DownloadError
 		} else {
-			a.logger.Printf("artifact downloaded: %s", downloadResult.DownloadPath)
+			if cfg.VerboseLogging {
+				a.logger.Printf("artifact downloaded: %s", downloadResult.DownloadPath)
+			}
+
 			downloadedArtifactPaths = append(downloadedArtifactPaths, downloadResult.DownloadPath)
 		}
 	}
@@ -144,9 +147,14 @@ func dirNamePrefix(dirName string) (string, error) {
 }
 
 func (a ArtifactPull) Export(result Result) error {
-	if err := a.envRepository.Set("BITRISE_ARTIFACT_PATHS", strings.Join(result.ArtifactLocations, "|")); err != nil {
+	locations := strings.Join(result.ArtifactLocations, "|")
+	if err := a.envRepository.Set("BITRISE_ARTIFACT_PATHS", locations); err != nil {
 		return fmt.Errorf("failed to export pulled artifact locations, error: %s", err)
 	}
+
+	a.logger.Println()
+	a.logger.Printf("The following outputs are exported as environment variables:")
+	a.logger.Printf("$BITRISE_ARTIFACT_PATHS = %s", locations)
 
 	return nil
 }
