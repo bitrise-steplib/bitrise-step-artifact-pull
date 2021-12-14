@@ -144,7 +144,7 @@ func dirNamePrefix(dirName string) (string, error) {
 }
 
 func (a ArtifactPull) Export(result Result) error {
-	if err := a.envRepository.Set("BITRISE_ARTIFACT_PATHS", strings.Join(result.ArtifactLocations, ",")); err != nil {
+	if err := a.envRepository.Set("BITRISE_ARTIFACT_PATHS", strings.Join(result.ArtifactLocations, "|")); err != nil {
 		return fmt.Errorf("failed to export pulled artifact locations, error: %s", err)
 	}
 

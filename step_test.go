@@ -50,7 +50,7 @@ func Test_Export(t *testing.T) {
 			inputResult: Result{
 				ArtifactLocations: []string{"aa.txt", "bb.txt"},
 			},
-			expectedExportValue: "aa.txt,bb.txt",
+			expectedExportValue: "aa.txt|bb.txt",
 		},
 		{
 			desc: "when there is a result element",
