@@ -153,7 +153,7 @@ func (a ArtifactPull) Export(result Result) error {
 	}
 
 	a.logger.Println()
-	a.logger.Printf("The following output variables have made with value:")
+	a.logger.Printf("The following outputs are exported as environment variables:")
 	a.logger.Printf("$BITRISE_ARTIFACT_PATHS = %s", locations)
 
 	return nil
