@@ -64,7 +64,7 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 	}
 
 	appSlug := a.envRepository.Get("BITRISE_APP_SLUG")
-	if err != nil {
+	if appSlug == "" {
 		return Config{}, fmt.Errorf("app slug (BITRISE_APP_SLUG env var) not found")
 	}
 

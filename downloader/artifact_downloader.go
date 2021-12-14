@@ -80,6 +80,7 @@ func (ad *ConcurrentArtifactDownloader) download(jobs <-chan downloadJob, result
 		out, err := os.Create(fileFullPath)
 		if err != nil {
 			results <- ArtifactDownloadResult{DownloadError: err, DownloadURL: j.ResponseModel.DownloadPath}
+			return
 		}
 
 		if _, err := out.Write(fileContent); err != nil {

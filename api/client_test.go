@@ -11,18 +11,9 @@ import (
 )
 
 func Test_ShowBuildArtifact_returnsArtifactModel(t *testing.T) {
-	expectedArtifact := ArtifactResponseItemModel{
-		Title:        "artifact-slug",
-		DownloadPath: "https://some.path.com/path",
-		Slug:         "artifact1",
-	}
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := ShowBuildArtifactResponse{
-			Data: expectedArtifact,
-		}
-		result, err := json.Marshal(response)
-		assert.NoError(t, err)
-		_, err = w.Write(result)
+		response := `{"data":{"title":"artifact-slug","expiring_download_url":"https://some.path.com/path","slug":"artifact1"}}`
+		_, err := w.Write([]byte(response))
 		assert.NoError(t, err)
 	}))
 	defer svr.Close()
@@ -33,6 +24,11 @@ func Test_ShowBuildArtifact_returnsArtifactModel(t *testing.T) {
 	artifact, showErr := client.ShowBuildArtifact("app-slug", "build-slug", "artifact-slug")
 
 	assert.NoError(t, showErr)
+	expectedArtifact := ArtifactResponseItemModel{
+		Title:        "artifact-slug",
+		DownloadPath: "https://some.path.com/path",
+		Slug:         "artifact1",
+	}
 	assert.Equal(t, expectedArtifact, artifact)
 }
 
@@ -52,17 +48,9 @@ func Test_ShowBuildArtifact_unauthorizedError(t *testing.T) {
 }
 
 func Test_ListBuildArtifacts_no_paging_returnsListOfArtifacts(t *testing.T) {
-	expectedArtifactList := []ArtifactListElementResponseModel{
-		{"artifact1", "slug1"}, {"artifact2", "slug2"}, {"artifact3", "slug3"},
-	}
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := ListBuildArtifactsResponse{
-			Data:   expectedArtifactList,
-			Paging: PagingModel{TotalItemCount: 3, PageItemLimit: 10},
-		}
-		result, err := json.Marshal(response)
-		assert.NoError(t, err)
-		_, err = w.Write(result)
+		response := `{"data":[{"title":"artifact1","slug":"slug1"},{"title":"artifact2","slug":"slug2"},{"title":"artifact3","slug":"slug3"}],"paging":{"total_item_count":3,"page_item_limit":10}}`
+		_, err := w.Write([]byte(response))
 		assert.NoError(t, err)
 	}))
 	defer svr.Close()
@@ -73,6 +61,9 @@ func Test_ListBuildArtifacts_no_paging_returnsListOfArtifacts(t *testing.T) {
 	artifactList, showErr := client.ListBuildArtifacts("app-slug", "build-slug")
 
 	assert.NoError(t, showErr)
+	expectedArtifactList := []ArtifactListElementResponseModel{
+		{"artifact1", "slug1"}, {"artifact2", "slug2"}, {"artifact3", "slug3"},
+	}
 	assert.Equal(t, expectedArtifactList, artifactList)
 }
 
