@@ -110,8 +110,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 		return Result{}, err
 	}
 
-	fileDownloader := downloader.NewDefaultFileDownloader(a.logger, 5*time.Minute)
-	artifactDownloader := downloader.NewConcurrentArtifactDownloader(artifacts, fileDownloader, targetDir, a.logger)
+	artifactDownloader := downloader.NewConcurrentArtifactDownloader(artifacts, 5*time.Minute, targetDir, a.logger)
 
 	downloadResults, err := artifactDownloader.DownloadAndSaveArtifacts()
 	if err != nil {

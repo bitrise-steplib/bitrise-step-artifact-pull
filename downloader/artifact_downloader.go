@@ -1,10 +1,14 @@
 package downloader
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"time"
 
+	"github.com/bitrise-io/go-utils/filedownloader"
 	"github.com/bitrise-io/go-utils/log"
+	"github.com/bitrise-io/go-utils/retry"
 	"github.com/bitrise-steplib/bitrise-step-artifact-pull/api"
 )
 
@@ -14,10 +18,10 @@ const (
 )
 
 type ConcurrentArtifactDownloader struct {
-	Artifacts  []api.ArtifactResponseItemModel
-	Downloader FileDownloader
-	Logger     log.Logger
-	TargetDir  string
+	Artifacts []api.ArtifactResponseItemModel
+	Logger    log.Logger
+	TargetDir string
+	Timeout   time.Duration
 }
 
 type ArtifactDownloadResult struct {
@@ -69,37 +73,29 @@ func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]Ar
 
 func (ad *ConcurrentArtifactDownloader) download(jobs <-chan downloadJob, results chan<- ArtifactDownloadResult) {
 	for j := range jobs {
-		fileContent, err := ad.Downloader.DownloadFileFromURL(j.ResponseModel.DownloadPath)
-
-		if err != nil {
-			results <- ArtifactDownloadResult{DownloadError: err, DownloadURL: j.ResponseModel.DownloadPath}
-		}
-
 		fileFullPath := fmt.Sprintf("%s/%s", j.TargetDir, j.ResponseModel.Title)
 
-		out, err := os.Create(fileFullPath)
+		ctx, cancel := context.WithTimeout(context.Background(), ad.Timeout)
+
+		downloader := filedownloader.NewWithContext(ctx, retry.NewHTTPClient().StandardClient())
+		err := downloader.Get(fileFullPath, j.ResponseModel.DownloadPath)
+
+		cancel()
+
 		if err != nil {
 			results <- ArtifactDownloadResult{DownloadError: err, DownloadURL: j.ResponseModel.DownloadPath}
 			return
-		}
-
-		if _, err := out.Write(fileContent); err != nil {
-			results <- ArtifactDownloadResult{DownloadError: err, DownloadURL: j.ResponseModel.DownloadPath}
-		}
-
-		if err := out.Close(); err != nil {
-			ad.Logger.Errorf("couldn't close file: %s", out.Name())
 		}
 
 		results <- ArtifactDownloadResult{DownloadPath: fileFullPath, DownloadURL: j.ResponseModel.DownloadPath}
 	}
 }
 
-func NewConcurrentArtifactDownloader(artifacts []api.ArtifactResponseItemModel, downloader FileDownloader, targetDir string, logger log.Logger) *ConcurrentArtifactDownloader {
+func NewConcurrentArtifactDownloader(artifacts []api.ArtifactResponseItemModel, timeout time.Duration, targetDir string, logger log.Logger) *ConcurrentArtifactDownloader {
 	return &ConcurrentArtifactDownloader{
-		Artifacts:  artifacts,
-		Downloader: downloader,
-		Logger:     logger,
-		TargetDir:  targetDir,
+		Artifacts: artifacts,
+		Timeout:   timeout,
+		Logger:    logger,
+		TargetDir: targetDir,
 	}
 }
