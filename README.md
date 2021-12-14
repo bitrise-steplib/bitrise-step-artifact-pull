@@ -138,7 +138,7 @@ $BITRISE_ARTIFACT_PATHS = /var/folders/sd/lvn5cp9x5dn_xh1vhfgjjjw40000gp/T/_arti
 
 | Environment Variable | Description |
 | --- | --- |
-| `BITRISE_ARTIFACT_PATHS` | An absolute path list of the downloaded artifacts. The list is separated with newlines (\n) |
+| `BITRISE_ARTIFACT_PATHS` | An absolute path list of the downloaded artifacts. The list is separated with pipe (\|) characters. |
 </details>
 
 ## 🙋 Contributing
