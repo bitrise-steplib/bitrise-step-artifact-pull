@@ -47,7 +47,7 @@ Use the `artifact_sources` input variable to limit the downloads to a set of sta
 | Key | Description | Flags | Default |
 | --- | --- | --- | --- |
 | `verbose` | Enable logging additional information for debugging | required | `false` |
-| `artifact_sources` | A comma separated list of workflows and stage paths, which can generate artifacts. You need to use the `{stage}.{workflow}` syntax. The "dot" character is the delimiter between the stage and the workflow. You can use wildcards in the expression. If you leave it empty, the default value will be the "*" (star), which means, it will get every artifact from every workflow. |  |  |
+| `artifact_sources` | A comma separated list of workflows and stage paths, which can generate artifacts. You need to use the `{stage}.{workflow}` syntax. The "dot" character is the delimiter between the stage and the workflow. You can use wildcards in the expression. If you leave it empty, the default value will be the "*" (star), which means, it will get every artifact from every workflow. |  | `*` |
 | `finished_stage` | This is a JSON representation of the finished stages for which the step can download build artifacts. | required | `$BITRISEIO_FINISHED_STAGES` |
 | `bitrise_api_base_url` | The base URL of the Bitrise API used to process the download requests. | required | `https://api.bitrise.io` |
 | `bitrise_api_access_token` | The OAuth access token that authorizes to call the Bitrise API. | sensitive | `$BITRISEIO_ARTIFACT_PULL_TOKEN` |
@@ -58,7 +58,7 @@ Use the `artifact_sources` input variable to limit the downloads to a set of sta
 
 | Environment Variable | Description |
 | --- | --- |
-| `BITRISE_ARTIFACT_PATHS` | An absolute path list of the downloaded artifacts. The list is separated with newlines (\n) |
+| `BITRISE_ARTIFACT_PATHS` | An absolute path list of the downloaded artifacts. The list is separated with pipe (\|) characters. |
 </details>
 
 ## 🙋 Contributing

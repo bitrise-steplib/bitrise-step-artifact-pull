@@ -50,7 +50,7 @@ func Test_Export(t *testing.T) {
 			inputResult: Result{
 				ArtifactLocations: []string{"aa.txt", "bb.txt"},
 			},
-			expectedExportValue: "aa.txt,bb.txt",
+			expectedExportValue: "aa.txt|bb.txt",
 		},
 		{
 			desc: "when there is a result element",
@@ -71,6 +71,7 @@ func Test_Export(t *testing.T) {
 		t.Run(tC.desc, func(t *testing.T) {
 			step := ArtifactPull{
 				envRepository: envRepository,
+				logger:        log.NewLogger(),
 			}
 
 			envRepository.On("Set", "BITRISE_ARTIFACT_PATHS", tC.expectedExportValue).Return(nil)
