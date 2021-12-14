@@ -71,6 +71,7 @@ func Test_Export(t *testing.T) {
 		t.Run(tC.desc, func(t *testing.T) {
 			step := ArtifactPull{
 				envRepository: envRepository,
+				logger:        log.NewLogger(),
 			}
 
 			envRepository.On("Set", "BITRISE_ARTIFACT_PATHS", tC.expectedExportValue).Return(nil)
