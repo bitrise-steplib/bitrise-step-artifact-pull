@@ -30,7 +30,7 @@ inputs:
     - "true"
     - "false"
 
-- artifact_sources: ""
+- artifact_sources: "*"
   opts:
     title: Artifact source
     summary: |-
