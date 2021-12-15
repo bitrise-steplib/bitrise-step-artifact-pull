@@ -2,8 +2,8 @@ package downloader
 
 import (
 	"context"
-	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/bitrise-io/go-utils/filedownloader"
@@ -73,7 +73,7 @@ func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]Ar
 
 func (ad *ConcurrentArtifactDownloader) download(jobs <-chan downloadJob, results chan<- ArtifactDownloadResult) {
 	for j := range jobs {
-		fileFullPath := fmt.Sprintf("%s/%s", j.TargetDir, j.ResponseModel.Title)
+		fileFullPath := filepath.Join(j.TargetDir, j.ResponseModel.Title)
 
 		ctx, cancel := context.WithTimeout(context.Background(), ad.Timeout)
 
