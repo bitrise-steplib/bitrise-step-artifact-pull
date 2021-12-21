@@ -19,7 +19,7 @@ import (
 const downloadDirPrefix = "_artifact_pull"
 
 type Input struct {
-	Verbose               bool            `env:"verbose,required"`
+	Verbose               string          `env:"verbose,opt[true,false]"`
 	ArtifactSources       string          `env:"artifact_sources"`
 	FinishedStages        string          `env:"finished_stage"`
 	BitriseAPIAccessToken stepconf.Secret `env:"bitrise_api_access_token"`
@@ -68,8 +68,13 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 		return Config{}, fmt.Errorf("app slug (BITRISE_APP_SLUG env var) not found")
 	}
 
+	verboseLoggingValue := false
+	if input.Verbose == "true" {
+		verboseLoggingValue = true
+	}
+
 	return Config{
-		VerboseLogging:        input.Verbose,
+		VerboseLogging:        verboseLoggingValue,
 		ArtifactSources:       strings.Split(input.ArtifactSources, ","),
 		FinishedStages:        finishedStagesModel,
 		BitriseAPIAccessToken: string(input.BitriseAPIAccessToken),
