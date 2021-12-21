@@ -38,7 +38,7 @@ func Test_DownloadAndSaveArtifacts(t *testing.T) {
 	var expectedDownloadResults []ArtifactDownloadResult
 	for i := 1; i <= 11; i++ {
 		downloadURL := fmt.Sprintf(svr.URL+"/%d.txt", i)
-		artifacts = append(artifacts, api.ArtifactResponseItemModel{DownloadPath: downloadURL, Title: fmt.Sprintf("%d.txt", i)})
+		artifacts = append(artifacts, api.ArtifactResponseItemModel{DownloadURL: downloadURL, Title: fmt.Sprintf("%d.txt", i)})
 		expectedDownloadResults = append(expectedDownloadResults, ArtifactDownloadResult{
 			DownloadPath: targetDir + fmt.Sprintf("/%d.txt", i),
 			DownloadURL:  downloadURL,
@@ -66,7 +66,7 @@ func Test_DownloadAndSaveArtifacts_DownloadFails(t *testing.T) {
 
 	var artifacts []api.ArtifactResponseItemModel
 	artifacts = append(artifacts,
-		api.ArtifactResponseItemModel{DownloadPath: svr.URL + "/1.txt", Title: "1.txt"})
+		api.ArtifactResponseItemModel{DownloadURL: svr.URL + "/1.txt", Title: "1.txt"})
 
 	artifactDownloader := NewConcurrentArtifactDownloader(artifacts, 5*time.Minute, targetDir, log.NewLogger())
 

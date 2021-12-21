@@ -63,17 +63,16 @@ func (c *DefaultBitriseAPIClient) ListBuildArtifacts(appSlug, buildSlug string) 
 	var artifacts []ArtifactListElementResponseModel
 	requestPath := fmt.Sprintf("v0.2/apps/%s/builds/%s/artifacts", appSlug, buildSlug)
 
-	stillPaging := true
 	var next string
-	for stillPaging {
+	for {
 		resp, err := c.get(requestPath, next)
 		if err != nil {
 			return nil, err
 		}
-		defer responseBodyCloser(resp)
 
 		var respBody []byte
 		respBody, err = ioutil.ReadAll(resp.Body)
+		responseBodyCloser(resp)
 		if err != nil {
 			return nil, err
 		}
@@ -87,7 +86,7 @@ func (c *DefaultBitriseAPIClient) ListBuildArtifacts(appSlug, buildSlug string) 
 		if len(responseModel.Paging.Next) > 0 {
 			next = responseModel.Paging.Next
 		} else {
-			stillPaging = false
+			break
 		}
 	}
 

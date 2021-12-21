@@ -10,9 +10,9 @@ type ShowBuildArtifactResponse struct {
 }
 
 type ArtifactResponseItemModel struct {
-	Title        string `json:"title"`
-	DownloadPath string `json:"expiring_download_url"`
-	Slug         string `json:"slug"`
+	Title       string `json:"title"`
+	DownloadURL string `json:"expiring_download_url"`
+	Slug        string `json:"slug"`
 }
 
 type ArtifactListElementResponseModel struct {

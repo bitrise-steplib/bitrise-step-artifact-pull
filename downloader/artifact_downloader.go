@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	filePermission               = 0o755
+	filePermission               = 0o655
 	maxConcurrentDownloadThreads = 10
 )
 
@@ -78,16 +78,16 @@ func (ad *ConcurrentArtifactDownloader) download(jobs <-chan downloadJob, result
 		ctx, cancel := context.WithTimeout(context.Background(), ad.Timeout)
 
 		downloader := filedownloader.NewWithContext(ctx, retry.NewHTTPClient().StandardClient())
-		err := downloader.Get(fileFullPath, j.ResponseModel.DownloadPath)
+		err := downloader.Get(fileFullPath, j.ResponseModel.DownloadURL)
 
 		cancel()
 
 		if err != nil {
-			results <- ArtifactDownloadResult{DownloadError: err, DownloadURL: j.ResponseModel.DownloadPath}
+			results <- ArtifactDownloadResult{DownloadError: err, DownloadURL: j.ResponseModel.DownloadURL}
 			return
 		}
 
-		results <- ArtifactDownloadResult{DownloadPath: fileFullPath, DownloadURL: j.ResponseModel.DownloadPath}
+		results <- ArtifactDownloadResult{DownloadPath: fileFullPath, DownloadURL: j.ResponseModel.DownloadURL}
 	}
 }
 
