@@ -25,9 +25,9 @@ func Test_ShowBuildArtifact_returnsArtifactModel(t *testing.T) {
 
 	assert.NoError(t, showErr)
 	expectedArtifact := ArtifactResponseItemModel{
-		Title:        "artifact-slug",
-		DownloadPath: "https://some.path.com/path",
-		Slug:         "artifact1",
+		Title:       "artifact-slug",
+		DownloadURL: "https://some.path.com/path",
+		Slug:        "artifact1",
 	}
 	assert.Equal(t, expectedArtifact, artifact)
 }

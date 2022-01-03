@@ -2,6 +2,17 @@ format_version: "11"
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 workflows:
+  sample:
+    envs:
+    - BITRISEIO_ARTIFACT_PULL_TOKEN: token
+    - BITRISE_APP_SLUG: slug
+    steps:
+    - path::./:
+        title: Execute step
+        inputs:
+        - verbose: true
+        - artifact_sources: "*"
+
   check:
     steps:
     - git::https://github.com/bitrise-steplib/steps-check.git: { }

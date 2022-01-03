@@ -19,7 +19,7 @@ import (
 const downloadDirPrefix = "_artifact_pull"
 
 type Input struct {
-	Verbose               bool            `env:"verbose,required"`
+	Verbose               string          `env:"verbose,opt[true,false]"`
 	ArtifactSources       string          `env:"artifact_sources"`
 	FinishedStages        string          `env:"finished_stage"`
 	BitriseAPIAccessToken stepconf.Secret `env:"bitrise_api_access_token"`
@@ -68,8 +68,13 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 		return Config{}, fmt.Errorf("app slug (BITRISE_APP_SLUG env var) not found")
 	}
 
+	verboseLoggingValue := false
+	if input.Verbose == "true" {
+		verboseLoggingValue = true
+	}
+
 	return Config{
-		VerboseLogging:        input.Verbose,
+		VerboseLogging:        verboseLoggingValue,
 		ArtifactSources:       strings.Split(input.ArtifactSources, ","),
 		FinishedStages:        finishedStagesModel,
 		BitriseAPIAccessToken: string(input.BitriseAPIAccessToken),
@@ -88,25 +93,25 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 
 	a.logger.Debugf("Downloading artifacts for builds %+v", buildIDs)
 
-	a.logger.Printf("getting the list of artifacts of %d builds", len(buildIDs))
+	a.logger.Printf("Getting the list of artifacts of %d builds", len(buildIDs))
 
 	artifactLister, err := api.NewArtifactLister(cfg.BitriseAPIBaseURL, cfg.BitriseAPIAccessToken, a.logger)
 	if err != nil {
-		a.logger.Debugf("failed to create artifact lister", err)
+		a.logger.Debugf("Failed to create artifact lister", err)
 		return Result{}, err
 	}
 	artifacts, err := artifactLister.ListBuildArtifactDetails(cfg.AppSlug, buildIDs)
 
 	if err != nil {
-		a.logger.Debugf("failed to list artifacts", err)
+		a.logger.Debugf("Failed to list artifacts", err)
 		return Result{}, err
 	}
 
-	a.logger.Printf("downloading %d artifacts", len(artifacts))
+	a.logger.Printf("Downloading %d artifacts", len(artifacts))
 
 	targetDir, err := dirNamePrefix(downloadDirPrefix)
 	if err != nil {
-		a.logger.Printf("failed to determine target artifact download directory", err)
+		a.logger.Printf("Failed to determine target artifact download directory", err)
 		return Result{}, err
 	}
 
@@ -114,19 +119,19 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 
 	downloadResults, err := artifactDownloader.DownloadAndSaveArtifacts()
 	if err != nil {
-		a.logger.Printf("failed", err)
+		a.logger.Printf("Failed", err)
 		return Result{}, err
 	}
 
 	var downloadedArtifactPaths []string
 	for _, downloadResult := range downloadResults {
 		if downloadResult.DownloadError != nil {
-			a.logger.Errorf("failed to download artifact from %s, error: %s", downloadResult.DownloadURL, downloadResult.DownloadError.Error())
+			a.logger.Errorf("Failed to download artifact from %s, error: %s", downloadResult.DownloadURL, downloadResult.DownloadError.Error())
 
 			return Result{}, downloadResult.DownloadError
 		} else {
 			if cfg.VerboseLogging {
-				a.logger.Printf("artifact downloaded: %s", downloadResult.DownloadPath)
+				a.logger.Printf("Artifact downloaded: %s", downloadResult.DownloadPath)
 			}
 
 			downloadedArtifactPaths = append(downloadedArtifactPaths, downloadResult.DownloadPath)
