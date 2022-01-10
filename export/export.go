@@ -60,17 +60,21 @@ func (oe OutputExporter) patternBasedOutputExport() error {
 
 	for k, v := range oe.ExportPattern {
 		for _, filePath := range filePaths {
-			matched, err := filepath.Match(v, filePath)
-			if err != nil {
-				return err
-			}
+			valueExpressions := strings.Split(v, ",")
 
-			if matched {
-				if el := exportMap[k]; el != nil {
-					el = append(el, filePath)
-					exportMap[k] = el
-				} else {
-					exportMap[k] = []string{filePath}
+			for _, expression := range valueExpressions {
+				matched, err := filepath.Match(expression, filePath)
+				if err != nil {
+					return err
+				}
+
+				if matched {
+					if el := exportMap[k]; el != nil {
+						el = append(el, filePath)
+						exportMap[k] = el
+					} else {
+						exportMap[k] = []string{filePath}
+					}
 				}
 			}
 		}

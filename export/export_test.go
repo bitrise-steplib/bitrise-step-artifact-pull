@@ -1,6 +1,9 @@
 package export
 
 import (
+	"errors"
+	mockenv "github.com/bitrise-io/go-utils/env/mocks"
+	"github.com/bitrise-io/go-utils/log"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -54,4 +57,106 @@ func TestProcessRawExportMap(t *testing.T) {
 			assert.Equal(t, tC.expectedOutput, result)
 		})
 	}
+}
+
+func TestSimpleOutputExport_NoError(t *testing.T) {
+	envRepository := new(mockenv.Repository)
+
+	envRepository.On("Set", "BITRISE_ARTIFACT_PATHS", "a/b.txt").Return(nil)
+
+	exporter := OutputExporter{
+		ExportValues: "a/b.txt",
+		Logger: log.NewLogger(),
+		EnvRepository: envRepository,
+	}
+
+	err := exporter.Export()
+	assert.NoError(t, err)
+
+	envRepository.AssertExpectations(t)
+}
+
+func TestSimpleOutputExport_Error(t *testing.T) {
+	envRepository := new(mockenv.Repository)
+
+	envRepository.On("Set", "BITRISE_ARTIFACT_PATHS", "a/b.txt").Return(errors.New("some kind of error"))
+
+	exporter := OutputExporter{
+		ExportValues: "a/b.txt",
+		Logger: log.NewLogger(),
+		EnvRepository: envRepository,
+	}
+
+	err := exporter.Export()
+	assert.EqualError(t, err, "failed to export pulled artifact locations, error: some kind of error")
+
+	envRepository.AssertExpectations(t)
+}
+
+func TestPatternBasedOutputExport_SingleFiles_NoError(t *testing.T) {
+	envRepository := new(mockenv.Repository)
+
+	envRepository.On("Set", "TXT_FILES", "a.txt").Return(nil)
+	envRepository.On("Set", "APK_FILES", "b.apk").Return(nil)
+
+	exporter := OutputExporter{
+		ExportValues: "a.txt|b.apk",
+		Logger: log.NewLogger(),
+		EnvRepository: envRepository,
+		ExportPattern: map[string]string{
+			"TXT_FILES":"*.txt",
+			"APK_FILES":"*.apk",
+		},
+	}
+
+	err := exporter.Export()
+	assert.NoError(t, err)
+
+	envRepository.AssertExpectations(t)
+}
+
+func TestPatternBasedOutputExport_MultipleFiles_NoError(t *testing.T) {
+	envRepository := new(mockenv.Repository)
+
+	envRepository.On("Set", "TXT_FILES", "a.txt|b.txt").Return(nil)
+	envRepository.On("Set", "APK_FILES", "b.apk").Return(nil)
+
+	exporter := OutputExporter{
+		ExportValues: "a.txt|b.txt|b.apk|x.ipa",
+		Logger: log.NewLogger(),
+		EnvRepository: envRepository,
+		ExportPattern: map[string]string{
+			"TXT_FILES":"*.txt",
+			"APK_FILES":"*.apk",
+		},
+	}
+
+	err := exporter.Export()
+	assert.NoError(t, err)
+
+	envRepository.AssertExpectations(t)
+}
+
+func TestPatternBasedOutputExport_MultipleFiles_MultipleExpressions_NoError(t *testing.T) {
+	envRepository := new(mockenv.Repository)
+
+	envRepository.On("Set", "TEXT_FILES", "a.txt|b.txt|d.docx").Return(nil)
+	envRepository.On("Set", "APK_FILES", "b.apk").Return(nil)
+	envRepository.On("Set", "ALL", "a.txt|b.txt|b.apk|x.ipa|d.docx").Return(nil)
+
+	exporter := OutputExporter{
+		ExportValues: "a.txt|b.txt|b.apk|x.ipa|d.docx",
+		Logger: log.NewLogger(),
+		EnvRepository: envRepository,
+		ExportPattern: map[string]string{
+			"TEXT_FILES":"*.txt,*.docx",
+			"APK_FILES":"*.apk",
+			"ALL":"*",
+		},
+	}
+
+	err := exporter.Export()
+	assert.NoError(t, err)
+
+	envRepository.AssertExpectations(t)
 }
