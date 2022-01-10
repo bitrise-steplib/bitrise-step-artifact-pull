@@ -145,6 +145,17 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 	return Result{ArtifactLocations: downloadedArtifactPaths}, nil
 }
 
+func (a ArtifactPull) Export(result Result, exportMap map[string]string) error {
+	exporter := export.OutputExporter{
+		ExportPattern: exportMap,
+		ExportValues: strings.Join(result.ArtifactLocations, "|"),
+		Logger: a.logger,
+		EnvRepository: a.envRepository,
+	}
+
+	return exporter.Export()
+}
+
 func dirNamePrefix(dirName string) (string, error) {
 	tempPath, err := pathutil.NormalizedOSTempDirPath(dirName)
 	if err != nil {
@@ -152,10 +163,4 @@ func dirNamePrefix(dirName string) (string, error) {
 	}
 
 	return tempPath, nil
-}
-
-func (a ArtifactPull) Export(result Result) error {
-	exporter := export.OutputExporter{}
-
-	return exporter.Export()
 }
