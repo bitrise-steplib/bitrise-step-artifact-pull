@@ -15,6 +15,24 @@ type OutputExporter struct {
 	EnvRepository env.Repository
 }
 
+func ProcessRawExportMap(rawMap string) map[string]string {
+	res := make(map[string]string, 0)
+	rawExportMapArray := strings.Split(strings.TrimSpace(rawMap), "\n")
+	for _, line := range rawExportMapArray {
+		parsedLine := strings.Split(line, "-")
+
+		if len(parsedLine) != 2 ||
+			len(strings.TrimSpace(parsedLine[0])) == 0 ||
+			len(strings.TrimSpace(parsedLine[1])) == 0 {
+			continue
+		}
+
+		res[strings.TrimSpace(parsedLine[1])] = strings.TrimSpace(parsedLine[0])
+	}
+
+	return res
+}
+
 func (oe OutputExporter) Export() error {
 	if len(oe.ExportPattern) == 0 {
 		return oe.simpleOutputExport()
@@ -66,7 +84,7 @@ func (oe OutputExporter) patternBasedOutputExport() error {
 
 		oe.Logger.Printf("$%s = %s", k, v)
 	}
-	
+
 	return nil
 }
 

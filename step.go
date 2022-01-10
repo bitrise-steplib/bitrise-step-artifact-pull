@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/bitrise-steplib/bitrise-step-artifact-pull/export"
 	"strings"
 	"time"
 
@@ -21,6 +22,7 @@ const downloadDirPrefix = "_artifact_pull"
 type Input struct {
 	Verbose               string          `env:"verbose,opt[true,false]"`
 	ArtifactSources       string          `env:"artifact_sources"`
+	ExportMap             string          `env:"export_map"`
 	FinishedStages        string          `env:"finished_stage"`
 	BitriseAPIAccessToken stepconf.Secret `env:"bitrise_api_access_token"`
 	BitriseAPIBaseURL     string          `env:"bitrise_api_base_url"`
@@ -29,6 +31,7 @@ type Input struct {
 type Config struct {
 	VerboseLogging        bool
 	ArtifactSources       []string
+	ExportMap             map[string]string
 	FinishedStages        model.FinishedStages
 	BitriseAPIAccessToken string
 	BitriseAPIBaseURL     string
@@ -76,6 +79,7 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 	return Config{
 		VerboseLogging:        verboseLoggingValue,
 		ArtifactSources:       strings.Split(input.ArtifactSources, ","),
+		ExportMap:             export.ProcessRawExportMap(input.ExportMap),
 		FinishedStages:        finishedStagesModel,
 		BitriseAPIAccessToken: string(input.BitriseAPIAccessToken),
 		BitriseAPIBaseURL:     input.BitriseAPIBaseURL,
@@ -151,14 +155,7 @@ func dirNamePrefix(dirName string) (string, error) {
 }
 
 func (a ArtifactPull) Export(result Result) error {
-	locations := strings.Join(result.ArtifactLocations, "|")
-	if err := a.envRepository.Set("BITRISE_ARTIFACT_PATHS", locations); err != nil {
-		return fmt.Errorf("failed to export pulled artifact locations, error: %s", err)
-	}
+	exporter := export.OutputExporter{}
 
-	a.logger.Println()
-	a.logger.Printf("The following outputs are exported as environment variables:")
-	a.logger.Printf("$BITRISE_ARTIFACT_PATHS = %s", locations)
-
-	return nil
+	return exporter.Export()
 }
