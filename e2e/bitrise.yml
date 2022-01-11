@@ -97,9 +97,9 @@ workflows:
 
   test_export_output_variables_based_on_patterns:
     before_run:
-      - _setup
+    - _setup
     steps:
-     - path::./:
+    - path::./:
         title: Execute step
         inputs:
         - verbose: true
@@ -115,17 +115,17 @@ workflows:
         - content: |-
             #!/usr/bin/env bash
             set -ex
-              
+
             if [[ -z "${TXT_FILES}" ]]; then
                 echo "Exported $TXT_FILES output variable does not exist"
                 exit 1
             fi
-              
+
             if [[ -z "${APK_FILES}" ]]; then
                 echo "Exported $APK_FILES output variable does not exist"
                 exit 1
             fi
-            
+
             IFS='|' read -ra FILES <<< "$TXT_FILES"
             for i in "${FILES[@]}"; do
                 # process "$i"
@@ -134,7 +134,7 @@ workflows:
                     exit 1
                 fi
             done
-              
+  
             IFS='|' read -ra FILES <<< "$APK_FILES"
             for i in "${FILES[@]}"; do
                 # process "$i"
@@ -143,7 +143,7 @@ workflows:
                     exit 1
                 fi
             done
-            
+
             array=( "lipsum.txt" "generated_text_file.txt" )
             for i in "${array[@]}"
             do
@@ -152,7 +152,7 @@ workflows:
                     exit 1
                 fi
             done
-              
+  
             array=( "app-release-unsigned.apk" )
             for i in "${array[@]}"
             do

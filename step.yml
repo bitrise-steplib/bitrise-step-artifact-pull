@@ -48,10 +48,9 @@ inputs:
       get every artifact from every workflow.
 
 - export_map: |-
-    
   opts:
-    title: "Export map"
-    description: |
+    title: Export map
+    description: |-
       Variable export map, use the following syntax to collect the downloaded file's locations into separated environment variables with a regex:
       *.apk - DOWNLOADED_APKS
       *.result - DOWNLOADED_TEST_RESULTS
