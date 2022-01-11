@@ -32,8 +32,8 @@ func TestProcessRawExportMap(t *testing.T) {
 *.txt,*docx - TEXTS
 `,
 			expectedOutput: map[string]string{
-				"ARTIFACTS":         "*.apk,*ipa",
-				"TEXTS": "*.txt,*docx",
+				"ARTIFACTS": "*.apk,*ipa",
+				"TEXTS":     "*.txt,*docx",
 			},
 		},
 		{
@@ -48,7 +48,6 @@ func TestProcessRawExportMap(t *testing.T) {
 				"DOWNLOADED_TEST_RESULTS": "*.result",
 			},
 		},
-
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
@@ -65,8 +64,8 @@ func TestSimpleOutputExport_NoError(t *testing.T) {
 	envRepository.On("Set", "BITRISE_ARTIFACT_PATHS", "a/b.txt").Return(nil)
 
 	exporter := OutputExporter{
-		ExportValues: "a/b.txt",
-		Logger: log.NewLogger(),
+		ExportValues:  "a/b.txt",
+		Logger:        log.NewLogger(),
 		EnvRepository: envRepository,
 	}
 
@@ -82,8 +81,8 @@ func TestSimpleOutputExport_Error(t *testing.T) {
 	envRepository.On("Set", "BITRISE_ARTIFACT_PATHS", "a/b.txt").Return(errors.New("some kind of error"))
 
 	exporter := OutputExporter{
-		ExportValues: "a/b.txt",
-		Logger: log.NewLogger(),
+		ExportValues:  "a/b.txt",
+		Logger:        log.NewLogger(),
 		EnvRepository: envRepository,
 	}
 
@@ -93,19 +92,19 @@ func TestSimpleOutputExport_Error(t *testing.T) {
 	envRepository.AssertExpectations(t)
 }
 
-func TestPatternBasedOutputExport_SingleFiles_NoError(t *testing.T) {
+func TestPatternBasedOutputExport_SingleFile_NoError(t *testing.T) {
 	envRepository := new(mockenv.Repository)
 
 	envRepository.On("Set", "TXT_FILES", "a.txt").Return(nil)
 	envRepository.On("Set", "APK_FILES", "b.apk").Return(nil)
 
 	exporter := OutputExporter{
-		ExportValues: "a.txt|b.apk",
-		Logger: log.NewLogger(),
+		ExportValues:  "a.txt|b.apk",
+		Logger:        log.NewLogger(),
 		EnvRepository: envRepository,
 		ExportPattern: map[string]string{
-			"TXT_FILES":"*.txt",
-			"APK_FILES":"*.apk",
+			"TXT_FILES": "*.txt",
+			"APK_FILES": "*.apk",
 		},
 	}
 
@@ -122,12 +121,12 @@ func TestPatternBasedOutputExport_MultipleFiles_NoError(t *testing.T) {
 	envRepository.On("Set", "APK_FILES", "b.apk").Return(nil)
 
 	exporter := OutputExporter{
-		ExportValues: "a.txt|b.txt|b.apk|x.ipa",
-		Logger: log.NewLogger(),
+		ExportValues:  "a.txt|b.txt|b.apk|x.ipa",
+		Logger:        log.NewLogger(),
 		EnvRepository: envRepository,
 		ExportPattern: map[string]string{
-			"TXT_FILES":"*.txt",
-			"APK_FILES":"*.apk",
+			"TXT_FILES": "*.txt",
+			"APK_FILES": "*.apk",
 		},
 	}
 
@@ -145,13 +144,13 @@ func TestPatternBasedOutputExport_MultipleFiles_MultipleExpressions_NoError(t *t
 	envRepository.On("Set", "ALL", "a.txt|b.txt|b.apk|x.ipa|d.docx").Return(nil)
 
 	exporter := OutputExporter{
-		ExportValues: "a.txt|b.txt|b.apk|x.ipa|d.docx",
-		Logger: log.NewLogger(),
+		ExportValues:  "a.txt|b.txt|b.apk|x.ipa|d.docx",
+		Logger:        log.NewLogger(),
 		EnvRepository: envRepository,
 		ExportPattern: map[string]string{
-			"TEXT_FILES":"*.txt,*.docx",
-			"APK_FILES":"*.apk",
-			"ALL":"*",
+			"TEXT_FILES": "*.txt,*.docx",
+			"APK_FILES":  "*.apk",
+			"ALL":        "*",
 		},
 	}
 

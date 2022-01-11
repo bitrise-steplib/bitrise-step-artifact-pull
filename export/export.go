@@ -63,7 +63,7 @@ func (oe OutputExporter) patternBasedOutputExport() error {
 			valueExpressions := strings.Split(v, ",")
 
 			for _, expression := range valueExpressions {
-				matched, err := filepath.Match(expression, filePath)
+				matched, err := filepath.Match(expression, filepath.Base(filePath))
 				if err != nil {
 					return err
 				}
