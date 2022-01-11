@@ -108,7 +108,7 @@ workflows:
               *.txt - TXT_FILES
               *.apk - APK_FILES
         - bitrise_api_base_url: https://api-staging.bitrise.io
-     - script:
+    - script:
         title: Validate downloaded artifacts
         is_always_run: true
         inputs:
@@ -134,7 +134,7 @@ workflows:
                     exit 1
                 fi
             done
-  
+
             IFS='|' read -ra FILES <<< "$APK_FILES"
             for i in "${FILES[@]}"; do
                 # process "$i"
@@ -152,7 +152,7 @@ workflows:
                     exit 1
                 fi
             done
-  
+
             array=( "app-release-unsigned.apk" )
             for i in "${array[@]}"
             do
