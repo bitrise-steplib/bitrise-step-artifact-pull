@@ -76,7 +76,7 @@ func Test_Export(t *testing.T) {
 
 			envRepository.On("Set", "BITRISE_ARTIFACT_PATHS", tC.expectedExportValue).Return(nil)
 
-			err := step.Export(tC.inputResult)
+			err := step.Export(tC.inputResult, make(map[string]string))
 
 			envRepository.AssertExpectations(t)
 			assert.NoError(t, err)

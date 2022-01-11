@@ -16,7 +16,7 @@ type OutputExporter struct {
 }
 
 func ProcessRawExportMap(rawMap string) map[string]string {
-	res := make(map[string]string, 0)
+	res := make(map[string]string)
 	rawExportMapArray := strings.Split(strings.TrimSpace(rawMap), "\n")
 	for _, line := range rawExportMapArray {
 		parsedLine := strings.Split(line, "-")
@@ -56,7 +56,7 @@ func (oe OutputExporter) simpleOutputExport() error {
 func (oe OutputExporter) patternBasedOutputExport() error {
 	filePaths := strings.Split(oe.ExportValues, "|")
 
-	exportMap := make(map[string][]string, 0)
+	exportMap := make(map[string][]string)
 
 	for k, v := range oe.ExportPattern {
 		for _, filePath := range filePaths {
@@ -86,7 +86,11 @@ func (oe OutputExporter) patternBasedOutputExport() error {
 	for k, v := range exportMap {
 		exportVal := strings.Join(v, "|")
 
-		oe.exportOutputVariable(k, exportVal)
+		err := oe.exportOutputVariable(k, exportVal)
+		if err != nil {
+			return err
+		}
+
 		oe.Logger.Printf("$%s = %s", k, exportVal)
 	}
 
