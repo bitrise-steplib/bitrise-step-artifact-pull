@@ -148,8 +148,8 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 func (a ArtifactPull) Export(result Result, exportMap map[string]string) error {
 	exporter := export.OutputExporter{
 		ExportPattern: exportMap,
-		ExportValues: strings.Join(result.ArtifactLocations, "|"),
-		Logger: a.logger,
+		ExportValues:  strings.Join(result.ArtifactLocations, "|"),
+		Logger:        a.logger,
 		EnvRepository: a.envRepository,
 	}
 

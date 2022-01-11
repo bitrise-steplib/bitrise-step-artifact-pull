@@ -84,9 +84,10 @@ func (oe OutputExporter) patternBasedOutputExport() error {
 	oe.Logger.Printf("The following outputs are exported as environment variables:")
 
 	for k, v := range exportMap {
-		oe.exportOutputVariable(k, strings.Join(v, "|"))
+		exportVal := strings.Join(v, "|")
 
-		oe.Logger.Printf("$%s = %s", k, v)
+		oe.exportOutputVariable(k, exportVal)
+		oe.Logger.Printf("$%s = %s", k, exportVal)
 	}
 
 	return nil
