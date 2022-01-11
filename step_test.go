@@ -19,6 +19,7 @@ func Test_GivenInputs_WhenCreatingConfig_ThenMappingIsCorrect(t *testing.T) {
 	envRepository.On("Get", "finished_stage").Return("")
 	envRepository.On("Get", "bitrise_api_base_url").Return("")
 	envRepository.On("Get", "bitrise_api_access_token").Return("")
+	envRepository.On("Get", "export_map").Return("")
 	inputParser := stepconf.NewInputParser(envRepository)
 	cmdFactory := command.NewFactory(envRepository)
 	step := ArtifactPull{
