@@ -2,10 +2,11 @@ package export
 
 import (
 	"fmt"
-	"github.com/bitrise-io/go-utils/env"
-	"github.com/bitrise-io/go-utils/log"
 	"path/filepath"
 	"strings"
+
+	"github.com/bitrise-io/go-utils/env"
+	"github.com/bitrise-io/go-utils/log"
 )
 
 type OutputExporter struct {

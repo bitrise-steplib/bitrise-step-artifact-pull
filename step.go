@@ -3,9 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bitrise-steplib/bitrise-step-artifact-pull/export"
 	"strings"
 	"time"
+
+	"github.com/bitrise-steplib/bitrise-step-artifact-pull/export"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-utils/command"
@@ -105,7 +106,6 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 		return Result{}, err
 	}
 	artifacts, err := artifactLister.ListBuildArtifactDetails(cfg.AppSlug, buildIDs)
-
 	if err != nil {
 		a.logger.Debugf("Failed to list artifacts", err)
 		return Result{}, err

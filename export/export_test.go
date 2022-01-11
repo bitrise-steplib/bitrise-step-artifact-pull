@@ -2,10 +2,11 @@ package export
 
 import (
 	"errors"
+	"testing"
+
 	mockenv "github.com/bitrise-io/go-utils/env/mocks"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestProcessRawExportMap(t *testing.T) {
