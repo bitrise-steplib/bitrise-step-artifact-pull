@@ -18,8 +18,8 @@ func TestProcessRawExportMap(t *testing.T) {
 		{
 			desc: "when input is given, parses the input string",
 			input: `
-*.apk - DOWNLOADED_APKS
-*.result - DOWNLOADED_TEST_RESULTS
+DOWNLOADED_APKS - *.apk
+DOWNLOADED_TEST_RESULTS - *.result
 `,
 			expectedOutput: map[string]string{
 				"DOWNLOADED_APKS":         "*.apk",
@@ -29,8 +29,8 @@ func TestProcessRawExportMap(t *testing.T) {
 		{
 			desc: "when multiple expressions presents in the expression field",
 			input: `
-*.apk,*ipa - ARTIFACTS
-*.txt,*docx - TEXTS
+ARTIFACTS - *.apk,*ipa
+TEXTS - *.txt,*docx
 `,
 			expectedOutput: map[string]string{
 				"ARTIFACTS": "*.apk,*ipa",
@@ -40,9 +40,10 @@ func TestProcessRawExportMap(t *testing.T) {
 		{
 			desc: "when the input has a messed up line",
 			input: `
-*.apk - DOWNLOADED_APKS
-*.ipa -
-*.result - DOWNLOADED_TEST_RESULTS
+DOWNLOADED_APKS - *.apk
+- *.ipa
+DOWNLOADED_TEST_RESULTS - *.result
+EMPTY - 
 `,
 			expectedOutput: map[string]string{
 				"DOWNLOADED_APKS":         "*.apk",

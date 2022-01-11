@@ -28,7 +28,7 @@ func ProcessRawExportMap(rawMap string) map[string]string {
 			continue
 		}
 
-		res[strings.TrimSpace(parsedLine[1])] = strings.TrimSpace(parsedLine[0])
+		res[strings.TrimSpace(parsedLine[0])] = strings.TrimSpace(parsedLine[1])
 	}
 
 	return res
