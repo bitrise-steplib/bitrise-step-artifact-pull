@@ -103,7 +103,7 @@ workflows:
         title: Execute step
         inputs:
         - verbose: true
-        - artifact_sources: "*"
+        - artifact_sources: .*
         - export_map: |-
               TXT_FILES: .*\.txt
               APK_FILES: .*\.apk

@@ -4,3 +4,5 @@ _artifact_pull
 .bitrise*
 .idea
 .vscode
+
+README.md.backup
