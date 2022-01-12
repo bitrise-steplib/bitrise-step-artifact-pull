@@ -127,7 +127,8 @@ $BITRISE_ARTIFACT_PATHS = /var/folders/sd/lvn5cp9x5dn_xh1vhfgjjjw40000gp/T/_arti
 | Key | Description | Flags | Default |
 | --- | --- | --- | --- |
 | `verbose` | Enable logging additional information for debugging | required | `false` |
-| `artifact_sources` | A comma separated list of workflows and stage paths, which can generate artifacts. You need to use the `{stage}.{workflow}` syntax. The "dot" character is the delimiter between the stage and the workflow. You can use regular expressions. If you leave it empty, the default value will be the ".*" (star), which means, it will get every artifact from every workflow. Do not forget to escape the special chatacters. |  | `.*` |
+| `artifact_sources` | A comma separated list of workflows and stage paths, which can generate artifacts. You need to use the `{stage}.{workflow}` syntax. The "dot" character is the delimiter between the stage and the workflow. You can use wildcards in the expression. If you leave it empty, the default value will be the "*" (star), which means, it will get every artifact from every workflow. |  | `*` |
+| `export_map` | Variable export map, use the following regular expression syntax to collect the downloaded file's locations into separated environment variables (do not forget to escape the special chatacters): DOWNLOADED_APKS: .*\.apk DOWNLOADED_TEST_RESULTS: .*\.result DOCS: .*\.txt,.*\.doc | required |  |
 | `finished_stage` | This is a JSON representation of the finished stages for which the step can download build artifacts. | required | `$BITRISEIO_FINISHED_STAGES` |
 | `bitrise_api_base_url` | The base URL of the Bitrise API used to process the download requests. | required | `https://api.bitrise.io` |
 | `bitrise_api_access_token` | The OAuth access token that authorizes to call the Bitrise API. | sensitive | `$BITRISEIO_ARTIFACT_PULL_TOKEN` |
