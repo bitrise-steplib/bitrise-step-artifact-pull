@@ -1,6 +1,5 @@
 # github.com/bitrise-io/go-steputils v0.0.0-20211205220451-e046db274afb
 ## explicit; go 1.16
-github.com/bitrise-io/go-steputils/input
 github.com/bitrise-io/go-steputils/stepconf
 github.com/bitrise-io/go-steputils/stepenv
 github.com/bitrise-io/go-steputils/tools

@@ -20,15 +20,17 @@ func ProcessRawExportMap(rawMap string) map[string]string {
 	res := make(map[string]string)
 	rawExportMapArray := strings.Split(strings.TrimSpace(rawMap), "\n")
 	for _, line := range rawExportMapArray {
-		parsedLine := strings.Split(line, "-")
+		parsedLine := strings.Split(line, ":")
 
+		variableName := strings.TrimSpace(parsedLine[0])
+		patternValue := strings.TrimSpace(parsedLine[1])
 		if len(parsedLine) != 2 ||
-			len(strings.TrimSpace(parsedLine[0])) == 0 ||
-			len(strings.TrimSpace(parsedLine[1])) == 0 {
+			len(variableName) == 0 ||
+			len(patternValue) == 0 {
 			continue
 		}
 
-		res[strings.TrimSpace(parsedLine[0])] = strings.TrimSpace(parsedLine[1])
+		res[variableName] = patternValue
 	}
 
 	return res

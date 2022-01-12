@@ -105,8 +105,8 @@ workflows:
         - verbose: true
         - artifact_sources: "*"
         - export_map: |-
-              TXT_FILES - *.txt
-              APK_FILES - *.apk
+              TXT_FILES: *.txt
+              APK_FILES: *.apk
         - bitrise_api_base_url: https://api-staging.bitrise.io
     - script:
         title: Validate downloaded artifacts

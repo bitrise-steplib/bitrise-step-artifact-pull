@@ -52,8 +52,9 @@ inputs:
     title: Export map
     description: |-
       Variable export map, use the following syntax to collect the downloaded file's locations into separated environment variables with a regex:
-      DOWNLOADED_APKS - *.apk
-      DOWNLOADED_TEST_RESULTS - *.result
+      DOWNLOADED_APKS: *.apk
+      DOWNLOADED_TEST_RESULTS: *.result
+      DOCS: *.txt,*.doc
     is_expand: false
     is_required: true
 
