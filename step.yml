@@ -49,7 +49,7 @@ inputs:
 
 - export_map: |-
   opts:
-    title: Export map
+    title: Output variable export map
     description: |-
       Variable export map, use the following regular expression syntax to collect the downloaded file's locations into separated environment variables (do not forget to escape the dot and slash characters):
       DOWNLOADED_APKS: .*\.apk
