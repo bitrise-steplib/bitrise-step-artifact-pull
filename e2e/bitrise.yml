@@ -18,7 +18,7 @@ workflows:
         title: Execute step
         inputs:
         - verbose: true
-        - artifact_sources: ".*"
+        - artifact_sources: .*
         - bitrise_api_base_url: https://api-staging.bitrise.io
     - script:
         title: Validate downloaded artifacts
