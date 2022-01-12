@@ -30,7 +30,7 @@ inputs:
     - "true"
     - "false"
 
-- artifact_sources: "*"
+- artifact_sources: ".*"
   opts:
     title: Artifact source
     summary: |-
@@ -42,10 +42,11 @@ inputs:
       You need to use the `{stage}.{workflow}` syntax.
       The "dot" character is the delimiter between
       the stage and the workflow.
-      You can use wildcards in the expression.
+      You can use regular expressions.
       If you leave it empty, the default value
-      will be the "*" (star), which means, it will
+      will be the ".*" (star), which means, it will
       get every artifact from every workflow.
+      Do not forget to escape the special chatacters.
 
 - finished_stage: $BITRISEIO_FINISHED_STAGES
   opts:
