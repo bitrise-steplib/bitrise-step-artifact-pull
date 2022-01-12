@@ -1,9 +1,8 @@
 package main
 
 import (
-	"path/filepath"
-
 	"github.com/bitrise-steplib/bitrise-step-artifact-pull/model"
+	"regexp"
 )
 
 const DELIMITER = "."
@@ -31,7 +30,7 @@ func (bg BuildIDGetter) GetBuildIDs() ([]string, error) {
 	kvpSlice := bg.createKeyValuePairSlice()
 
 	if len(bg.TargetNames) == 0 {
-		for _, kvPair := range kvpSlice  {
+		for _, kvPair := range kvpSlice {
 			buildIDsSet[kvPair.value] = true
 		}
 
@@ -40,7 +39,7 @@ func (bg BuildIDGetter) GetBuildIDs() ([]string, error) {
 
 	for _, target := range bg.TargetNames {
 		for _, kvPair := range kvpSlice {
-			matched, err := filepath.Match(target, kvPair.key)
+			matched, err := regexp.MatchString(target, kvPair.key)
 			if err != nil {
 				return nil, err
 			}
