@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bitrise-steplib/bitrise-step-artifact-pull/export"
+
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/env"
@@ -21,6 +23,7 @@ const downloadDirPrefix = "_artifact_pull"
 type Input struct {
 	Verbose               string          `env:"verbose,opt[true,false]"`
 	ArtifactSources       string          `env:"artifact_sources"`
+	ExportMap             string          `env:"export_map"`
 	FinishedStages        string          `env:"finished_stage"`
 	BitriseAPIAccessToken stepconf.Secret `env:"bitrise_api_access_token"`
 	BitriseAPIBaseURL     string          `env:"bitrise_api_base_url"`
@@ -29,6 +32,7 @@ type Input struct {
 type Config struct {
 	VerboseLogging        bool
 	ArtifactSources       []string
+	ExportMap             map[string]string
 	FinishedStages        model.FinishedStages
 	BitriseAPIAccessToken string
 	BitriseAPIBaseURL     string
@@ -76,6 +80,7 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 	return Config{
 		VerboseLogging:        verboseLoggingValue,
 		ArtifactSources:       strings.Split(input.ArtifactSources, ","),
+		ExportMap:             export.ProcessRawExportMap(input.ExportMap),
 		FinishedStages:        finishedStagesModel,
 		BitriseAPIAccessToken: string(input.BitriseAPIAccessToken),
 		BitriseAPIBaseURL:     input.BitriseAPIBaseURL,
@@ -101,7 +106,6 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 		return Result{}, err
 	}
 	artifacts, err := artifactLister.ListBuildArtifactDetails(cfg.AppSlug, buildIDs)
-
 	if err != nil {
 		a.logger.Debugf("Failed to list artifacts", err)
 		return Result{}, err
@@ -141,6 +145,17 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 	return Result{ArtifactLocations: downloadedArtifactPaths}, nil
 }
 
+func (a ArtifactPull) Export(result Result, exportMap map[string]string) error {
+	exporter := export.OutputExporter{
+		ExportPattern: exportMap,
+		ExportValues:  strings.Join(result.ArtifactLocations, "|"),
+		Logger:        a.logger,
+		EnvRepository: a.envRepository,
+	}
+
+	return exporter.Export()
+}
+
 func dirNamePrefix(dirName string) (string, error) {
 	tempPath, err := pathutil.NormalizedOSTempDirPath(dirName)
 	if err != nil {
@@ -148,17 +163,4 @@ func dirNamePrefix(dirName string) (string, error) {
 	}
 
 	return tempPath, nil
-}
-
-func (a ArtifactPull) Export(result Result) error {
-	locations := strings.Join(result.ArtifactLocations, "|")
-	if err := a.envRepository.Set("BITRISE_ARTIFACT_PATHS", locations); err != nil {
-		return fmt.Errorf("failed to export pulled artifact locations, error: %s", err)
-	}
-
-	a.logger.Println()
-	a.logger.Printf("The following outputs are exported as environment variables:")
-	a.logger.Printf("$BITRISE_ARTIFACT_PATHS = %s", locations)
-
-	return nil
 }

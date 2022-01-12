@@ -47,6 +47,17 @@ inputs:
       will be the "*" (star), which means, it will
       get every artifact from every workflow.
 
+- export_map: |-
+  opts:
+    title: Output variable export map
+    description: |-
+      Variable export map, use the following regular expression syntax to collect the downloaded file's locations into separated environment variables (do not forget to escape the special chatacters):
+      DOWNLOADED_APKS: .*\.apk
+      DOWNLOADED_TEST_RESULTS: .*\.result
+      DOCS: .*\.txt,.*\.doc
+    is_expand: false
+    is_required: true
+
 - finished_stage: $BITRISEIO_FINISHED_STAGES
   opts:
     title: The finished stages for which artifacts are available to download

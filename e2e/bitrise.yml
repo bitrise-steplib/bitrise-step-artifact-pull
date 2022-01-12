@@ -94,6 +94,73 @@ workflows:
               fi
             done
 
+
+  test_export_output_variables_based_on_patterns:
+    before_run:
+    - _setup
+    steps:
+    - path::./:
+        title: Execute step
+        inputs:
+        - verbose: true
+        - artifact_sources: "*"
+        - export_map: |-
+              TXT_FILES: .*\.txt
+              APK_FILES: .*\.apk
+        - bitrise_api_base_url: https://api-staging.bitrise.io
+    - script:
+        title: Validate downloaded artifacts
+        is_always_run: true
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+
+            if [[ -z "${TXT_FILES}" ]]; then
+                echo "Exported $TXT_FILES output variable does not exist"
+                exit 1
+            fi
+
+            if [[ -z "${APK_FILES}" ]]; then
+                echo "Exported $APK_FILES output variable does not exist"
+                exit 1
+            fi
+
+            IFS='|' read -ra FILES <<< "$TXT_FILES"
+            for i in "${FILES[@]}"; do
+                # process "$i"
+                if [ ! -f $i ]; then
+                    echo "$i not found"
+                    exit 1
+                fi
+            done
+
+            IFS='|' read -ra FILES <<< "$APK_FILES"
+            for i in "${FILES[@]}"; do
+                # process "$i"
+                if [ ! -f $i ]; then
+                    echo "$i not found"
+                    exit 1
+                fi
+            done
+
+            array=( "lipsum.txt" "generated_text_file.txt" )
+            for i in "${array[@]}"
+            do
+                if [[ "$TXT_FILES" != *"$i"* ]]; then
+                    echo "$TXT_FILES not contains the $i file"
+                    exit 1
+                fi
+            done
+
+            array=( "app-release-unsigned.apk" )
+            for i in "${array[@]}"
+            do
+              if [[ "$APK_FILES" != *"$i"* ]]; then
+                  echo "$APK_FILES not contains the $i file"
+                  exit 1
+              fi
+            done
   _setup:
     steps:
     - script:
