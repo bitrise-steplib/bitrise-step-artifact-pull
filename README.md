@@ -27,10 +27,10 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 
 ```yaml
 steps:
-  - git::https://github.com/bitrise-steplib/bitrise-step-artifact-pull.git@main::
+  - git::https://github.com/bitrise-steplib/bitrise-step-artifact-pull.git@main:
       title: Pull artifacts
       inputs:
-        - verbose: true
+        - verbose: "true"
         - artifact_sources: stage-1.*
 ```
 
