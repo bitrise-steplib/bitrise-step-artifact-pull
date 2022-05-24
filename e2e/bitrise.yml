@@ -4,8 +4,45 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 app:
   envs:
   # Shared envs for every test workflow
-  - BITRISEIO_FINISHED_STAGES: '[{"id":"083aa861-55b1-4132-ba70-0dfcd48fe929","name":"stage-1","workflows":[{"external_id":"73d33fb5-35c6-495f-bd80-015ae681db33","finished_at":"2021-12-07T14:04:45Z","id":"b1c6f0a1-06e7-4f63-a172-ac541a467d71","name":"placeholder","started_at":"2021-12-07T14:04:27Z","status":"succeeded"},{"external_id":"39404bee-52ba-4ca2-8508-91489e7f6afa","finished_at":"2021-12-07T14:05:07Z","id":"f3bda7bb-37be-409f-9291-b377717cba60","name":"textfile_generator","started_at":"2021-12-07T14:04:48Z","status":"succeeded"}]},{"id":"4919fe0e-877a-45ca-ab25-7da2ddf54bce","name":"stage-2","workflows":[{"external_id":"ed0da0cf-66cc-4109-b23f-8a156d61b0c3","finished_at":"2021-12-07T14:06:41Z","id":"f572ca4e-2f06-40f1-a4cf-c208af15ff28","name":"deployer","started_at":"2021-12-07T14:06:13Z","status":"succeeded"},{"external_id":"05130ce4-825b-4ca1-a9be-4f54413e5dcd","finished_at":"2021-12-07T14:07:04Z","id":"861fd1be-48b1-4a6b-ae4c-ee5449eaa6b6","name":"textfile_generator","started_at":"2021-12-07T14:06:45Z","status":"succeeded"}]}]' # yamllint disable-line
-  - BITRISE_APP_SLUG: 11abc8954aa46c5a
+  - BITRISEIO_FINISHED_STAGES: |-
+        [{
+            "id": "fb96d509-3966-4ca7-acf2-da596cb4a895",
+            "name": "stage-1",
+            "workflows": [{
+                "external_id": "70bbdfd1-96d5-447c-9731-20da9312643c",
+                "finished_at": "2022-05-24T20:39:06Z",
+                "id": "44b69b43-3a3e-474b-a133-99717c96d719",
+                "name": "placeholder",
+                "started_at": "2022-05-24T20:39:04Z",
+                "status": "succeeded"
+            }, {
+                "external_id": "3daa3d92-6d7a-4791-928a-b83506881ecd",
+                "finished_at": "2022-05-24T20:38:33Z",
+                "id": "5b8e99f4-5836-4eb5-bbc3-61fff4410919",
+                "name": "textfile_generator",
+                "started_at": "2022-05-24T20:38:09Z",
+                "status": "succeeded"
+            }]
+        }, {
+            "id": "e9ab9871-3a50-47d0-88f7-33dbceff7e87",
+            "name": "stage-2",
+            "workflows": [{
+                "external_id": "2f031c63-ed6c-4a26-aff1-57b00ed2f8ba",
+                "finished_at": "2022-05-24T20:41:26Z",
+                "id": "f1c01cf2-ebcc-4db6-a19c-dfab20762b06",
+                "name": "deployer",
+                "started_at": "2022-05-24T20:40:47Z",
+                "status": "succeeded"
+            }, {
+                "external_id": "a9d6148e-59e1-417e-99a0-49e5dd014f85",
+                "finished_at": "2022-05-24T20:40:34Z",
+                "id": "1730a356-6a32-4b77-807b-4a6f587fee33",
+                "name": "textfile_generator",
+                "started_at": "2022-05-24T20:40:15Z",
+                "status": "succeeded"
+            }]
+        }]
+  - BITRISE_APP_SLUG: b520099804d7e71a
   - BITRISE_AUTH_SERVICE_ARTIFACT_PULL_CLIENT_SECRET: $BITRISE_AUTH_SERVICE_ARTIFACT_PULL_CLIENT_SECRET
 
 workflows:
