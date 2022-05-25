@@ -212,7 +212,7 @@ workflows:
                 --data "client_secret=$BITRISE_AUTH_SERVICE_ARTIFACT_PULL_CLIENT_SECRET" \
                 --data "grant_type=urn:ietf:params:oauth:grant-type:uma-ticket" \
                 --data "scope=build_artifact:read build:read app:read" \
-                --data "claim_token=eyJidWlsZF9pZHMiOlsiNzNkMzNmYjUtMzVjNi00OTVmLWJkODAtMDE1YWU2ODFkYjMzIiwiMzk0MDRiZWUtNTJiYS00Y2EyLTg1MDgtOTE0ODllN2Y2YWZhIiwiZWQwZGEwY2YtNjZjYy00MTA5LWIyM2YtOGExNTZkNjFiMGMzIiwiMDUxMzBjZTQtODI1Yi00Y2ExLWE5YmUtNGY1NDQxM2U1ZGNkIl0sInBpcGVsaW5lX2lkIjpbIjM2ZTg1NDBkLTQxYzctNDNjZS05NzRiLTgyNTQ5OTc2OTkxZSJdfQ==" \
+                --data "claim_token=ewogICJidWlsZF9pZHMiOiBbCiAgICAiNzBiYmRmZDEtOTZkNS00NDdjLTk3MzEtMjBkYTkzMTI2NDNjIiwKICAgICIzZGFhM2Q5Mi02ZDdhLTQ3OTEtOTI4YS1iODM1MDY4ODFlY2QiLAogICAgIjJmMDMxYzYzLWVkNmMtNGEyNi1hZmYxLTU3YjAwZWQyZjhiYSIsCiAgICAiYTlkNjE0OGUtNTllMS00MTdlLTk5YTAtNDllNWRkMDE0Zjg1IgogIF0sCiAgInBpcGVsaW5lX2lkIjogWwogICAgImIzY2U4MGJhLTEzOGMtNDk4Mi1iMmRmLWM4NGIzMzhiM2EyZSIKICBdCn0=" \
                 --data "claim_token_format=urn:ietf:params:oauth:token-type:jwt" \
                 --data "audience=bitrise-api")
 
