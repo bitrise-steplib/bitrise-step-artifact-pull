@@ -207,7 +207,7 @@ workflows:
             #!/bin/env bash
             set -ex
 
-            json_response=$(curl --fail -X POST https://auth.services.bitrise.dev/auth/realms/bitrise-services/protocol/openid-connect/token -k \
+            json_response=$(curl --fail -X POST https://auth.services.bitrise.io/auth/realms/bitrise-services/protocol/openid-connect/token -k \
                 --data "client_id=artifact-pull" \
                 --data "client_secret=$BITRISE_AUTH_SERVICE_ARTIFACT_PULL_CLIENT_SECRET" \
                 --data "grant_type=urn:ietf:params:oauth:grant-type:uma-ticket" \
