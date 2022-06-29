@@ -81,6 +81,11 @@ func (c *DefaultBitriseAPIClient) ListBuildArtifacts(appSlug, buildSlug string) 
 		if err := json.Unmarshal(respBody, &responseModel); err != nil {
 			return nil, err
 		}
+
+		for _, data := range responseModel.Data {
+			fmt.Printf("%s meta: %v\n", data.Title, data.Meta)
+		}
+
 		artifacts = append(artifacts, responseModel.Data...)
 
 		if len(responseModel.Paging.Next) > 0 {

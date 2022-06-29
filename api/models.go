@@ -16,8 +16,9 @@ type ArtifactResponseItemModel struct {
 }
 
 type ArtifactListElementResponseModel struct {
-	Title string `json:"title"`
-	Slug  string `json:"slug"`
+	Title string                 `json:"title"`
+	Slug  string                 `json:"slug"`
+	Meta  map[string]interface{} `json:"artifact_meta"`
 }
 
 type PagingModel struct {
