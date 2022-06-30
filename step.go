@@ -6,15 +6,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bitrise-steplib/bitrise-step-artifact-pull/export"
-
 	"github.com/bitrise-io/go-steputils/stepconf"
+	"github.com/bitrise-io/go-steputils/tools"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/env"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-steplib/bitrise-step-artifact-pull/api"
 	"github.com/bitrise-steplib/bitrise-step-artifact-pull/downloader"
+	"github.com/bitrise-steplib/bitrise-step-artifact-pull/export"
 	"github.com/bitrise-steplib/bitrise-step-artifact-pull/model"
 )
 
@@ -139,7 +139,10 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 			}
 
 			if downloadResult.EnvKey != "" {
-				fmt.Printf("env key found for: %s\n", downloadResult.DownloadPath)
+				fmt.Printf("env key found for %s: %s\n", downloadResult.DownloadPath, downloadResult.EnvKey)
+				if err := tools.ExportEnvironmentWithEnvman(downloadResult.EnvKey, downloadResult.DownloadPath); err != nil {
+					a.logger.Errorf("Failed to export artifact: %s", err)
+				}
 			}
 
 			downloadedArtifactPaths = append(downloadedArtifactPaths, downloadResult.DownloadPath)
