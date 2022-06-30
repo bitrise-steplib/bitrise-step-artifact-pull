@@ -13,6 +13,7 @@ type ArtifactResponseItemModel struct {
 	Title       string `json:"title"`
 	DownloadURL string `json:"expiring_download_url"`
 	Slug        string `json:"slug"`
+	EnvKey      string
 }
 
 type ArtifactListElementResponseModel struct {

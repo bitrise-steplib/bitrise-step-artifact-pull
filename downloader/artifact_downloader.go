@@ -28,6 +28,7 @@ type ArtifactDownloadResult struct {
 	DownloadError error
 	DownloadPath  string
 	DownloadURL   string
+	EnvKey        string
 }
 
 type downloadJob struct {
@@ -87,7 +88,7 @@ func (ad *ConcurrentArtifactDownloader) download(jobs <-chan downloadJob, result
 			return
 		}
 
-		results <- ArtifactDownloadResult{DownloadPath: fileFullPath, DownloadURL: j.ResponseModel.DownloadURL}
+		results <- ArtifactDownloadResult{DownloadPath: fileFullPath, DownloadURL: j.ResponseModel.DownloadURL, EnvKey: j.ResponseModel.EnvKey}
 	}
 }
 

@@ -138,6 +138,10 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 				a.logger.Printf("Artifact downloaded: %s", downloadResult.DownloadPath)
 			}
 
+			if downloadResult.EnvKey != "" {
+				fmt.Printf("env key found for: %s\n", downloadResult.DownloadPath)
+			}
+
 			downloadedArtifactPaths = append(downloadedArtifactPaths, downloadResult.DownloadPath)
 		}
 	}

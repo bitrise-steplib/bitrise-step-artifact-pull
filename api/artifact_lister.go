@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -73,6 +74,34 @@ func (lister ArtifactLister) ListBuildArtifactDetails(appSlug string, buildSlugs
 	return artifacts, nil
 }
 
+type PipelineIntermediateFileMeta struct {
+	EnvKey string `json:"env_key"`
+}
+
+func parseEnvKey(artifactListItems []ArtifactListElementResponseModel, slug string) string {
+	fmt.Printf("Searching env key for: %s\n", slug)
+
+	for _, artifactListItem := range artifactListItems {
+		fmt.Printf("checking %s (%s)\n", artifactListItem.Title, artifactListItem.Slug)
+
+		if artifactListItem.Slug == slug {
+			fakeSchemeInt, ok := artifactListItem.Meta["scheme"]
+			if ok {
+				fmt.Printf("found meta: %s\n", fakeSchemeInt)
+				fakeScheme, ok := fakeSchemeInt.(string)
+				if ok {
+					var meta PipelineIntermediateFileMeta
+					if err := json.Unmarshal([]byte(fakeScheme), &meta); err == nil {
+						fmt.Printf("found env key: %s\n", meta.EnvKey)
+						return meta.EnvKey
+					}
+				}
+			}
+		}
+	}
+	return ""
+}
+
 // listArtifactsWorker gets details of all artifacts of a particular build using the Bitrise API
 func (lister ArtifactLister) listArtifactsWorker(appSlug string, buildSlugs chan string, results chan listArtifactsResult) {
 	for buildSlug := range buildSlugs {
@@ -102,6 +131,8 @@ func (lister ArtifactLister) listArtifactsWorker(appSlug string, buildSlugs chan
 					results <- listArtifactsResult{buildSlug: buildSlug, err: err}
 					return
 				} else {
+					envKey := parseEnvKey(artifactListItems, res.artifact.Slug)
+					res.artifact.EnvKey = envKey
 					artifacts = append(artifacts, res.artifact)
 				}
 			}
