@@ -88,7 +88,7 @@ func (ad *ConcurrentArtifactDownloader) download(jobs <-chan downloadJob, result
 			return
 		}
 
-		results <- ArtifactDownloadResult{DownloadPath: fileFullPath, DownloadURL: j.ResponseModel.DownloadURL, EnvKey: j.ResponseModel.EnvKey}
+		results <- ArtifactDownloadResult{DownloadPath: fileFullPath, DownloadURL: j.ResponseModel.DownloadURL, EnvKey: j.ResponseModel.IntermediateFileInfo.EnvKey}
 	}
 }
 

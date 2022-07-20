@@ -10,16 +10,18 @@ type ShowBuildArtifactResponse struct {
 }
 
 type ArtifactResponseItemModel struct {
-	Title       string `json:"title"`
-	DownloadURL string `json:"expiring_download_url"`
-	Slug        string `json:"slug"`
-	EnvKey      string
+	Title                string `json:"title"`
+	Slug                 string `json:"slug"`
+	DownloadURL          string `json:"expiring_download_url"`
+	IntermediateFileInfo struct {
+		EnvKey string `json:"env_key"`
+		IsDir  bool   `json:"is_dir"`
+	} `json:"intermediate_file_info"`
 }
 
 type ArtifactListElementResponseModel struct {
-	Title string                 `json:"title"`
-	Slug  string                 `json:"slug"`
-	Meta  map[string]interface{} `json:"artifact_meta"`
+	Title string `json:"title"`
+	Slug  string `json:"slug"`
 }
 
 type PagingModel struct {
