@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/bitrise-io/go-utils/filedownloader"
@@ -72,16 +73,50 @@ func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]Ar
 	return downloadResults, nil
 }
 
+func (ad *ConcurrentArtifactDownloader) downloadFile(targetDir, fileName, downloadURL string) (string, error) {
+	fileFullPath := filepath.Join(targetDir, fileName)
+
+	ctx, cancel := context.WithTimeout(context.Background(), ad.Timeout)
+
+	downloader := filedownloader.NewWithContext(ctx, retry.NewHTTPClient().StandardClient())
+	err := downloader.Get(fileFullPath, downloadURL)
+	cancel()
+	if err != nil {
+		return "", err
+	}
+	return fileFullPath, nil
+}
+
+func (ad *ConcurrentArtifactDownloader) downloadDirectory(targetDir, fileName, downloadURL string) (string, error) {
+	client := retry.NewHTTPClient()
+
+	resp, err := client.Get(downloadURL)
+	if err != nil {
+		return "", err
+	}
+
+	if err := extractCacheArchive(resp.Body, targetDir, false); err != nil {
+		return "", err
+	}
+
+	if err := resp.Body.Close(); err != nil {
+		log.Warnf("Failed to close response body: %s", err)
+	}
+
+	dirName := strings.TrimSuffix(fileName, filepath.Ext(fileName))
+	return filepath.Join(targetDir, dirName), nil
+}
+
 func (ad *ConcurrentArtifactDownloader) download(jobs <-chan downloadJob, results chan<- ArtifactDownloadResult) {
 	for j := range jobs {
-		fileFullPath := filepath.Join(j.TargetDir, j.ResponseModel.Title)
+		var fileFullPath string
+		var err error
 
-		ctx, cancel := context.WithTimeout(context.Background(), ad.Timeout)
-
-		downloader := filedownloader.NewWithContext(ctx, retry.NewHTTPClient().StandardClient())
-		err := downloader.Get(fileFullPath, j.ResponseModel.DownloadURL)
-
-		cancel()
+		if j.ResponseModel.IntermediateFileInfo.IsDir {
+			fileFullPath, err = ad.downloadDirectory(j.TargetDir, j.ResponseModel.Title, j.ResponseModel.DownloadURL)
+		} else {
+			fileFullPath, err = ad.downloadFile(j.TargetDir, j.ResponseModel.Title, j.ResponseModel.DownloadURL)
+		}
 
 		if err != nil {
 			results <- ArtifactDownloadResult{DownloadError: err, DownloadURL: j.ResponseModel.DownloadURL}
