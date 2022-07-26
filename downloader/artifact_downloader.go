@@ -102,16 +102,16 @@ func (ad *ConcurrentArtifactDownloader) downloadDirectory(targetDir, fileName, d
 
 	fmt.Println("targetDir: ", targetDir)
 
-	if err := extractCacheArchive(resp.Body, targetDir, false); err != nil {
+	dirName := strings.TrimSuffix(fileName, filepath.Ext(fileName))
+	dirPath := filepath.Join(targetDir, dirName)
+
+	if err := extractCacheArchive(resp.Body, dirPath, false); err != nil {
 		return "", err
 	}
 
 	if err := resp.Body.Close(); err != nil {
 		log.Warnf("Failed to close response body: %s", err)
 	}
-
-	dirName := strings.TrimSuffix(fileName, filepath.Ext(fileName))
-	dirPath := filepath.Join(targetDir, dirName)
 
 	exist, err := pathutil.IsDirExists(dirPath)
 	if err != nil {
