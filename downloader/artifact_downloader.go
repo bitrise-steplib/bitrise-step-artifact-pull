@@ -2,6 +2,7 @@ package downloader
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/bitrise-io/go-utils/filedownloader"
 	"github.com/bitrise-io/go-utils/log"
+	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/retry"
 	"github.com/bitrise-steplib/bitrise-step-artifact-pull/api"
 )
@@ -104,7 +106,17 @@ func (ad *ConcurrentArtifactDownloader) downloadDirectory(targetDir, fileName, d
 	}
 
 	dirName := strings.TrimSuffix(fileName, filepath.Ext(fileName))
-	return filepath.Join(targetDir, dirName), nil
+	dirPath := filepath.Join(targetDir, dirName)
+
+	exist, err := pathutil.IsDirExists(dirPath)
+	if err != nil {
+		return "", err
+	}
+	if !exist {
+		return "", fmt.Errorf("unzipped dir doesn't exist on the expected path: %s", dirPath)
+	}
+
+	return dirPath, nil
 }
 
 func (ad *ConcurrentArtifactDownloader) download(jobs <-chan downloadJob, results chan<- ArtifactDownloadResult) {
