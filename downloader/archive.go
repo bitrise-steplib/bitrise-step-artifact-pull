@@ -3,28 +3,21 @@ package downloader
 import (
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/env"
-	"github.com/bitrise-io/go-utils/log"
 )
 
 // extractCacheArchive invokes tar tool by piping the archive to the command's input.
 func extractCacheArchive(r io.Reader, targetDir string, compressed bool) error {
 	factory := command.NewFactory(env.NewRepository())
 	cmd := factory.Create("tar", []string{processArgs(true, compressed), "-"}, &command.Opts{
-		Stdin:  r,
-		Stdout: os.Stdout,
-		Stderr: os.Stderr,
-		Dir:    targetDir,
+		Stdin: r,
+		Dir:   targetDir,
 	})
 
-	printableCmd := fmt.Sprintf("curl <CACHE_URL> | %s", cmd.PrintableCommandArgs())
-	log.Donef(printableCmd)
-
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("%s failed: %s", printableCmd, err)
+		return fmt.Errorf("%s failed: %s", cmd.PrintableCommandArgs(), err)
 	}
 
 	return nil

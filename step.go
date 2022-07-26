@@ -139,7 +139,6 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 			}
 
 			if downloadResult.EnvKey != "" {
-				fmt.Printf("env key found for %s: %s\n", downloadResult.DownloadPath, downloadResult.EnvKey)
 				if err := tools.ExportEnvironmentWithEnvman(downloadResult.EnvKey, downloadResult.DownloadPath); err != nil {
 					a.logger.Errorf("Failed to export artifact: %s", err)
 				}

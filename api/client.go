@@ -77,8 +77,6 @@ func (c *DefaultBitriseAPIClient) ListBuildArtifacts(appSlug, buildSlug string) 
 			return nil, err
 		}
 
-		fmt.Printf("ListBuildArtifactsResponse:\n%s\n", string(respBody))
-
 		var responseModel ListBuildArtifactsResponse
 		if err := json.Unmarshal(respBody, &responseModel); err != nil {
 			return nil, err
@@ -111,8 +109,6 @@ func (c *DefaultBitriseAPIClient) ShowBuildArtifact(appSlug, buildSlug, artifact
 	if err != nil {
 		return ArtifactResponseItemModel{}, err
 	}
-
-	fmt.Printf("ShowBuildArtifactResponse:\n%s\n", string(respBody))
 
 	var responseModel ShowBuildArtifactResponse
 	if err := json.Unmarshal(respBody, &responseModel); err != nil {
