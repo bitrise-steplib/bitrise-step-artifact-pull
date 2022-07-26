@@ -105,6 +105,10 @@ func (ad *ConcurrentArtifactDownloader) downloadDirectory(targetDir, fileName, d
 	dirName := strings.TrimSuffix(fileName, filepath.Ext(fileName))
 	dirPath := filepath.Join(targetDir, dirName)
 
+	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
+		return "", err
+	}
+
 	if err := extractCacheArchive(resp.Body, dirPath, false); err != nil {
 		return "", err
 	}
