@@ -97,6 +97,8 @@ func (ad *ConcurrentArtifactDownloader) downloadDirectory(targetDir, fileName, d
 		return "", err
 	}
 
+	fmt.Println("targetDir: ", targetDir)
+
 	if err := extractCacheArchive(resp.Body, targetDir, false); err != nil {
 		return "", err
 	}

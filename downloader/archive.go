@@ -16,6 +16,7 @@ func extractCacheArchive(r io.Reader, targetDir string, compressed bool) error {
 	cmd := factory.Create("tar", []string{processArgs(true, compressed), "-"}, &command.Opts{
 		Stdin:  r,
 		Stdout: os.Stdout,
+		Stderr: os.Stderr,
 		Dir:    targetDir,
 	})
 
