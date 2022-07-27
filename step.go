@@ -87,7 +87,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 	if err != nil {
 		return Result{}, fmt.Errorf("failed to create artifact lister: %w", err)
 	}
-	artifacts, err := artifactLister.ListBuildArtifactDetails(cfg.AppSlug, buildIDs)
+	artifacts, err := artifactLister.ListIntermediateFileDetails(cfg.AppSlug, buildIDs)
 	if err != nil {
 		return Result{}, fmt.Errorf("failed to list artifacts: %w", err)
 	}
@@ -120,11 +120,6 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 }
 
 func (a ArtifactPull) Export(result Result) error {
-	exporter := export.OutputExporter{
-		Logger:            a.logger,
-		EnvRepository:     a.envRepository,
-		IntermediateFiles: result.IntermediateFiles,
-	}
-
-	return exporter.Export()
+	exporter := export.NewOutputExporter(a.logger, a.envRepository)
+	return exporter.Export(result.IntermediateFiles)
 }

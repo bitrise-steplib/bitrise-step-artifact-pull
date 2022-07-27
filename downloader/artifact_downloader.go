@@ -22,13 +22,6 @@ const (
 	maxConcurrentDownloadThreads = 10
 )
 
-type ConcurrentArtifactDownloader struct {
-	Artifacts []api.ArtifactResponseItemModel
-	Logger    log.Logger
-	TargetDir string
-	Timeout   time.Duration
-}
-
 type ArtifactDownloadResult struct {
 	DownloadError error
 	DownloadPath  string
@@ -39,6 +32,22 @@ type ArtifactDownloadResult struct {
 type downloadJob struct {
 	ResponseModel api.ArtifactResponseItemModel
 	TargetDir     string
+}
+
+type ConcurrentArtifactDownloader struct {
+	Artifacts []api.ArtifactResponseItemModel
+	Logger    log.Logger
+	TargetDir string
+	Timeout   time.Duration
+}
+
+func NewConcurrentArtifactDownloader(artifacts []api.ArtifactResponseItemModel, timeout time.Duration, targetDir string, logger log.Logger) *ConcurrentArtifactDownloader {
+	return &ConcurrentArtifactDownloader{
+		Artifacts: artifacts,
+		Timeout:   timeout,
+		Logger:    logger,
+		TargetDir: targetDir,
+	}
 }
 
 func (ad *ConcurrentArtifactDownloader) DownloadAndSaveArtifacts() ([]ArtifactDownloadResult, error) {
@@ -152,14 +161,5 @@ func (ad *ConcurrentArtifactDownloader) download(jobs <-chan downloadJob, result
 		}
 
 		results <- ArtifactDownloadResult{DownloadPath: fileFullPath, DownloadURL: j.ResponseModel.DownloadURL, EnvKey: j.ResponseModel.IntermediateFileInfo.EnvKey}
-	}
-}
-
-func NewConcurrentArtifactDownloader(artifacts []api.ArtifactResponseItemModel, timeout time.Duration, targetDir string, logger log.Logger) *ConcurrentArtifactDownloader {
-	return &ConcurrentArtifactDownloader{
-		Artifacts: artifacts,
-		Timeout:   timeout,
-		Logger:    logger,
-		TargetDir: targetDir,
 	}
 }

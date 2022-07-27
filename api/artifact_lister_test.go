@@ -69,7 +69,7 @@ func Test_ListBuildArtifactDetails_concurrent_returnsArtifactListForMultipleBuil
 		lister.maxConcurrentListArtifactAPICalls = testCase.maxConcurrentListCalls
 		lister.maxConcurrentShowArtifactAPICalls = testCase.maxConcurrentShowCalls
 
-		artifacts, err := lister.ListBuildArtifactDetails("app-slug", mockBuildSlugs)
+		artifacts, err := lister.ListIntermediateFileDetails("app-slug", mockBuildSlugs)
 
 		assert.NoError(t, err)
 		assert.Equal(t, len(mockBuildSlugs)*len(mockArtifactList), len(artifacts))
@@ -85,7 +85,7 @@ func Test_ListBuildArtifactDetails_returnsErrorWhenApiCallFails(t *testing.T) {
 		Return([]ArtifactListElementResponseModel{}, errors.New("API error"))
 
 	lister := newArtifactLister(mockClient, log.NewLogger())
-	_, err := lister.ListBuildArtifactDetails("app-slug", mockBuildSlugs)
+	_, err := lister.ListIntermediateFileDetails("app-slug", mockBuildSlugs)
 
 	assert.EqualError(t, err, "failed to get artifact download links for build(s): build-slug, build-slug, build-slug")
 }

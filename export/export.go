@@ -10,19 +10,24 @@ import (
 type OutputExporter struct {
 	Logger        log.Logger
 	EnvRepository env.Repository
-
-	IntermediateFiles map[string]string
 }
 
-func (oe OutputExporter) Export() error {
-	if len(oe.IntermediateFiles) == 0 {
+func NewOutputExporter(logger log.Logger, envRepository env.Repository) OutputExporter {
+	return OutputExporter{
+		Logger:        logger,
+		EnvRepository: envRepository,
+	}
+}
+
+func (oe OutputExporter) Export(intermediateFiles map[string]string) error {
+	if len(intermediateFiles) == 0 {
 		return nil
 	}
 
 	oe.Logger.Println()
 	oe.Logger.Printf("The following outputs are exported as environment variables:")
 
-	for envKey, path := range oe.IntermediateFiles {
+	for envKey, path := range intermediateFiles {
 		if err := oe.exportOutputVariable(envKey, path); err != nil {
 			return err
 		}

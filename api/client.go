@@ -11,6 +11,10 @@ import (
 	"github.com/bitrise-io/go-utils/retry"
 )
 
+const (
+	bitriseAPIClientTimeout = 30
+)
+
 type DefaultBitriseAPIClient struct {
 	httpClient *http.Client
 	authToken  string
@@ -19,7 +23,7 @@ type DefaultBitriseAPIClient struct {
 
 func NewDefaultBitriseAPIClient(baseURL, authToken string) (DefaultBitriseAPIClient, error) {
 	httpClient := retry.NewHTTPClient().StandardClient()
-	httpClient.Timeout = time.Second * 30
+	httpClient.Timeout = time.Second * bitriseAPIClientTimeout
 
 	c := DefaultBitriseAPIClient{
 		httpClient: httpClient,
@@ -28,34 +32,6 @@ func NewDefaultBitriseAPIClient(baseURL, authToken string) (DefaultBitriseAPICli
 	}
 
 	return c, nil
-}
-
-func (c DefaultBitriseAPIClient) get(endpoint, next string) (*http.Response, error) {
-	url := fmt.Sprintf("%s/%s", c.baseURL, endpoint)
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Authorization", "Bearer "+c.authToken)
-
-	if next != "" {
-		queryValues := req.URL.Query()
-		queryValues.Add("next", next)
-		req.URL.RawQuery = queryValues.Encode()
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	if resp.StatusCode >= 300 || resp.StatusCode < 200 {
-		err = fmt.Errorf("request to %s failed - status code should be 2XX (%d)", req.URL.String(), resp.StatusCode)
-	}
-
-	return resp, err
 }
 
 // ListBuildArtifacts gets the list of artifact details for a given build slug (also performs paging and calls the endpoint multiple times if needed)
@@ -116,6 +92,34 @@ func (c *DefaultBitriseAPIClient) ShowBuildArtifact(appSlug, buildSlug, artifact
 	}
 
 	return responseModel.Data, nil
+}
+
+func (c DefaultBitriseAPIClient) get(endpoint, next string) (*http.Response, error) {
+	url := fmt.Sprintf("%s/%s", c.baseURL, endpoint)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Authorization", "Bearer "+c.authToken)
+
+	if next != "" {
+		queryValues := req.URL.Query()
+		queryValues.Add("next", next)
+		req.URL.RawQuery = queryValues.Encode()
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode >= 300 || resp.StatusCode < 200 {
+		err = fmt.Errorf("request to %s failed - status code should be 2XX (%d)", req.URL.String(), resp.StatusCode)
+	}
+
+	return resp, err
 }
 
 func responseBodyCloser(resp *http.Response) {
