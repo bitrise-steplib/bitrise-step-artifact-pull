@@ -25,16 +25,16 @@ type Input struct {
 	Verbose               bool            `env:"verbose,opt[true,false]"`
 	AppSlug               string          `env:"app_slug,required"`
 	FinishedStages        string          `env:"finished_stage,required"`
-	BitriseAPIAccessToken stepconf.Secret `env:"bitrise_api_access_token,required"`
 	BitriseAPIBaseURL     string          `env:"bitrise_api_base_url,required"`
+	BitriseAPIAccessToken stepconf.Secret `env:"bitrise_api_access_token,required"`
 }
 
 type Config struct {
 	ArtifactSources       []string
 	AppSlug               string
 	FinishedStages        model.FinishedStages
-	BitriseAPIAccessToken string
 	BitriseAPIBaseURL     string
+	BitriseAPIAccessToken string
 }
 
 type Result struct {
@@ -52,7 +52,7 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 	var input Input
 	err := a.inputParser.Parse(&input)
 	if err != nil {
-		return Config{}, fmt.Errorf("failed to parse step inputs: %w", err)
+		return Config{}, err
 	}
 
 	stepconf.Print(input)
@@ -61,15 +61,15 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 	finishedStages := input.FinishedStages
 	var finishedStagesModel model.FinishedStages
 	if err := json.Unmarshal([]byte(finishedStages), &finishedStagesModel); err != nil {
-		return Config{}, fmt.Errorf("failed to parse step inputs: %w", err)
+		return Config{}, fmt.Errorf("invalid finished stages: %w", err)
 	}
 
 	return Config{
 		ArtifactSources:       strings.Split(input.ArtifactSources, ","),
 		AppSlug:               input.AppSlug,
 		FinishedStages:        finishedStagesModel,
-		BitriseAPIAccessToken: string(input.BitriseAPIAccessToken),
 		BitriseAPIBaseURL:     input.BitriseAPIBaseURL,
+		BitriseAPIAccessToken: string(input.BitriseAPIAccessToken),
 	}, nil
 }
 
