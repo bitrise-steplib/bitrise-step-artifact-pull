@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
-	"github.com/bitrise-io/go-steputils/tools"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/env"
 	"github.com/bitrise-io/go-utils/log"
@@ -117,17 +116,11 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 			a.logger.Errorf("Failed to download artifact from %s, error: %s", downloadResult.DownloadURL, downloadResult.DownloadError.Error())
 
 			return Result{}, downloadResult.DownloadError
-		} else {
-			a.logger.Debugf("Artifact downloaded: %s", downloadResult.DownloadPath)
-
-			if downloadResult.EnvKey != "" {
-				if err := tools.ExportEnvironmentWithEnvman(downloadResult.EnvKey, downloadResult.DownloadPath); err != nil {
-					a.logger.Errorf("Failed to export artifact: %s", err)
-				}
-			}
-
-			intermediateFiles[downloadResult.EnvKey] = downloadResult.DownloadPath
 		}
+
+		a.logger.Debugf("Artifact downloaded: %s", downloadResult.DownloadPath)
+
+		intermediateFiles[downloadResult.EnvKey] = downloadResult.DownloadPath
 	}
 
 	return Result{IntermediateFiles: intermediateFiles}, nil
