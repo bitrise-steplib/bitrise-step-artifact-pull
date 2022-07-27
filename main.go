@@ -40,7 +40,7 @@ func run(logger log.Logger) error {
 		return err
 	}
 
-	if err := artifactPull.Export(result, config.ExportMap); err != nil {
+	if err := artifactPull.Export(result); err != nil {
 		return err
 	}
 

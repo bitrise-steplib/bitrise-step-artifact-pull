@@ -23,7 +23,6 @@ const downloadDirPrefix = "_artifact_pull"
 type Input struct {
 	Verbose               string          `env:"verbose,opt[true,false]"`
 	ArtifactSources       string          `env:"artifact_sources"`
-	ExportMap             string          `env:"export_map"`
 	FinishedStages        string          `env:"finished_stage"`
 	BitriseAPIAccessToken stepconf.Secret `env:"bitrise_api_access_token"`
 	BitriseAPIBaseURL     string          `env:"bitrise_api_base_url"`
@@ -32,7 +31,6 @@ type Input struct {
 type Config struct {
 	VerboseLogging        bool
 	ArtifactSources       []string
-	ExportMap             map[string]string
 	FinishedStages        model.FinishedStages
 	BitriseAPIAccessToken string
 	BitriseAPIBaseURL     string
@@ -40,7 +38,7 @@ type Config struct {
 }
 
 type Result struct {
-	ArtifactLocations []string
+	ArtifactLocations []export.ArtifactLocation
 }
 
 type ArtifactPull struct {
@@ -80,7 +78,6 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 	return Config{
 		VerboseLogging:        verboseLoggingValue,
 		ArtifactSources:       strings.Split(input.ArtifactSources, ","),
-		ExportMap:             export.ProcessRawExportMap(input.ExportMap),
 		FinishedStages:        finishedStagesModel,
 		BitriseAPIAccessToken: string(input.BitriseAPIAccessToken),
 		BitriseAPIBaseURL:     input.BitriseAPIBaseURL,
@@ -96,8 +93,8 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 		return Result{}, err
 	}
 
+	a.logger.Println()
 	a.logger.Debugf("Downloading artifacts for builds %+v", buildIDs)
-
 	a.logger.Printf("Getting the list of artifacts of %d builds", len(buildIDs))
 
 	artifactLister, err := api.NewArtifactLister(cfg.BitriseAPIBaseURL, cfg.BitriseAPIAccessToken, a.logger)
@@ -127,7 +124,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 		return Result{}, err
 	}
 
-	var downloadedArtifactPaths []string
+	var artifactLocations []export.ArtifactLocation
 	for _, downloadResult := range downloadResults {
 		if downloadResult.DownloadError != nil {
 			a.logger.Errorf("Failed to download artifact from %s, error: %s", downloadResult.DownloadURL, downloadResult.DownloadError.Error())
@@ -144,19 +141,21 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 				}
 			}
 
-			downloadedArtifactPaths = append(downloadedArtifactPaths, downloadResult.DownloadPath)
+			artifactLocations = append(artifactLocations, export.ArtifactLocation{
+				Path:   downloadResult.DownloadPath,
+				EnvKey: downloadResult.EnvKey,
+			})
 		}
 	}
 
-	return Result{ArtifactLocations: downloadedArtifactPaths}, nil
+	return Result{ArtifactLocations: artifactLocations}, nil
 }
 
-func (a ArtifactPull) Export(result Result, exportMap map[string]string) error {
+func (a ArtifactPull) Export(result Result) error {
 	exporter := export.OutputExporter{
-		ExportPattern: exportMap,
-		ExportValues:  strings.Join(result.ArtifactLocations, "|"),
-		Logger:        a.logger,
-		EnvRepository: a.envRepository,
+		Logger:            a.logger,
+		EnvRepository:     a.envRepository,
+		ArtifactLocations: result.ArtifactLocations,
 	}
 
 	return exporter.Export()
