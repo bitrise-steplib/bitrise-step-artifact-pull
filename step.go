@@ -76,7 +76,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 	buildIdGetter := NewBuildIDGetter(cfg.FinishedStages, cfg.ArtifactSources)
 	buildIDs, err := buildIdGetter.GetBuildIDs()
 	if err != nil {
-		return Result{}, err
+		return Result{}, fmt.Errorf("failed to get build IDs: %w", err)
 	}
 
 	a.logger.Println()
@@ -85,37 +85,30 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 
 	artifactLister, err := api.NewArtifactLister(cfg.BitriseAPIBaseURL, cfg.BitriseAPIAccessToken, a.logger)
 	if err != nil {
-		a.logger.Debugf("Failed to create artifact lister", err)
-		return Result{}, err
+		return Result{}, fmt.Errorf("failed to create artifact lister: %w", err)
 	}
 	artifacts, err := artifactLister.ListBuildArtifactDetails(cfg.AppSlug, buildIDs)
 	if err != nil {
-		a.logger.Debugf("Failed to list artifacts", err)
-		return Result{}, err
+		return Result{}, fmt.Errorf("failed to list artifacts: %w", err)
 	}
 
 	a.logger.Printf("Downloading %d artifacts", len(artifacts))
 
-	targetDir, err := dirNamePrefix(downloadDirPrefix)
+	targetDir, err := pathutil.NormalizedOSTempDirPath(downloadDirPrefix)
 	if err != nil {
-		a.logger.Printf("Failed to determine target artifact download directory", err)
-		return Result{}, err
+		return Result{}, fmt.Errorf("failed to create artifact download directory: %w", err)
 	}
 
 	artifactDownloader := downloader.NewConcurrentArtifactDownloader(artifacts, 5*time.Minute, targetDir, a.logger)
-
 	downloadResults, err := artifactDownloader.DownloadAndSaveArtifacts()
 	if err != nil {
-		a.logger.Printf("Failed", err)
-		return Result{}, err
+		return Result{}, fmt.Errorf("failed to download artifacts: %w", err)
 	}
 
 	intermediateFiles := map[string]string{}
 	for _, downloadResult := range downloadResults {
 		if downloadResult.DownloadError != nil {
-			a.logger.Errorf("Failed to download artifact from %s, error: %s", downloadResult.DownloadURL, downloadResult.DownloadError.Error())
-
-			return Result{}, downloadResult.DownloadError
+			return Result{}, fmt.Errorf("failed to download artifact from %s, error: %s", downloadResult.DownloadURL, downloadResult.DownloadError.Error())
 		}
 
 		a.logger.Debugf("Artifact downloaded: %s", downloadResult.DownloadPath)
@@ -134,13 +127,4 @@ func (a ArtifactPull) Export(result Result) error {
 	}
 
 	return exporter.Export()
-}
-
-func dirNamePrefix(dirName string) (string, error) {
-	tempPath, err := pathutil.NormalizedOSTempDirPath(dirName)
-	if err != nil {
-		return "", err
-	}
-
-	return tempPath, nil
 }
