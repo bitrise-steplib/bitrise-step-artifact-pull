@@ -40,22 +40,22 @@ type Result struct {
 	IntermediateFiles map[string]string
 }
 
-type ArtifactPull struct {
+type IntermediateFileDownloader struct {
 	inputParser   stepconf.InputParser
 	envRepository env.Repository
 	cmdFactory    command.Factory
 	logger        log.Logger
 }
 
-func (a ArtifactPull) ProcessConfig() (Config, error) {
+func (d IntermediateFileDownloader) ProcessConfig() (Config, error) {
 	var input Input
-	err := a.inputParser.Parse(&input)
+	err := d.inputParser.Parse(&input)
 	if err != nil {
 		return Config{}, err
 	}
 
 	stepconf.Print(input)
-	a.logger.EnableDebugLog(input.Verbose)
+	d.logger.EnableDebugLog(input.Verbose)
 
 	finishedStages := input.FinishedStages
 	var finishedStagesModel model.FinishedStages
@@ -72,18 +72,18 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 	}, nil
 }
 
-func (a ArtifactPull) Run(cfg Config) (Result, error) {
+func (d IntermediateFileDownloader) Run(cfg Config) (Result, error) {
 	buildIdGetter := NewBuildIDGetter(cfg.FinishedStages, cfg.ArtifactSources)
 	buildIDs, err := buildIdGetter.GetBuildIDs()
 	if err != nil {
 		return Result{}, fmt.Errorf("failed to get build IDs: %w", err)
 	}
 
-	a.logger.Println()
-	a.logger.Debugf("Downloading artifacts for builds %+v", buildIDs)
-	a.logger.Printf("Getting the list of artifacts of %d builds", len(buildIDs))
+	d.logger.Println()
+	d.logger.Debugf("Downloading artifacts for builds %+v", buildIDs)
+	d.logger.Printf("Getting the list of artifacts of %d builds", len(buildIDs))
 
-	artifactLister, err := api.NewArtifactLister(cfg.BitriseAPIBaseURL, cfg.BitriseAPIAccessToken, a.logger)
+	artifactLister, err := api.NewArtifactLister(cfg.BitriseAPIBaseURL, cfg.BitriseAPIAccessToken, d.logger)
 	if err != nil {
 		return Result{}, fmt.Errorf("failed to create artifact lister: %w", err)
 	}
@@ -92,14 +92,14 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 		return Result{}, fmt.Errorf("failed to list artifacts: %w", err)
 	}
 
-	a.logger.Printf("Downloading %d artifacts", len(artifacts))
+	d.logger.Printf("Downloading %d artifacts", len(artifacts))
 
 	targetDir, err := pathutil.NormalizedOSTempDirPath(downloadDirPrefix)
 	if err != nil {
 		return Result{}, fmt.Errorf("failed to create artifact download directory: %w", err)
 	}
 
-	artifactDownloader := downloader.NewConcurrentArtifactDownloader(artifacts, 5*time.Minute, targetDir, a.logger)
+	artifactDownloader := downloader.NewConcurrentArtifactDownloader(artifacts, 5*time.Minute, targetDir, d.logger)
 	downloadResults, err := artifactDownloader.DownloadAndSaveArtifacts()
 	if err != nil {
 		return Result{}, fmt.Errorf("failed to download artifacts: %w", err)
@@ -111,7 +111,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 			return Result{}, fmt.Errorf("failed to download artifact from %s, error: %s", downloadResult.DownloadURL, downloadResult.DownloadError.Error())
 		}
 
-		a.logger.Debugf("Artifact downloaded: %s", downloadResult.DownloadPath)
+		d.logger.Debugf("Artifact downloaded: %s", downloadResult.DownloadPath)
 
 		intermediateFiles[downloadResult.EnvKey] = downloadResult.DownloadPath
 	}
@@ -119,7 +119,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 	return Result{IntermediateFiles: intermediateFiles}, nil
 }
 
-func (a ArtifactPull) Export(result Result) error {
-	exporter := export.NewOutputExporter(a.logger, a.envRepository)
+func (d IntermediateFileDownloader) Export(result Result) error {
+	exporter := export.NewOutputExporter(d.logger, d.envRepository)
 	return exporter.Export(result.IntermediateFiles)
 }

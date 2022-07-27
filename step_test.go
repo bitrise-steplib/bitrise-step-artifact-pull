@@ -22,7 +22,7 @@ func Test_GivenInputs_WhenCreatingConfig_ThenMappingIsCorrect(t *testing.T) {
 	envRepository.On("Get", "export_map").Return("")
 	inputParser := stepconf.NewInputParser(envRepository)
 	cmdFactory := command.NewFactory(envRepository)
-	step := ArtifactPull{
+	step := IntermediateFileDownloader{
 		inputParser:   inputParser,
 		envRepository: envRepository,
 		cmdFactory:    cmdFactory,
@@ -70,7 +70,7 @@ func Test_Export(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			step := ArtifactPull{
+			step := IntermediateFileDownloader{
 				envRepository: envRepository,
 				logger:        log.NewLogger(),
 			}
