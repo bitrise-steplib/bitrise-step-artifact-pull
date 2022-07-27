@@ -6,41 +6,41 @@ app:
   # Shared envs for every test workflow
   - BITRISEIO_FINISHED_STAGES: |-
       [{
-        "id": "eda3cd1f-fb5b-4b17-960b-0aed1e5ef9b2",
-        "name": "stage-1-new",
-        "workflows": [{
-          "external_id": "9e3dedb3-3441-40a3-a6ee-b55df86f4112",
-          "finished_at": "2022-07-27T21:46:35Z",
-          "id": "aa50a889-c364-445a-a47c-e56ae0cb2e01",
-          "name": "placeholder",
-          "started_at": "2022-07-27T21:46:34Z",
-          "status": "succeeded"
-        }, {
-          "external_id": "cf913e65-a88f-4e81-8625-2bc980af7677",
-          "finished_at": "2022-07-27T21:46:48Z",
-          "id": "ac069396-fa8f-469d-a86f-be411f8a31d1",
-          "name": "textfile_generator-new",
-          "started_at": "2022-07-27T21:46:38Z",
-          "status": "succeeded"
-        }]
+          "id": "449d4000-dfb7-4673-8de2-51189af8866f",
+          "name": "stage-1-new",
+          "workflows": [{
+              "external_id": "6f49f5e2-e498-4088-a139-92e109da7abc",
+              "finished_at": "2022-07-27T22:29:11Z",
+              "id": "da8f2e61-d128-4242-be2c-73954055c559",
+              "name": "placeholder",
+              "started_at": "2022-07-27T22:29:10Z",
+              "status": "succeeded"
+          }, {
+              "external_id": "825664aa-3ec9-4a75-8c02-33459f82a232",
+              "finished_at": "2022-07-27T22:29:21Z",
+              "id": "cd73e2c0-787a-4a6c-b55c-35ce567184ea",
+              "name": "textfile_generator-new",
+              "started_at": "2022-07-27T22:29:09Z",
+              "status": "succeeded"
+          }]
       }, {
-        "id": "694863de-6075-4431-b0b6-c77b7ca441de",
-        "name": "stage-2-new",
-        "workflows": [{
-          "external_id": "84f9f8ad-09f7-4b0f-84f6-6d7f1f411505",
-          "finished_at": "2022-07-27T21:48:08Z",
-          "id": "1af16393-b67c-4846-a6e0-40107a178c9a",
-          "name": "deployer-new",
-          "started_at": "2022-07-27T21:47:35Z",
-          "status": "succeeded"
-        }, {
-          "external_id": "1c98cb3e-a73f-40f1-9a53-5822adee1b5d",
-          "finished_at": "2022-07-27T21:47:53Z",
-          "id": "908fa7a9-1c5a-462f-9d1b-695747c332ea",
-          "name": "textfile_generator-new",
-          "started_at": "2022-07-27T21:47:40Z",
-          "status": "succeeded"
-        }]
+          "id": "83ebb220-e3e1-4f31-955e-363227bf0765",
+          "name": "stage-2-new",
+          "workflows": [{
+              "external_id": "323aab5c-39b4-4cd5-974e-7fddf47ce65e",
+              "finished_at": "2022-07-27T22:30:10Z",
+              "id": "e5b0e93c-e139-48af-8549-72e6a4f3119a",
+              "name": "deployer-new",
+              "started_at": "2022-07-27T22:29:49Z",
+              "status": "succeeded"
+          }, {
+              "external_id": "4cd4b6d5-7147-4315-a9be-4a1f8d4baae8",
+              "finished_at": "2022-07-27T22:30:05Z",
+              "id": "062304f6-5780-41d4-a23e-c64bf18b56d5",
+              "name": "textfile_generator-new",
+              "started_at": "2022-07-27T22:29:53Z",
+              "status": "succeeded"
+          }]
       }]
   - BITRISE_APP_SLUG: b520099804d7e71a
   - BITRISE_AUTH_SERVICE_ARTIFACT_PULL_CLIENT_SECRET: $BITRISE_AUTH_SERVICE_ARTIFACT_PULL_CLIENT_SECRET
