@@ -13,13 +13,13 @@ import (
 func Test_GivenInputs_WhenCreatingConfig_ThenMappingIsCorrect(t *testing.T) {
 	// Given
 	envRepository := new(mockenv.Repository)
-	envRepository.On("Get", "BITRISE_APP_SLUG").Return("app-slug")
-	envRepository.On("Get", "verbose").Return("true")
 	envRepository.On("Get", "artifact_sources").Return("stage1.workflow1,stage2.*")
-	envRepository.On("Get", "finished_stage").Return("")
-	envRepository.On("Get", "bitrise_api_base_url").Return("")
-	envRepository.On("Get", "bitrise_api_access_token").Return("")
-	envRepository.On("Get", "export_map").Return("")
+	envRepository.On("Get", "verbose").Return("true")
+	envRepository.On("Get", "app_slug").Return("app-slug")
+	envRepository.On("Get", "finished_stage").Return("[]")
+	envRepository.On("Get", "bitrise_api_base_url").Return("url")
+	envRepository.On("Get", "bitrise_api_access_token").Return("token")
+
 	inputParser := stepconf.NewInputParser(envRepository)
 	cmdFactory := command.NewFactory(envRepository)
 	step := IntermediateFileDownloader{
@@ -34,7 +34,6 @@ func Test_GivenInputs_WhenCreatingConfig_ThenMappingIsCorrect(t *testing.T) {
 
 	// Then
 	assert.NoError(t, err)
-	assert.Equal(t, true, config.VerboseLogging)
 	assert.Equal(t, []string{"stage1.workflow1", "stage2.*"}, config.ArtifactSources)
 }
 
@@ -42,30 +41,29 @@ func Test_Export(t *testing.T) {
 	envRepository := new(mockenv.Repository)
 
 	testCases := []struct {
-		desc                string
-		inputResult         Result
-		expectedExportValue string
+		desc        string
+		inputResult Result
 	}{
 		{
 			desc: "when there are more than one result, it exports a coma separated list",
 			inputResult: Result{
-				ArtifactLocations: []string{"aa.txt", "bb.txt"},
+				IntermediateFiles: map[string]string{"ENV_KEY_A": "aa.txt", "ENV_KEY_B": "bb.txt"},
+				//ArtifactLocations: []string{"aa.txt", "bb.txt"},
 			},
-			expectedExportValue: "aa.txt|bb.txt",
 		},
 		{
 			desc: "when there is a result element",
 			inputResult: Result{
-				ArtifactLocations: []string{"aa.txt"},
+				IntermediateFiles: map[string]string{"ENV_KEY_A": "aa.txt"},
+				//ArtifactLocations: []string{"aa.txt"},
 			},
-			expectedExportValue: "aa.txt",
 		},
 		{
 			desc: "when there is no result element",
 			inputResult: Result{
-				ArtifactLocations: []string{},
+				IntermediateFiles: map[string]string{},
+				//ArtifactLocations: []string{},
 			},
-			expectedExportValue: "",
 		},
 	}
 	for _, tC := range testCases {
@@ -75,9 +73,11 @@ func Test_Export(t *testing.T) {
 				logger:        log.NewLogger(),
 			}
 
-			envRepository.On("Set", "BITRISE_ARTIFACT_PATHS", tC.expectedExportValue).Return(nil)
+			for envKey, path := range tC.inputResult.IntermediateFiles {
+				envRepository.On("Set", envKey, path).Return(nil)
+			}
 
-			err := step.Export(tC.inputResult, make(map[string]string))
+			err := step.Export(tC.inputResult)
 
 			envRepository.AssertExpectations(t)
 			assert.NoError(t, err)

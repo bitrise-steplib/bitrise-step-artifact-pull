@@ -59,7 +59,7 @@ func Test_ListBuildArtifactDetails_concurrent_returnsArtifactListForMultipleBuil
 		On("ListBuildArtifacts", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).
 		Return(mockArtifactList, nil)
 
-	mockClient.On("ShowBuildArtifact", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).Return(ArtifactResponseItemModel{}, nil)
+	mockClient.On("ShowBuildArtifact", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).Return(ArtifactResponseItemModel{IntermediateFileInfo: IntermediateFileInfo{EnvKey: "EnvKey"}}, nil)
 
 	testCases := []listConcurrencyTestCase{
 		{1, 1}, {3, 3}, {10, 1}, {1, 10}, {10, 10},

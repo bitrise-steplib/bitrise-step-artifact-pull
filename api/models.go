@@ -9,14 +9,16 @@ type ShowBuildArtifactResponse struct {
 	Data ArtifactResponseItemModel `json:"data"`
 }
 
+type IntermediateFileInfo struct {
+	EnvKey string `json:"env_key"`
+	IsDir  bool   `json:"is_dir"`
+}
+
 type ArtifactResponseItemModel struct {
-	Title                string `json:"title"`
-	Slug                 string `json:"slug"`
-	DownloadURL          string `json:"expiring_download_url"`
-	IntermediateFileInfo struct {
-		EnvKey string `json:"env_key"`
-		IsDir  bool   `json:"is_dir"`
-	} `json:"intermediate_file_info"`
+	Title                string               `json:"title"`
+	Slug                 string               `json:"slug"`
+	DownloadURL          string               `json:"expiring_download_url"`
+	IntermediateFileInfo IntermediateFileInfo `json:"intermediate_file_info"`
 }
 
 type ArtifactListElementResponseModel struct {
