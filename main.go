@@ -8,6 +8,7 @@ import (
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/env"
 	"github.com/bitrise-io/go-utils/log"
+	"github.com/bitrise-steplib/bitrise-step-artifact-pull/step"
 )
 
 func main() {
@@ -38,17 +39,10 @@ func run() int {
 	return 0
 }
 
-func createIntermediateFileDownloader(logger log.Logger) IntermediateFileDownloader {
+func createIntermediateFileDownloader(logger log.Logger) step.IntermediateFileDownloader {
 	envRepository := stepenv.NewRepository(env.NewRepository())
 	cmdFactory := command.NewFactory(envRepository)
 	inputParser := stepconf.NewInputParser(envRepository)
 
-	downloader := IntermediateFileDownloader{
-		inputParser:   inputParser,
-		envRepository: envRepository,
-		cmdFactory:    cmdFactory,
-		logger:        logger,
-	}
-
-	return downloader
+	return step.NewIntermediateFileDownloader(inputParser, envRepository, cmdFactory, logger)
 }

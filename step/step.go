@@ -1,4 +1,4 @@
-package main
+package step
 
 import (
 	"encoding/json"
@@ -45,6 +45,10 @@ type IntermediateFileDownloader struct {
 	envRepository env.Repository
 	cmdFactory    command.Factory
 	logger        log.Logger
+}
+
+func NewIntermediateFileDownloader(inputParser stepconf.InputParser, envRepository env.Repository, cmdFactory command.Factory, logger log.Logger) IntermediateFileDownloader {
+	return IntermediateFileDownloader{inputParser: inputParser, envRepository: envRepository, cmdFactory: cmdFactory, logger: logger}
 }
 
 func (d IntermediateFileDownloader) ProcessConfig() (Config, error) {
