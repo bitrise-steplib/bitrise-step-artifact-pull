@@ -5,43 +5,43 @@ app:
   envs:
   # Shared envs for every test workflow
   - BITRISEIO_FINISHED_STAGES: |-
-        [{
-            "id": "fb96d509-3966-4ca7-acf2-da596cb4a895",
-            "name": "stage-1",
-            "workflows": [{
-                "external_id": "70bbdfd1-96d5-447c-9731-20da9312643c",
-                "finished_at": "2022-05-24T20:39:06Z",
-                "id": "44b69b43-3a3e-474b-a133-99717c96d719",
-                "name": "placeholder",
-                "started_at": "2022-05-24T20:39:04Z",
-                "status": "succeeded"
-            }, {
-                "external_id": "3daa3d92-6d7a-4791-928a-b83506881ecd",
-                "finished_at": "2022-05-24T20:38:33Z",
-                "id": "5b8e99f4-5836-4eb5-bbc3-61fff4410919",
-                "name": "textfile_generator",
-                "started_at": "2022-05-24T20:38:09Z",
-                "status": "succeeded"
-            }]
+      [{
+        "id": "eda3cd1f-fb5b-4b17-960b-0aed1e5ef9b2",
+        "name": "stage-1-new",
+        "workflows": [{
+          "external_id": "9e3dedb3-3441-40a3-a6ee-b55df86f4112",
+          "finished_at": "2022-07-27T21:46:35Z",
+          "id": "aa50a889-c364-445a-a47c-e56ae0cb2e01",
+          "name": "placeholder",
+          "started_at": "2022-07-27T21:46:34Z",
+          "status": "succeeded"
         }, {
-            "id": "e9ab9871-3a50-47d0-88f7-33dbceff7e87",
-            "name": "stage-2",
-            "workflows": [{
-                "external_id": "2f031c63-ed6c-4a26-aff1-57b00ed2f8ba",
-                "finished_at": "2022-05-24T20:41:26Z",
-                "id": "f1c01cf2-ebcc-4db6-a19c-dfab20762b06",
-                "name": "deployer",
-                "started_at": "2022-05-24T20:40:47Z",
-                "status": "succeeded"
-            }, {
-                "external_id": "a9d6148e-59e1-417e-99a0-49e5dd014f85",
-                "finished_at": "2022-05-24T20:40:34Z",
-                "id": "1730a356-6a32-4b77-807b-4a6f587fee33",
-                "name": "textfile_generator",
-                "started_at": "2022-05-24T20:40:15Z",
-                "status": "succeeded"
-            }]
+          "external_id": "cf913e65-a88f-4e81-8625-2bc980af7677",
+          "finished_at": "2022-07-27T21:46:48Z",
+          "id": "ac069396-fa8f-469d-a86f-be411f8a31d1",
+          "name": "textfile_generator-new",
+          "started_at": "2022-07-27T21:46:38Z",
+          "status": "succeeded"
         }]
+      }, {
+        "id": "694863de-6075-4431-b0b6-c77b7ca441de",
+        "name": "stage-2-new",
+        "workflows": [{
+          "external_id": "84f9f8ad-09f7-4b0f-84f6-6d7f1f411505",
+          "finished_at": "2022-07-27T21:48:08Z",
+          "id": "1af16393-b67c-4846-a6e0-40107a178c9a",
+          "name": "deployer-new",
+          "started_at": "2022-07-27T21:47:35Z",
+          "status": "succeeded"
+        }, {
+          "external_id": "1c98cb3e-a73f-40f1-9a53-5822adee1b5d",
+          "finished_at": "2022-07-27T21:47:53Z",
+          "id": "908fa7a9-1c5a-462f-9d1b-695747c332ea",
+          "name": "textfile_generator-new",
+          "started_at": "2022-07-27T21:47:40Z",
+          "status": "succeeded"
+        }]
+      }]
   - BITRISE_APP_SLUG: b520099804d7e71a
   - BITRISE_AUTH_SERVICE_ARTIFACT_PULL_CLIENT_SECRET: $BITRISE_AUTH_SERVICE_ARTIFACT_PULL_CLIENT_SECRET
 
@@ -64,25 +64,22 @@ workflows:
         - content: |-
             #!/usr/bin/env bash
             set -ex
-
-            IFS='|' read -ra FILES <<< "$BITRISE_ARTIFACT_PATHS"
-            for i in "${FILES[@]}"; do
-              # process "$i"
-              if [ ! -f $i ]; then
-                echo "$i not found"
-                exit 1
-              fi
-            done
-
-            array=( "example.csv" "export_options.plist" "test.json" "xcode-test-results-ios-simple-objc.html" "lipsum.txt" "generated_text_file.txt" "Test.xcresult.zip" "ios-simple-objcTests.ipa" "cat-illustration@3x.png" "xcodebuild-archive.log" "app-release-unsigned.apk")
-            for i in "${array[@]}"
-            do
-              if [[ "$BITRISE_ARTIFACT_PATHS" != *"$i"* ]]; then
-                echo "BITRISE_ARTIFACT_PATHS not contains the $i file"
-                exit 1
-              fi
-            done
-
+            
+            if [ ! -f $EXAMPLE_CSV ]; then
+              echo "EXAMPLE_CSV does not exist"
+            fi
+            
+            if [ ! -f $EXPORT_OPTIONS_PLIST ]; then
+              echo "EXPORT_OPTIONS_PLIST does not exist"
+            fi
+            
+            if [ ! -f $TEST_JSON ]; then
+              echo "TEST_JSON does not exist"
+            fi
+            
+            if [ ! -f $TEXT_FILE_TXT ]; then
+              echo "TEXT_FILE_TXT does not exist"
+            fi
 
   test_download_specific_stage_artifacts:
     before_run:
@@ -102,102 +99,18 @@ workflows:
             #!/usr/bin/env bash
             set -ex
 
-            IFS='|' read -ra FILES <<< "$BITRISE_ARTIFACT_PATHS"
-            for i in "${FILES[@]}"; do
-              # process "$i"
-              if [ ! -f $i ]; then
-                echo "$i not found"
-                exit 1
-              fi
-            done
-
-            fc=$(ls $BITRISE_ARTIFACT_PATHS | wc -l | xargs)
-            if [ $fc -gt 1 ]; then
-              echo "There are more than 1 files"
-              exit 1
+            if [ ! -f $EXAMPLE_CSV ]; then
+              echo "EXAMPLE_CSV does not exist"
+            fi
+            
+            if [ ! -f $EXPORT_OPTIONS_PLIST ]; then
+              echo "EXPORT_OPTIONS_PLIST does not exist"
+            fi
+            
+            if [ ! -f $TEST_JSON ]; then
+              echo "TEST_JSON does not exist"
             fi
 
-            if [[ -z "${BITRISE_ARTIFACT_PATHS}" ]]; then
-              echo "Exported BITRISE_ARTIFACT_PATHS output variable does not exist"
-              exit 1
-            fi
-
-            array=( "generated_text_file.txt")
-            for i in "${array[@]}"
-            do
-              if [[ "$BITRISE_ARTIFACT_PATHS" != *"$i"* ]]; then
-                echo "BITRISE_ARTIFACT_PATHS not contains the $i file"
-                exit 1
-              fi
-            done
-
-
-  test_export_output_variables_based_on_patterns:
-    before_run:
-    - _setup
-    steps:
-    - path::./:
-        title: Execute step
-        inputs:
-        - verbose: true
-        - artifact_sources: .*
-        - export_map: |-
-              TXT_FILES: .*\.txt
-              APK_FILES: .*\.apk
-        - bitrise_api_base_url: https://api.bitrise.io
-    - script:
-        title: Validate downloaded artifacts
-        is_always_run: true
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            set -ex
-
-            if [[ -z "${TXT_FILES}" ]]; then
-                echo "Exported $TXT_FILES output variable does not exist"
-                exit 1
-            fi
-
-            if [[ -z "${APK_FILES}" ]]; then
-                echo "Exported $APK_FILES output variable does not exist"
-                exit 1
-            fi
-
-            IFS='|' read -ra FILES <<< "$TXT_FILES"
-            for i in "${FILES[@]}"; do
-                # process "$i"
-                if [ ! -f $i ]; then
-                    echo "$i not found"
-                    exit 1
-                fi
-            done
-
-            IFS='|' read -ra FILES <<< "$APK_FILES"
-            for i in "${FILES[@]}"; do
-                # process "$i"
-                if [ ! -f $i ]; then
-                    echo "$i not found"
-                    exit 1
-                fi
-            done
-
-            array=( "lipsum.txt" "generated_text_file.txt" )
-            for i in "${array[@]}"
-            do
-                if [[ "$TXT_FILES" != *"$i"* ]]; then
-                    echo "$TXT_FILES not contains the $i file"
-                    exit 1
-                fi
-            done
-
-            array=( "app-release-unsigned.apk" )
-            for i in "${array[@]}"
-            do
-              if [[ "$APK_FILES" != *"$i"* ]]; then
-                  echo "$APK_FILES not contains the $i file"
-                  exit 1
-              fi
-            done
   _setup:
     steps:
     - script:
