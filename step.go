@@ -38,7 +38,7 @@ type Config struct {
 }
 
 type Result struct {
-	ArtifactLocations []export.ArtifactLocation
+	IntermediateFiles map[string]string
 }
 
 type ArtifactPull struct {
@@ -124,7 +124,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 		return Result{}, err
 	}
 
-	var artifactLocations []export.ArtifactLocation
+	intermediateFiles := map[string]string{}
 	for _, downloadResult := range downloadResults {
 		if downloadResult.DownloadError != nil {
 			a.logger.Errorf("Failed to download artifact from %s, error: %s", downloadResult.DownloadURL, downloadResult.DownloadError.Error())
@@ -141,21 +141,18 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 				}
 			}
 
-			artifactLocations = append(artifactLocations, export.ArtifactLocation{
-				Path:   downloadResult.DownloadPath,
-				EnvKey: downloadResult.EnvKey,
-			})
+			intermediateFiles[downloadResult.EnvKey] = downloadResult.DownloadPath
 		}
 	}
 
-	return Result{ArtifactLocations: artifactLocations}, nil
+	return Result{IntermediateFiles: intermediateFiles}, nil
 }
 
 func (a ArtifactPull) Export(result Result) error {
 	exporter := export.OutputExporter{
 		Logger:            a.logger,
 		EnvRepository:     a.envRepository,
-		ArtifactLocations: result.ArtifactLocations,
+		IntermediateFiles: result.IntermediateFiles,
 	}
 
 	return exporter.Export()

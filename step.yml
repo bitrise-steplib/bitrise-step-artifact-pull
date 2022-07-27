@@ -21,15 +21,6 @@ toolkit:
     package_name: github.com/bitrise-steplib/steps-artifact-pull
 
 inputs:
-- verbose: "false"
-  opts:
-    title: Enable verbose logging
-    summary: Enable logging additional information for debugging
-    is_required: true
-    value_options:
-    - "true"
-    - "false"
-
 - artifact_sources: .*
   opts:
     title: Artifact source
@@ -47,6 +38,15 @@ inputs:
       will be the ".*" (star), which means, it will
       get every artifact from every workflow.
       Do not forget to escape the special chatacters.
+
+- verbose: "false"
+  opts:
+    title: Enable verbose logging
+    summary: Enable logging additional information for debugging
+    is_required: true
+    value_options:
+    - "true"
+    - "false"
 
 - finished_stage: $BITRISEIO_FINISHED_STAGES
   opts:
@@ -69,9 +69,3 @@ inputs:
     is_dont_change_value: true
     is_expand: true
     is_sensitive: true
-
-outputs:
-- BITRISE_ARTIFACT_PATHS:
-  opts:
-    title: Pulled artifacts locations
-    summary: An absolute path list of the downloaded artifacts. The list is separated with pipe (|) characters.

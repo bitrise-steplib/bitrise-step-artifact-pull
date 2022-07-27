@@ -2,55 +2,31 @@ package export
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/bitrise-io/go-utils/env"
 	"github.com/bitrise-io/go-utils/log"
 )
 
-type ArtifactLocation struct {
-	Path   string
-	EnvKey string
-}
-
 type OutputExporter struct {
 	Logger        log.Logger
 	EnvRepository env.Repository
 
-	ArtifactLocations []ArtifactLocation
+	IntermediateFiles map[string]string
 }
 
 func (oe OutputExporter) Export() error {
-	if len(oe.ArtifactLocations) == 0 {
+	if len(oe.IntermediateFiles) == 0 {
 		return nil
 	}
 
 	oe.Logger.Println()
 	oe.Logger.Printf("The following outputs are exported as environment variables:")
 
-	for _, artifact := range oe.ArtifactLocations {
-		if artifact.EnvKey != "" {
-			if err := oe.exportOutputVariable(artifact.EnvKey, artifact.Path); err != nil {
-				return err
-			}
+	for envKey, path := range oe.IntermediateFiles {
+		if err := oe.exportOutputVariable(envKey, path); err != nil {
+			return err
 		}
 	}
-	return oe.simpleOutputExport()
-}
-
-func (oe OutputExporter) simpleOutputExport() error {
-	var paths []string
-	for _, artifact := range oe.ArtifactLocations {
-		paths = append(paths, artifact.Path)
-	}
-	exportValues := strings.Join(paths, "|")
-	err := oe.exportOutputVariable("BITRISE_ARTIFACT_PATHS", exportValues)
-	if err != nil {
-		return err
-	}
-
-	oe.Logger.Donef("$BITRISE_ARTIFACT_PATHS = %s", exportValues)
-
 	return nil
 }
 

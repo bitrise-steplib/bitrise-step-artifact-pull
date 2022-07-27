@@ -101,7 +101,10 @@ func (lister ArtifactLister) listArtifactsWorker(appSlug string, buildSlugs chan
 				if res.err != nil {
 					results <- listArtifactsResult{buildSlug: buildSlug, err: err}
 					return
-				} else {
+				}
+
+				// Keep Build Artifacts which are Intermediate Files
+				if res.artifact.IntermediateFileInfo.EnvKey != "" {
 					artifacts = append(artifacts, res.artifact)
 				}
 			}
