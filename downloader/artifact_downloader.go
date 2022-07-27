@@ -8,11 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bitrise-io/go-utils/command"
-	"github.com/bitrise-io/go-utils/env"
 	"github.com/bitrise-io/go-utils/filedownloader"
 	"github.com/bitrise-io/go-utils/log"
-	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/retry"
 	"github.com/bitrise-steplib/bitrise-step-artifact-pull/api"
 )
@@ -123,22 +120,6 @@ func (ad *ConcurrentArtifactDownloader) downloadDirectory(targetDir, fileName, d
 
 	if err := resp.Body.Close(); err != nil {
 		log.Warnf("Failed to close response body: %s", err)
-	}
-
-	exist, err := pathutil.IsDirExists(dirPath)
-	if err != nil {
-		return "", err
-	}
-	if !exist {
-		factory := command.NewFactory(env.NewRepository())
-		cmd := factory.Create("tree", []string{"-L", "5", targetDir}, &command.Opts{
-			Stdout: os.Stdout,
-			Stderr: os.Stderr,
-		})
-		if err := cmd.Run(); err != nil {
-			log.Errorf("%s failed: %s", cmd.PrintableCommandArgs(), err)
-		}
-		return "", fmt.Errorf("unzipped dir doesn't exist on the expected path: %s", dirPath)
 	}
 
 	return dirPath, nil

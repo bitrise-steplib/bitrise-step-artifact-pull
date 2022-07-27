@@ -64,19 +64,19 @@ workflows:
         - content: |-
             #!/usr/bin/env bash
             set -ex
-            
+
             if [ ! -f $EXAMPLE_CSV ]; then
               echo "EXAMPLE_CSV does not exist"
             fi
-            
+
             if [ ! -f $EXPORT_OPTIONS_PLIST ]; then
               echo "EXPORT_OPTIONS_PLIST does not exist"
             fi
-            
+
             if [ ! -f $TEST_JSON ]; then
               echo "TEST_JSON does not exist"
             fi
-            
+
             if [ ! -f $TEXT_FILE_TXT ]; then
               echo "TEXT_FILE_TXT does not exist"
             fi
@@ -102,11 +102,11 @@ workflows:
             if [ ! -f $EXAMPLE_CSV ]; then
               echo "EXAMPLE_CSV does not exist"
             fi
-            
+
             if [ ! -f $EXPORT_OPTIONS_PLIST ]; then
               echo "EXPORT_OPTIONS_PLIST does not exist"
             fi
-            
+
             if [ ! -f $TEST_JSON ]; then
               echo "TEST_JSON does not exist"
             fi
