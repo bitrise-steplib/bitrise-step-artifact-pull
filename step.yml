@@ -48,6 +48,13 @@ inputs:
     - "true"
     - "false"
 
+- app_slug: $BITRISE_APP_SLUG
+  opts:
+    title: Bitrise App Slug
+    summary: The slug that uniquely identifies your app on bitrise.io. It’s part of the app URL, too.
+    is_required: true
+    is_dont_change_value: true
+
 - finished_stage: $BITRISEIO_FINISHED_STAGES
   opts:
     title: The finished stages for which artifacts are available to download
