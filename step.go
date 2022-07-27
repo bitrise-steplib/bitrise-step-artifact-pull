@@ -31,7 +31,6 @@ type Input struct {
 
 type Config struct {
 	ArtifactSources       []string
-	VerboseLogging        bool
 	AppSlug               string
 	FinishedStages        model.FinishedStages
 	BitriseAPIAccessToken string
@@ -57,6 +56,7 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 	}
 
 	stepconf.Print(input)
+	a.logger.EnableDebugLog(input.Verbose)
 
 	finishedStages := input.FinishedStages
 	var finishedStagesModel model.FinishedStages
@@ -66,7 +66,6 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 
 	return Config{
 		ArtifactSources:       strings.Split(input.ArtifactSources, ","),
-		VerboseLogging:        input.Verbose,
 		AppSlug:               input.AppSlug,
 		FinishedStages:        finishedStagesModel,
 		BitriseAPIAccessToken: string(input.BitriseAPIAccessToken),
@@ -75,7 +74,6 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 }
 
 func (a ArtifactPull) Run(cfg Config) (Result, error) {
-	a.logger.EnableDebugLog(cfg.VerboseLogging)
 	buildIdGetter := NewBuildIDGetter(cfg.FinishedStages, cfg.ArtifactSources)
 	buildIDs, err := buildIdGetter.GetBuildIDs()
 	if err != nil {
@@ -120,9 +118,7 @@ func (a ArtifactPull) Run(cfg Config) (Result, error) {
 
 			return Result{}, downloadResult.DownloadError
 		} else {
-			if cfg.VerboseLogging {
-				a.logger.Printf("Artifact downloaded: %s", downloadResult.DownloadPath)
-			}
+			a.logger.Debugf("Artifact downloaded: %s", downloadResult.DownloadPath)
 
 			if downloadResult.EnvKey != "" {
 				if err := tools.ExportEnvironmentWithEnvman(downloadResult.EnvKey, downloadResult.DownloadPath); err != nil {
