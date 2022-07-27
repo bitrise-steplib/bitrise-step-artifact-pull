@@ -22,7 +22,7 @@ const downloadDirPrefix = "_artifact_pull"
 
 type Input struct {
 	ArtifactSources       string          `env:"artifact_sources"`
-	Verbose               string          `env:"verbose,opt[true,false]"`
+	Verbose               bool            `env:"verbose,opt[true,false]"`
 	AppSlug               string          `env:"app_slug,required"`
 	FinishedStages        string          `env:"finished_stage"`
 	BitriseAPIAccessToken stepconf.Secret `env:"bitrise_api_access_token"`
@@ -66,14 +66,9 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 		}
 	}
 
-	verboseLoggingValue := false
-	if input.Verbose == "true" {
-		verboseLoggingValue = true
-	}
-
 	return Config{
 		ArtifactSources:       strings.Split(input.ArtifactSources, ","),
-		VerboseLogging:        verboseLoggingValue,
+		VerboseLogging:        input.Verbose,
 		AppSlug:               input.AppSlug,
 		FinishedStages:        finishedStagesModel,
 		BitriseAPIAccessToken: string(input.BitriseAPIAccessToken),
