@@ -21,12 +21,12 @@ import (
 const downloadDirPrefix = "_artifact_pull"
 
 type Input struct {
-	ArtifactSources       string          `env:"artifact_sources"`
+	ArtifactSources       string          `env:"artifact_sources,required"`
 	Verbose               bool            `env:"verbose,opt[true,false]"`
 	AppSlug               string          `env:"app_slug,required"`
-	FinishedStages        string          `env:"finished_stage"`
-	BitriseAPIAccessToken stepconf.Secret `env:"bitrise_api_access_token"`
-	BitriseAPIBaseURL     string          `env:"bitrise_api_base_url"`
+	FinishedStages        string          `env:"finished_stage,required"`
+	BitriseAPIAccessToken stepconf.Secret `env:"bitrise_api_access_token,required"`
+	BitriseAPIBaseURL     string          `env:"bitrise_api_base_url,required"`
 }
 
 type Config struct {
@@ -60,10 +60,8 @@ func (a ArtifactPull) ProcessConfig() (Config, error) {
 
 	finishedStages := input.FinishedStages
 	var finishedStagesModel model.FinishedStages
-	if finishedStages != "" {
-		if err := json.Unmarshal([]byte(finishedStages), &finishedStagesModel); err != nil {
-			return Config{}, fmt.Errorf("failed to parse step inputs: %w", err)
-		}
+	if err := json.Unmarshal([]byte(finishedStages), &finishedStagesModel); err != nil {
+		return Config{}, fmt.Errorf("failed to parse step inputs: %w", err)
 	}
 
 	return Config{

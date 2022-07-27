@@ -38,6 +38,7 @@ inputs:
       will be the ".*" (star), which means, it will
       get every artifact from every workflow.
       Do not forget to escape the special chatacters.
+    is_required: true
 
 - verbose: "false"
   opts:
@@ -73,6 +74,6 @@ inputs:
   opts:
     title: Access token to call the Bitrise API
     summary: The OAuth access token that authorizes to call the Bitrise API.
-    is_dont_change_value: true
-    is_expand: true
+    is_required: true
     is_sensitive: true
+    is_dont_change_value: true
