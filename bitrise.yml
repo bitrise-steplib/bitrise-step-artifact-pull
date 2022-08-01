@@ -12,7 +12,7 @@ workflows:
         title: Execute step
         inputs:
         - verbose: true
-        - artifact_sources: ".*"
+        - artifact_sources: .*
 
   check:
     steps:
