@@ -103,8 +103,8 @@ func (d IntermediateFileDownloader) Run(cfg Config) (Result, error) {
 		return Result{}, fmt.Errorf("failed to create artifact download directory: %w", err)
 	}
 
-	artifactDownloader := downloader.NewConcurrentArtifactDownloader(artifacts, 5*time.Minute, targetDir, d.logger)
-	downloadResults, err := artifactDownloader.DownloadAndSaveArtifacts()
+	artifactDownloader := downloader.NewConcurrentArtifactDownloader(5*time.Minute, d.logger, d.cmdFactory)
+	downloadResults, err := artifactDownloader.DownloadAndSaveArtifacts(artifacts, targetDir)
 	if err != nil {
 		return Result{}, fmt.Errorf("failed to download artifacts: %w", err)
 	}

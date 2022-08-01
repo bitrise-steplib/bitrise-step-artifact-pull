@@ -3,11 +3,13 @@ package downloader
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/filedownloader"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/retry"
@@ -32,42 +34,40 @@ type downloadJob struct {
 }
 
 type ConcurrentArtifactDownloader struct {
-	Artifacts []api.ArtifactResponseItemModel
-	Logger    log.Logger
-	TargetDir string
-	Timeout   time.Duration
+	Timeout        time.Duration
+	Logger         log.Logger
+	CommandFactory command.Factory
 }
 
-func NewConcurrentArtifactDownloader(artifacts []api.ArtifactResponseItemModel, timeout time.Duration, targetDir string, logger log.Logger) *ConcurrentArtifactDownloader {
+func NewConcurrentArtifactDownloader(timeout time.Duration, logger log.Logger, commandFactory command.Factory) *ConcurrentArtifactDownloader {
 	return &ConcurrentArtifactDownloader{
-		Artifacts: artifacts,
-		Timeout:   timeout,
-		Logger:    logger,
-		TargetDir: targetDir,
+		Timeout:        timeout,
+		Logger:         logger,
+		CommandFactory: commandFactory,
 	}
 }
 
-func (ad *ConcurrentArtifactDownloader) DownloadAndSaveArtifacts() ([]ArtifactDownloadResult, error) {
-	if _, err := os.Stat(ad.TargetDir); os.IsNotExist(err) {
-		if err := os.Mkdir(ad.TargetDir, filePermission); err != nil {
+func (ad *ConcurrentArtifactDownloader) DownloadAndSaveArtifacts(artifacts []api.ArtifactResponseItemModel, targetDir string) ([]ArtifactDownloadResult, error) {
+	if _, err := os.Stat(targetDir); os.IsNotExist(err) {
+		if err := os.Mkdir(targetDir, filePermission); err != nil {
 			return nil, err
 		}
 	}
 
-	return ad.downloadParallel(ad.TargetDir)
+	return ad.downloadParallel(artifacts, targetDir)
 }
 
-func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]ArtifactDownloadResult, error) {
+func (ad *ConcurrentArtifactDownloader) downloadParallel(artifacts []api.ArtifactResponseItemModel, targetDir string) ([]ArtifactDownloadResult, error) {
 	var downloadResults []ArtifactDownloadResult
 
-	jobs := make(chan downloadJob, len(ad.Artifacts))
-	results := make(chan ArtifactDownloadResult, len(ad.Artifacts))
+	jobs := make(chan downloadJob, len(artifacts))
+	results := make(chan ArtifactDownloadResult, len(artifacts))
 
 	for i := 0; i < maxConcurrentDownloadThreads; i++ {
 		go ad.download(jobs, results)
 	}
 
-	for _, artifact := range ad.Artifacts {
+	for _, artifact := range artifacts {
 		jobs <- downloadJob{
 			ResponseModel: artifact,
 			TargetDir:     targetDir,
@@ -75,7 +75,7 @@ func (ad *ConcurrentArtifactDownloader) downloadParallel(targetDir string) ([]Ar
 	}
 	close(jobs)
 
-	for i := 0; i < len(ad.Artifacts); i++ {
+	for i := 0; i < len(artifacts); i++ {
 		res := <-results
 		downloadResults = append(downloadResults, res)
 	}
@@ -114,7 +114,7 @@ func (ad *ConcurrentArtifactDownloader) downloadDirectory(targetDir, fileName, d
 		return "", err
 	}
 
-	if err := extractCacheArchive(resp.Body, dirPath, false); err != nil {
+	if err := ad.extractArchive(resp.Body, dirPath); err != nil {
 		return "", err
 	}
 
@@ -143,4 +143,22 @@ func (ad *ConcurrentArtifactDownloader) download(jobs <-chan downloadJob, result
 
 		results <- ArtifactDownloadResult{DownloadPath: fileFullPath, DownloadURL: j.ResponseModel.DownloadURL, EnvKey: j.ResponseModel.IntermediateFileInfo.EnvKey}
 	}
+}
+
+// extractArchive extracts an archive using the tar CLI tool by piping the archive to the command's input.
+func (ad *ConcurrentArtifactDownloader) extractArchive(r io.Reader, targetDir string) error {
+	tarArgs := []string{
+		"-x",      // -x: extract files from an archive: https://www.gnu.org/software/tar/manual/html_node/extract.html#SEC25
+		"-f", "-", // -f "-": reads the archive from standard input: https://www.gnu.org/software/tar/manual/html_node/Device.html#SEC155
+	}
+	cmd := ad.CommandFactory.Create("tar", tarArgs, &command.Opts{
+		Stdin: r,
+		Dir:   targetDir,
+	})
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("%s failed: %s", cmd.PrintableCommandArgs(), err)
+	}
+
+	return nil
 }
