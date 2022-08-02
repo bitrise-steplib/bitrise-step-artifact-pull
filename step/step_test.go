@@ -48,21 +48,18 @@ func Test_Export(t *testing.T) {
 			desc: "when there are more than one result, it exports a coma separated list",
 			inputResult: Result{
 				IntermediateFiles: map[string]string{"ENV_KEY_A": "aa.txt", "ENV_KEY_B": "bb.txt"},
-				//ArtifactLocations: []string{"aa.txt", "bb.txt"},
 			},
 		},
 		{
 			desc: "when there is a result element",
 			inputResult: Result{
 				IntermediateFiles: map[string]string{"ENV_KEY_A": "aa.txt"},
-				//ArtifactLocations: []string{"aa.txt"},
 			},
 		},
 		{
 			desc: "when there is no result element",
 			inputResult: Result{
 				IntermediateFiles: map[string]string{},
-				//ArtifactLocations: []string{},
 			},
 		},
 	}
