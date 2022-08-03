@@ -6,12 +6,13 @@ workflows:
     envs:
     - BITRISEIO_ARTIFACT_PULL_TOKEN: token
     - BITRISE_APP_SLUG: slug
+    - BITRISEIO_FINISHED_STAGES: "[]"
     steps:
     - path::./:
         title: Execute step
         inputs:
         - verbose: true
-        - artifact_sources: "*"
+        - artifact_sources: .*
 
   check:
     steps:
