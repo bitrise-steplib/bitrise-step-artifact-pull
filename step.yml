@@ -19,7 +19,7 @@ description: |-
   This can be limited by setting the *Artifact source* input.
 
   Please note that this step is designed to be executed on the CI only.
-  
+
   ### Configuring the Step
 
   To configure the Step:
