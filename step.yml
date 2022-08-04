@@ -9,16 +9,16 @@ description: |-
 
   Please note that this step is designed to be executed on the CI only.
 
-website: https://github.com/bitrise-steplib/steps-artifact-pull
-source_code_url: https://github.com/bitrise-steplib/steps-artifact-pull
-support_url: https://github.com/bitrise-steplib/steps-artifact-pull/issues
+website: https://github.com/bitrise-steplib/bitrise-step-artifact-pull
+source_code_url: https://github.com/bitrise-steplib/bitrise-step-artifact-pull
+support_url: https://github.com/bitrise-steplib/bitrise-step-artifact-pull/issues
 type_tags:
 - utility
 is_always_run: false
 is_skippable: false
 toolkit:
   go:
-    package_name: github.com/bitrise-steplib/steps-artifact-pull
+    package_name: github.com/bitrise-steplib/bitrise-step-artifact-pull
 
 inputs:
 - verbose: "false"
