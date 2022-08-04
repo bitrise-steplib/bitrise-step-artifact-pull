@@ -83,7 +83,6 @@ workflows:
               fi
             done
 
-
   test_download_specific_stage_artifacts:
     before_run:
     - _setup
@@ -130,7 +129,6 @@ workflows:
                 exit 1
               fi
             done
-
 
   test_export_output_variables_based_on_patterns:
     before_run:
