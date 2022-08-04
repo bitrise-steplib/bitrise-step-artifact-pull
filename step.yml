@@ -37,16 +37,15 @@ inputs:
       The list of the stage and workflow
       paths, which can generate artifacts.
     description: |-
-      A comma separated list of workflows and stage
-      paths, which can generate artifacts.
+      A comma separated list of workflows and stage paths, which can generate artifacts.
       You need to use the `{stage}.{workflow}` syntax.
-      The "dot" character is the delimiter between
-      the stage and the workflow.
+      The "dot" character is the delimiter between the stage and the workflow.
+      
       You can use regular expressions.
-      If you leave it empty, the default value
-      will be the ".*" (star), which means, it will
-      get every artifact from every workflow.
-      Do not forget to escape the special chatacters.
+      The default value is `.*` (star), which means, it will get every artifact from every workflow.
+      
+      Do not forget to escape the special characters.
+      If you want to match all workflow from a stage then you need to escape the `.` separator and the use the `.*` any characters regex like `{stage-name}\..*`.
 
 - export_map: |-
   opts:
