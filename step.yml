@@ -42,7 +42,7 @@ inputs:
       The "dot" character is the delimiter between the stage and the workflow.
 
       You can use regular expressions.
-      The default value is `.*` (star), which means, it will get every artifact from every workflow.
+      The default value (`.*`) means: get every artifact from every workflow.
 
       Do not forget to escape the special characters.
       If you want to match all workflow from a stage then you need to escape the `.` separator and the use the `.*` any characters regex like `{stage-name}\..*`.
