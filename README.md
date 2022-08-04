@@ -31,7 +31,7 @@ steps:
     title: Pull artifacts
     inputs:
     - verbose: "true"
-    - artifact_sources: stage-1.*
+    - artifact_sources: stage-1\..*
 ```
 
 Use the `artifact_sources` input variable to limit the downloads to a set of stages or workflows:
