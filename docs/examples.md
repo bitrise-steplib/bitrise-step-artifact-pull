@@ -4,7 +4,7 @@
 
 ```yaml
 steps:
-  - git::https://github.com/bitrise-steplib/bitrise-step-artifact-pull.git@main:
+  - artifact-pull@1:
       title: Pull artifacts
       inputs:
         - verbose: "true"
@@ -81,13 +81,14 @@ Let's see the following use-cases, the use cases first part is the demand, the s
 
 - As a developer, I would like to get the build artifact(s) of the _stage-2_'s _deployer_'s workflow and the _stage-1_'s _placeholder_'s workflow: `stage-1.placeholder,stage-2.deployer`. The two expressions are separated by a comma.
 
-- As a developer, I would like to retrieve already generated artifacts: `*` or `"" (empty string)`. As the example shows, developers can use wildcard expressions.
+- As a developer, I would like to retrieve already generated artifacts: `.*` or `"" (empty string)`. As the example shows, developers can use regex.
 
-- As a developer, I would like to retrieve the generated artifacts from the _stage-2_ stage: `stage-2.*`.
+- As a developer, I would like to retrieve the generated artifacts from the _stage-2_ stage: `stage-2\..*`.
 
-- As a developer, I would like to get the _textfile_generator_ workflow artifacts: `*.textfile_generator`
+- As a developer, I would like to get the _textfile_generator_ workflow artifacts: `.*\.textfile_generator`
 
 And so on. The syntax is: `{stage-name}.{workflow-name}`.
+Do not forget to escape the special characters when using a regex pattern.
 
 The results will be in the `$BITRISE_ARTIFACT_PATHS` env. var. The list is delimited with a `|` pipe character.
 
