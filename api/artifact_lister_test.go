@@ -59,7 +59,7 @@ func Test_ListBuildArtifactDetails_concurrent_returnsArtifactListForMultipleBuil
 		On("ListBuildArtifacts", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).
 		Return(mockArtifactList, nil)
 
-	mockClient.On("ShowBuildArtifact", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).Return(ArtifactResponseItemModel{IntermediateFileInfo: IntermediateFileInfo{EnvKey: "EnvKey"}}, nil)
+	mockClient.On("ShowBuildArtifact", mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string"), mock.AnythingOfTypeArgument("string")).Return(ArtifactResponseItemModel{}, nil)
 
 	testCases := []listConcurrencyTestCase{
 		{1, 1}, {3, 3}, {10, 1}, {1, 10}, {10, 10},
@@ -69,7 +69,7 @@ func Test_ListBuildArtifactDetails_concurrent_returnsArtifactListForMultipleBuil
 		lister.maxConcurrentListArtifactAPICalls = testCase.maxConcurrentListCalls
 		lister.maxConcurrentShowArtifactAPICalls = testCase.maxConcurrentShowCalls
 
-		artifacts, err := lister.ListIntermediateFileDetails("app-slug", mockBuildSlugs)
+		artifacts, err := lister.ListBuildArtifactDetails("app-slug", mockBuildSlugs)
 
 		assert.NoError(t, err)
 		assert.Equal(t, len(mockBuildSlugs)*len(mockArtifactList), len(artifacts))
@@ -85,7 +85,7 @@ func Test_ListBuildArtifactDetails_returnsErrorWhenApiCallFails(t *testing.T) {
 		Return([]ArtifactListElementResponseModel{}, errors.New("API error"))
 
 	lister := newArtifactLister(mockClient, log.NewLogger())
-	_, err := lister.ListIntermediateFileDetails("app-slug", mockBuildSlugs)
+	_, err := lister.ListBuildArtifactDetails("app-slug", mockBuildSlugs)
 
 	assert.EqualError(t, err, "failed to get artifact download links for build(s): build-slug, build-slug, build-slug")
 }

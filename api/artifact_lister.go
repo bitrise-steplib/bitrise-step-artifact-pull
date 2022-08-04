@@ -7,28 +7,11 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 )
 
-const (
-	maxConcurrentListArtifactAPICalls = 3
-	maxConcurrentShowArtifactAPICalls = 3
-)
-
 type bitriseAPIClient interface {
 	// ListBuildArtifacts lists all build artifacts that have been generated for an app’s build - https://api-docs.bitrise.io/#/build-artifact/artifact-list
 	ListBuildArtifacts(appSlug, buildSlug string) ([]ArtifactListElementResponseModel, error)
 	// ShowBuildArtifact retrieves data of a specific build artifact - https://api-docs.bitrise.io/#/build-artifact/artifact-show
 	ShowBuildArtifact(appSlug, buildSlug, artifactSlug string) (ArtifactResponseItemModel, error)
-}
-
-type listArtifactsResult struct {
-	buildSlug string
-	artifacts []ArtifactResponseItemModel
-	err       error
-}
-
-type showArtifactResult struct {
-	buildSlug string
-	artifact  ArtifactResponseItemModel
-	err       error
 }
 
 type ArtifactLister struct {
@@ -51,12 +34,12 @@ func newArtifactLister(client bitriseAPIClient, logger log.Logger) ArtifactListe
 	return ArtifactLister{
 		apiClient:                         client,
 		logger:                            logger,
-		maxConcurrentListArtifactAPICalls: maxConcurrentListArtifactAPICalls,
-		maxConcurrentShowArtifactAPICalls: maxConcurrentShowArtifactAPICalls, // per list artifact call (so the total number of max API calls is maxConcurrentListArtifactAPICalls * maxConcurrentShowArtifactAPICalls)
+		maxConcurrentListArtifactAPICalls: 3,
+		maxConcurrentShowArtifactAPICalls: 3, // per list artifact call (so the total number of max API calls is maxConcurrentListArtifactAPICalls * maxConcurrentShowArtifactAPICalls)
 	}
 }
 
-func (lister ArtifactLister) ListIntermediateFileDetails(appSlug string, buildSlugs []string) ([]ArtifactResponseItemModel, error) {
+func (lister ArtifactLister) ListBuildArtifactDetails(appSlug string, buildSlugs []string) ([]ArtifactResponseItemModel, error) {
 	listJobs := make(chan string, len(buildSlugs))
 	listResults := make(chan listArtifactsResult, len(buildSlugs))
 
@@ -118,10 +101,7 @@ func (lister ArtifactLister) listArtifactsWorker(appSlug string, buildSlugs chan
 				if res.err != nil {
 					results <- listArtifactsResult{buildSlug: buildSlug, err: err}
 					return
-				}
-
-				// Keep Build Artifacts which are Intermediate Files
-				if res.artifact.IntermediateFileInfo.EnvKey != "" {
+				} else {
 					artifacts = append(artifacts, res.artifact)
 				}
 			}
@@ -142,4 +122,16 @@ func (lister ArtifactLister) showArtifactWorker(appSlug, buildSlug string, artif
 			results <- showArtifactResult{buildSlug: buildSlug, artifact: artifact}
 		}
 	}
+}
+
+type listArtifactsResult struct {
+	buildSlug string
+	artifacts []ArtifactResponseItemModel
+	err       error
+}
+
+type showArtifactResult struct {
+	buildSlug string
+	artifact  ArtifactResponseItemModel
+	err       error
 }

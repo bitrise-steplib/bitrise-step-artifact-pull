@@ -1,9 +1,8 @@
-package step
+package main
 
 import (
-	"regexp"
-
 	"github.com/bitrise-steplib/bitrise-step-artifact-pull/model"
+	"regexp"
 )
 
 const DELIMITER = "."
