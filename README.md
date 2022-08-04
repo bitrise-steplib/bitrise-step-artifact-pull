@@ -1,6 +1,6 @@
 # Artifact pull
 
-[![Step changelog](https://shields.io/github/v/release/bitrise-steplib/steps-artifact-pull?include_prereleases&label=changelog&color=blueviolet)](https://github.com/bitrise-steplib/steps-artifact-pull/releases)
+[![Step changelog](https://shields.io/github/v/release/bitrise-steplib/bitrise-step-artifact-pull?include_prereleases&label=changelog&color=blueviolet)](https://github.com/bitrise-steplib/bitrise-step-artifact-pull/releases)
 
 Step to pull artifacts of a pipeline
 
@@ -27,18 +27,18 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 
 ```yaml
 steps:
-  - git::https://github.com/bitrise-steplib/bitrise-step-artifact-pull.git@main:
-      title: Pull artifacts
-      inputs:
-        - verbose: "true"
-        - artifact_sources: stage-1.*
+- artifact-pull@1:
+    title: Pull artifacts
+    inputs:
+    - verbose: "true"
+    - artifact_sources: stage-1\..*
 ```
 
 Use the `artifact_sources` input variable to limit the downloads to a set of stages or workflows:
 
 - `stage1.workflow1` - Gets the artifacts from the stage1's workflow1.
-- `stage1.*` - Gets all artifacts from the stage1's workflows.
-- `*workflow1` - Gets the workflows' artifacts from all stages.
+- `stage1\..*` - Gets all artifacts from the stage1's workflows.
+- `.*\.workflow1` - Gets workflow1s' artifacts from all stages.
 - `.*` - Gets every generated artifacts in the pipeline.
 
 ##### Wildcard based artifact pull
@@ -104,20 +104,20 @@ Let's see the following use-cases, the use cases first part is the demand, the s
 
 - As a developer, I would like to get the build artifact(s) of the _stage-2_'s _deployer_'s workflow and the _stage-1_'s _placeholder_'s workflow: `stage-1.placeholder,stage-2.deployer`. The two expressions are separated by a comma.
 
-- As a developer, I would like to retrieve already generated artifacts: `*` or `"" (empty string)`. As the example shows, developers can use wildcard expressions.
+- As a developer, I would like to retrieve already generated artifacts: `.*` or `"" (empty string)`. As the example shows, developers can use regex.
 
-- As a developer, I would like to retrieve the generated artifacts from the _stage-2_ stage: `stage-2.*`.
+- As a developer, I would like to retrieve the generated artifacts from the _stage-2_ stage: `stage-2\..*`.
 
-- As a developer, I would like to get the _textfile_generator_ workflow artifacts: `*.textfile_generator`
+- As a developer, I would like to get the _textfile_generator_ workflow artifacts: `.*\.textfile_generator`
 
 And so on. The syntax is: `{stage-name}.{workflow-name}`.
+Do not forget to escape the special characters when using a regex pattern.
 
 The results will be in the `$BITRISE_ARTIFACT_PATHS` env. var. The list is delimited with a `|` pipe character.
 
 ```bash
 $BITRISE_ARTIFACT_PATHS = /var/folders/sd/lvn5cp9x5dn_xh1vhfgjjjw40000gp/T/_artifact_pull3010595419/generated_text_file.txt|/var/folders/sd/lvn5cp9x5dn_xh1vhfgjjjw40000gp/T/_artifact_pull3010595419/app-release-unsigned.apk
 ```
-
 
 ## ⚙️ Configuration
 
@@ -127,7 +127,7 @@ $BITRISE_ARTIFACT_PATHS = /var/folders/sd/lvn5cp9x5dn_xh1vhfgjjjw40000gp/T/_arti
 | Key | Description | Flags | Default |
 | --- | --- | --- | --- |
 | `verbose` | Enable logging additional information for debugging | required | `false` |
-| `artifact_sources` | A comma separated list of workflows and stage paths, which can generate artifacts. You need to use the `{stage}.{workflow}` syntax. The "dot" character is the delimiter between the stage and the workflow. You can use regular expressions. If you leave it empty, the default value will be the ".*" (star), which means, it will get every artifact from every workflow. Do not forget to escape the special chatacters. |  | `.*` |
+| `artifact_sources` | A comma separated list of workflows and stage paths, which can generate artifacts. You need to use the `{stage}.{workflow}` syntax. The "dot" character is the delimiter between the stage and the workflow.  You can use regular expressions. The default value (`.*`) means: get every artifact from every workflow.  Do not forget to escape the special characters. If you want to match all workflow from a stage then you need to escape the `.` separator and the use the `.*` any characters regex like `{stage-name}\..*`. |  | `.*` |
 | `export_map` | Variable export map, use the following regular expression syntax to collect the downloaded file's locations into separated environment variables (do not forget to escape the special chatacters): DOWNLOADED_APKS: .*\.apk DOWNLOADED_TEST_RESULTS: .*\.result DOCS: .*\.txt,.*\.doc | required |  |
 | `finished_stage` | This is a JSON representation of the finished stages for which the step can download build artifacts. | required | `$BITRISEIO_FINISHED_STAGES` |
 | `bitrise_api_base_url` | The base URL of the Bitrise API used to process the download requests. | required | `https://api.bitrise.io` |
@@ -144,7 +144,7 @@ $BITRISE_ARTIFACT_PATHS = /var/folders/sd/lvn5cp9x5dn_xh1vhfgjjjw40000gp/T/_arti
 
 ## 🙋 Contributing
 
-We welcome [pull requests](https://github.com/bitrise-steplib/steps-artifact-pull/pulls) and [issues](https://github.com/bitrise-steplib/steps-artifact-pull/issues) against this repository.
+We welcome [pull requests](https://github.com/bitrise-steplib/bitrise-step-artifact-pull/pulls) and [issues](https://github.com/bitrise-steplib/bitrise-step-artifact-pull/issues) against this repository.
 
 For pull requests, work on your changes in a forked repository and use the Bitrise CLI to [run step tests locally](https://devcenter.bitrise.io/bitrise-cli/run-your-first-build/).
 
