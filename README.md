@@ -36,9 +36,9 @@ steps:
 
 Use the `artifact_sources` input variable to limit the downloads to a set of stages or workflows:
 
-- `stage1.workflow1` - Gets the artifacts from the stage1's workflow1.
-- `stage1\..*` - Gets all artifacts from the stage1's workflows.
-- `.*\.workflow1` - Gets workflow1s' artifacts from all stages.
+- `^stage1.workflow1$` - Gets the artifacts from the stage1's workflow1.
+- `^stage1\..*` - Gets all artifacts from the stage1's workflows.
+- `.*\.workflow1$` - Gets workflow1s' artifacts from all stages.
 - `.*` - Gets every generated artifacts in the pipeline.
 
 ##### Wildcard based artifact pull
@@ -100,17 +100,17 @@ As the key names in the object are self-describing, we will not cover those name
 
 Let's see the following use-cases, the use cases first part is the demand, the second is the `artifact_sources` config:
 
-- As a developer, I would like to get the build artifact(s) of the _stage-1_'s _placeholder_'s workflow: `stage-1.placeholder`.
+- As a developer, I would like to get the build artifact(s) of the _stage-1_'s _placeholder_'s workflow: `^stage-1.placeholder$`.
 
-- As a developer, I would like to get the build artifact(s) of the _stage-2_'s _deployer_'s workflow and the _stage-1_'s _placeholder_'s workflow: `stage-1.placeholder,stage-2.deployer`. The two expressions are separated by a comma.
+- As a developer, I would like to get the build artifact(s) of the _stage-2_'s _deployer_'s workflow and the _stage-1_'s _placeholder_'s workflow: `^stage-1.placeholder$,^stage-2.deployer$`. The two expressions are separated by a comma.
 
 - As a developer, I would like to retrieve already generated artifacts: `.*` or `"" (empty string)`. As the example shows, developers can use regex.
 
-- As a developer, I would like to retrieve the generated artifacts from the _stage-2_ stage: `stage-2\..*`.
+- As a developer, I would like to retrieve the generated artifacts from the _stage-2_ stage: `^stage-2\..*`.
 
-- As a developer, I would like to get the _textfile_generator_ workflow artifacts: `.*\.textfile_generator`
+- As a developer, I would like to get the _textfile_generator_ workflow artifacts: `.*\.textfile_generator$`
 
-And so on. The syntax is: `{stage-name}.{workflow-name}`.
+And so on. The syntax is: `^{stage-name}.{workflow-name}$`.
 Do not forget to escape the special characters when using a regex pattern.
 
 The results will be in the `$BITRISE_ARTIFACT_PATHS` env. var. The list is delimited with a `|` pipe character.
